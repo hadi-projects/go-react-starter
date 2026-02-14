@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadi-projects/go-react-starter/config"
+	"github.com/hadi-projects/go-react-starter/internal/middleware"
 )
 
 type Router struct {
@@ -33,6 +34,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	router := gin.New()
 
+	router.Use(middleware.RateLimiter(r.config.RateLimitRps, r.config.RateLimitBurst))
+
 	r.setupPublicRuotes(router)
 
 	return router
@@ -48,7 +51,7 @@ func (r *Router) Run() {
 	}
 
 	go func() {
-		fmt.Printf("Server running on port %s: ", r.config.AppPort)
+		fmt.Printf("Server running on port :%s", r.config.AppPort)
 		if err := app.ListenAndServe(); err != nil {
 			log.Fatal("Server failed start: ", err)
 		}

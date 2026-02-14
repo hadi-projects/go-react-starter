@@ -35,6 +35,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	router := gin.New()
 
 	router.Use(middleware.RateLimiter(r.config.RateLimitRps, r.config.RateLimitBurst))
+	router.Use(middleware.CORS(r.config))
 
 	r.setupPublicRuotes(router)
 

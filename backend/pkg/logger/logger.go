@@ -18,8 +18,8 @@ var (
 )
 
 type Config struct {
-	LogDir       string
-	Environtment string
+	LogDir      string
+	Environment string
 }
 
 func InitLogger(cfg Config) {
@@ -46,7 +46,7 @@ func newLogger(cfg Config, filename string) zerolog.Logger {
 	var writers []io.Writer
 	writers = append(writers, fileLogger)
 
-	if cfg.Environtment == "development" {
+	if cfg.Environment == "development" {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 

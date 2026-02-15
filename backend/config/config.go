@@ -44,9 +44,11 @@ type Config struct {
 
 	AdminEmail    string `mapstructure:"ADMIN_EMAIL"`
 	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
+	LogDir        string `mapstructure:"LOG_DIR"`
 }
 
 func LoadConfig() (config Config) {
+	viper.SetDefault("LOG_DIR", "./storage/logs")
 	viper.AddConfigPath(".")
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
@@ -80,6 +82,7 @@ func LoadConfig() (config Config) {
 		"BCRYPT_COST",
 		"ADMIN_EMAIL",
 		"ADMIN_PASSWORD",
+		"LOG_DIR",
 	}
 
 	for _, envVar := range envVars {

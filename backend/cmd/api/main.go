@@ -17,10 +17,7 @@ type Application struct {
 
 func main() {
 	cfg := config.LoadConfig()
-	logger.InitLogger(logger.Config{
-		LogDir:      cfg.LogDir,
-		Environment: cfg.APPEnv,
-	})
+	logger.InitLogger(&cfg)
 
 	router := router.NewRouter(&cfg)
 	router.SetupRouter()

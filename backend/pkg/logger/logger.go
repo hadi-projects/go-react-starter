@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hadi-projects/go-react-starter/config"
 	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -17,24 +18,19 @@ var (
 	RateLimitLogger zerolog.Logger
 )
 
-type Config struct {
-	LogDir      string
-	Environment string
-}
-
-func InitLogger(cfg Config) {
+func InitLogger(cfg *config.Config) {
 	if err := os.MkdirAll(cfg.LogDir, 0755); err != nil {
 		panic(err)
 	}
 
-	SystemLogger = newLogger(cfg, "system.log")
-	AuthLogger = newLogger(cfg, "auth.log")
-	DBLogger = newLogger(cfg, "db.log")
-	RedisLogger = newLogger(cfg, "redis.log")
-	RateLimitLogger = newLogger(cfg, "rate_limit.log")
+	SystemLogger = newLogger(*cfg, "system.log")
+	AuthLogger = newLogger(*cfg, "auth.log")
+	DBLogger = newLogger(*cfg, "db.log")
+	RedisLogger = newLogger(*cfg, "redis.log")
+	RateLimitLogger = newLogger(*cfg, "rate_limit.log")
 }
 
-func newLogger(cfg Config, filename string) zerolog.Logger {
+func newLogger(cfg config.Config, filename string) zerolog.Logger {
 	fileLogger := &lumberjack.Logger{
 		Filename:   filepath.Join(cfg.LogDir, filename),
 		MaxSize:    10, // megabytes
@@ -46,7 +42,7 @@ func newLogger(cfg Config, filename string) zerolog.Logger {
 	var writers []io.Writer
 	writers = append(writers, fileLogger)
 
-	if cfg.Environment == "development" {
+	if cfg.APPEnv == "development" {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 

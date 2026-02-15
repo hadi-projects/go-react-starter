@@ -38,6 +38,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	router.Use(middleware.CORS(r.config))
 	router.Use(middleware.RequestLogger())
 	router.Use(middleware.SecureHeaders())
+	router.Use(middleware.XSSProtection())
 
 	r.setupPublicRuotes(router)
 

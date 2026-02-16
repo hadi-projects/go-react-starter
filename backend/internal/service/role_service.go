@@ -33,7 +33,8 @@ func NewRoleService(roleRepo repository.RoleRepository, cache cache.CacheService
 
 func (s *roleService) Create(req dto.CreateRoleRequest) (*dto.RoleResponse, error) {
 	role := &entity.Role{
-		Name: req.Name,
+		Name:        req.Name,
+		Description: req.Description,
 	}
 
 	if err := s.roleRepo.Create(role, req.PermissionIDs); err != nil {
@@ -120,6 +121,10 @@ func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleRespo
 		role.Name = req.Name
 	}
 
+	if req.Description != "" {
+		role.Description = req.Description
+	}
+
 	if err := s.roleRepo.Update(role, req.PermissionIDs); err != nil {
 		return nil, err
 	}
@@ -158,6 +163,7 @@ func (s *roleService) mapToResponse(role *entity.Role) *dto.RoleResponse {
 	return &dto.RoleResponse{
 		ID:          role.ID,
 		Name:        role.Name,
+		Description: role.Description,
 		Permissions: permissions,
 		CreatedAt:   role.CreatedAt,
 		UpdatedAt:   role.UpdatedAt,

@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // MD3 Purple Theme
+        // MD3 Purple Theme - Expressive
         primary: {
           50: '#F3E5F5',
           100: '#E1BEE7',
@@ -19,6 +19,8 @@ export default {
           700: '#4A378B',
           800: '#3C2976',
           900: '#2E1A61',
+          container: '#EADDFF',
+          'on-container': '#21005D',
         },
         secondary: {
           50: '#F5F3FF',
@@ -26,22 +28,43 @@ export default {
           200: '#D0BCFF',
           300: '#B89EFF',
           400: '#A080FF',
-          500: '#885DFF',
-          600: '#7043E6',
-          700: '#5929CC',
-          800: '#4210B3',
-          900: '#2B0099',
+          500: '#625B71',
+          600: '#4A4458',
+          700: '#332D41',
+          800: '#1D192B',
+          900: '#000000',
+          container: '#E8DEF8',
+          'on-container': '#1D192B',
         },
         surface: {
-          DEFAULT: '#FFFBFE',
+          DEFAULT: '#FEF7FF',
           variant: '#E7E0EC',
           dim: '#DED8E1',
           bright: '#FFFFFF',
+          'on': '#1D1B20',
+          'on-variant': '#49454F',
+          'container-lowest': '#FFFFFF',
+          'container-low': '#F7F2FA',
+          'container': '#F3EDF7',
+          'container-high': '#ECE6F0',
+          'container-highest': '#E6E0E9',
         },
+        'on-primary': '#FFFFFF',
+        'on-secondary': '#FFFFFF',
         outline: {
           DEFAULT: '#79747E',
           variant: '#CAC4D0',
         },
+      },
+      fontSize: {
+        // MD3 Typography Scale - Refined (smaller)
+        'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
+        'base': ['0.9375rem', { lineHeight: '1.375rem' }], // 15px
+        'lg': ['1rem', { lineHeight: '1.5rem' }],       // 16px
+        'xl': ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
+        '2xl': ['1.375rem', { lineHeight: '2rem' }],    // 22px
+        '3xl': ['1.75rem', { lineHeight: '2.25rem' }],  // 28px
       },
       borderRadius: {
         'md3-sm': '8px',

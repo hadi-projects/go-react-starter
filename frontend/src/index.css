@@ -10,63 +10,110 @@
   }
 
   body {
-    @apply bg-surface text-gray-900 font-sans;
+    background-color: theme('colors.surface.DEFAULT');
+    color: theme('colors.surface.on');
+    @apply font-sans text-sm;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
+  h1 {
+    @apply text-2xl font-semibold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg font-semibold;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply text-base font-semibold;
+  }
+
+  p {
+    @apply text-sm;
   }
 }
 
 @layer components {
-  /* MD3 Button Styles */
+
+  /* MD3 Button Styles - Expressive */
   .btn {
-    @apply px-6 py-3 rounded-md3 font-medium text-sm transition-all duration-200;
+    @apply px-6 py-3 rounded-full font-medium text-sm transition-all duration-300;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
   .btn-primary {
-    @apply bg-primary-500 text-white hover:bg-primary-600 shadow-md3-1;
+    background-color: theme('colors.primary.500');
+    color: theme('colors.on-primary');
+    @apply hover:bg-primary-600 shadow-md3-1;
     @apply hover:shadow-md3-2 active:shadow-md3-1;
     @apply focus:ring-primary-500;
   }
 
   .btn-secondary {
-    @apply bg-secondary-200 text-primary-500 hover:bg-secondary-300;
-    @apply shadow-md3-1 hover:shadow-md3-2;
+    background-color: theme('colors.secondary.container');
+    color: theme('colors.secondary.on-container');
+    @apply hover:shadow-md3-1 transition-shadow duration-300;
   }
 
   .btn-outline {
-    @apply border border-outline text-primary-500 hover:bg-primary-50;
+    border: 1px solid theme('colors.outline.DEFAULT');
+    color: theme('colors.primary.500');
+    @apply hover:bg-primary-50;
   }
 
-  /* MD3 Card */
+  /* MD3 Card - Expressive */
   .card {
-    @apply bg-white rounded-md3-lg shadow-md3-2 p-6;
+    background-color: theme('colors.surface.container-low');
+    @apply rounded-md3-xl shadow-md3-1 p-6 transition-all duration-300;
   }
 
-  /* MD3 Text Field */
+  .card-high {
+    background-color: theme('colors.surface.container-highest');
+    @apply shadow-md3-3;
+  }
+
+  /* MD3 Text Field - Expressive */
   .text-field {
-    @apply w-full px-4 py-3 bg-surface-variant rounded-md3-sm;
-    @apply border-b-2 border-transparent focus:border-primary-500;
-    @apply text-gray-900 placeholder-gray-500;
-    @apply focus:outline-none transition-all duration-200;
+    background-color: theme('colors.surface.container-high');
+    border-bottom: 2px solid theme('colors.outline-variant');
+    color: theme('colors.surface.on');
+    @apply w-full px-4 py-3 rounded-md3-sm;
+    @apply focus:border-primary-500;
+    @apply text-sm;
+
+    &::placeholder {
+      color: theme('colors.surface.on-variant');
+      opacity: 0.5;
+    }
+
+    @apply focus:outline-none transition-all duration-300;
   }
 
-  .text-field-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+  /* Navigation Specifics */
+  .nav-rail {
+    background-color: theme('colors.surface.container-low');
+    border-right: 1px solid theme('colors.outline-variant');
+    @apply w-20 flex flex-col items-center py-4 z-30 transition-all duration-300;
   }
 
-  .text-field-error {
-    @apply border-red-500 focus:border-red-500;
+  .nav-drawer {
+    background-color: theme('colors.surface.container-low');
+    border-right: 1px solid theme('colors.outline-variant');
+    @apply w-64 flex flex-col z-20 transition-all duration-300;
   }
 
-  .text-field-helper {
-    @apply text-xs text-gray-500 mt-1;
+  .nav-item-active {
+    background-color: theme('colors.secondary.container');
+    color: theme('colors.secondary.on-container');
   }
 
-  .text-field-error-message {
-    @apply text-xs text-red-500 mt-1;
+  .nav-pill {
+    @apply flex items-center justify-center w-14 h-8 rounded-full transition-all duration-300;
   }
 }
 
@@ -77,7 +124,7 @@
 
   .state-layer::before {
     content: '';
-    @apply absolute inset-0 bg-current opacity-0 transition-opacity duration-200;
+    @apply absolute inset-0 bg-current opacity-0 transition-opacity duration-300;
   }
 
   .state-layer:hover::before {
@@ -86,5 +133,21 @@
 
   .state-layer:active::before {
     @apply opacity-[0.12];
+  }
+
+  .surface-container-low {
+    background-color: theme('colors.surface.container-low');
+  }
+
+  .surface-container {
+    background-color: theme('colors.surface.container');
+  }
+
+  .surface-container-high {
+    background-color: theme('colors.surface.container-high');
+  }
+
+  .surface-container-highest {
+    background-color: theme('colors.surface.container-highest');
   }
 }

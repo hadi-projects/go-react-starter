@@ -1,135 +1,171 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
-const Sidebar = () => {
+const Sidebar = ({ sections = [], title = "Admin Panel", onLogout }) => {
     const location = useLocation();
-    const [isAdminOpen, setIsAdminOpen] = useState(true);
+    const [expandedSections, setExpandedSections] = useState({});
 
     const isActive = (path) => location.pathname === path;
-    const isAdminActive = () => location.pathname.startsWith('/admin/');
+    const isChildActive = (item) => {
+        if (!item.subItems) return isActive(item.path);
+        return item.subItems.some(sub => isActive(sub.path));
+    };
+
+    // Auto-expand section if a child is active
+    useEffect(() => {
+        const newExpanded = { ...expandedSections };
+        let changed = false;
+
+        sections.forEach(section => {
+            section.items.forEach(item => {
+                if (item.subItems && isChildActive(item) && !expandedSections[item.label]) {
+                    newExpanded[item.label] = true;
+                    changed = true;
+                }
+            });
+        });
+
+        if (changed) {
+            setExpandedSections(newExpanded);
+        }
+    }, [location.pathname, sections]);
+
+    const toggleSection = (label) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [label]: !prev[label]
+        }));
+    };
 
     return (
-        <aside className="w-64 bg-gray-50 border-r border-gray-200 h-screen flex flex-col py-6">
-            {/* Logo */}
-            <div className="px-6 mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">G</span>
-                    </div>
-                    <h1 className="text-xl font-bold text-gray-900">Admin</h1>
-                </div>
+        <aside className="nav-drawer flex-shrink-0 animate-fade-in shadow-md3-1">
+            {/* Header */}
+            <div className="h-16 flex items-center px-6">
+                <h2 className="text-xl font-semibold text-surface-on">{title}</h2>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto">
-                <ul className="space-y-1 px-3">
-                    {/* Dashboard */}
-                    <li>
-                        <Link
-                            to="/dashboard"
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/dashboard')
-                                ? 'bg-gray-200 text-gray-900'
-                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                                }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span className="font-medium">Dashboard</span>
-                        </Link>
-                    </li>
-
-                    {/* Administrator Parent */}
-                    <li>
-                        <button
-                            onClick={() => setIsAdminOpen(!isAdminOpen)}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isAdminActive()
-                                ? 'bg-gray-200 text-gray-900'
-                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="font-medium">Administrator</span>
-                            </div>
-                            <svg
-                                className={`w-4 h-4 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        {/* Submenu */}
-                        {isAdminOpen && (
-                            <ul className="mt-2 ml-8 space-y-1">
-                                <li>
-                                    <Link
-                                        to="/admin/users"
-                                        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${isActive('/admin/users')
-                                            ? 'bg-gray-200 text-gray-900'
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
-                                        <span className="text-sm">Users</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/admin/roles"
-                                        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${isActive('/admin/roles')
-                                            ? 'bg-gray-200 text-gray-900'
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                        </svg>
-                                        <span className="text-sm">Roles</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/admin/permissions"
-                                        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${isActive('/admin/permissions')
-                                            ? 'bg-gray-200 text-gray-900'
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                        </svg>
-                                        <span className="text-sm">Permissions</span>
-                                    </Link>
-                                </li>
-                            </ul>
+            {/* Navigation Drawer Content */}
+            <nav className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+                {sections.map((section, idx) => (
+                    <div key={idx} className="mb-4">
+                        {section.label && (
+                            <h3 className="px-6 py-3 text-xs font-semibold text-surface-on-variant uppercase tracking-wider">
+                                {section.label}
+                            </h3>
                         )}
-                    </li>
-                </ul>
+                        <ul className="space-y-1 px-3">
+                            {section.items.map((item) => {
+                                const active = isChildActive(item);
+                                const hasSubItems = !!item.subItems;
+                                const isExpanded = expandedSections[item.label];
+
+                                return (
+                                    <li key={item.label}>
+                                        {hasSubItems ? (
+                                            <div>
+                                                <button
+                                                    onClick={() => toggleSection(item.label)}
+                                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-full transition-all duration-300 group ${active
+                                                        ? 'bg-secondary-container/50 text-secondary-on-container'
+                                                        : 'text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="transition-transform duration-300 group-hover:scale-110">
+                                                            {item.icon}
+                                                        </div>
+                                                        <span className="font-medium text-sm">{item.label}</span>
+                                                    </div>
+                                                    <svg
+                                                        className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+
+                                                {/* Sub Items */}
+                                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-64 mt-1' : 'max-h-0'}`}>
+                                                    <ul className="space-y-1 ml-4 pl-4 border-l border-outline-variant/30">
+                                                        {item.subItems.map((sub) => {
+                                                            const subActive = isActive(sub.path);
+                                                            return (
+                                                                <li key={sub.path}>
+                                                                    <Link
+                                                                        to={sub.path}
+                                                                        className={`flex items-center gap-3 px-4 py-2.5 rounded-full transition-all duration-300 group ${subActive
+                                                                            ? 'bg-secondary-container text-secondary-on-container shadow-sm'
+                                                                            : 'text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on'
+                                                                            }`}
+                                                                    >
+                                                                        <div className="transition-transform duration-300 group-hover:scale-110">
+                                                                            {sub.icon}
+                                                                        </div>
+                                                                        <span className="font-medium text-sm">{sub.label}</span>
+                                                                    </Link>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Link
+                                                to={item.path}
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-full transition-all duration-300 group ${active
+                                                    ? 'bg-secondary-container text-secondary-on-container'
+                                                    : 'text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on'
+                                                    }`}
+                                            >
+                                                <div className="transition-transform duration-300 group-hover:scale-110">
+                                                    {item.icon}
+                                                </div>
+                                                <span className="font-medium text-sm">{item.label}</span>
+                                            </Link>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                ))}
             </nav>
 
-            {/* User Avatar */}
-            <div className="px-6 mt-auto pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-medium">
-                        A
+            {/* Bottom Actions */}
+            <div className="p-4 border-t border-outline-variant/30">
+                <button
+                    onClick={onLogout}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-full text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on transition-all duration-300 group"
+                >
+                    <div className="transition-transform duration-300 group-hover:scale-110">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">Admin</p>
-                        <p className="text-xs text-gray-500">Administrator</p>
-                    </div>
-                </div>
+                    <span className="font-medium text-sm">Logout</span>
+                </button>
             </div>
         </aside>
     );
+};
+
+Sidebar.propTypes = {
+    sections: PropTypes.arrayOf(PropTypes.shape({
+        label: PropTypes.string,
+        items: PropTypes.arrayOf(PropTypes.shape({
+            path: PropTypes.string,
+            label: PropTypes.string.isRequired,
+            icon: PropTypes.node.isRequired,
+            subItems: PropTypes.arrayOf(PropTypes.shape({
+                path: PropTypes.string.isRequired,
+                label: PropTypes.string.isRequired,
+                icon: PropTypes.node.isRequired,
+            }))
+        })).isRequired,
+    })),
+    title: PropTypes.string,
+    onLogout: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

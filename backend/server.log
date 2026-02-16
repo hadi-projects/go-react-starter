@@ -17,7 +17,7 @@
 [GIN-debug] GET    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.GetByID-fm (11 handlers)
 [GIN-debug] PUT    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.Update-fm (11 handlers)
 [GIN-debug] DELETE /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.Delete-fm (11 handlers)
-2026/02/17 01:35:45 Server running on port 8080
+2026/02/17 01:42:57 Server running on port 8080
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
@@ -37,18 +37,18 @@
 [GIN-debug] GET    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.GetByID-fm (11 handlers)
 [GIN-debug] PUT    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.Update-fm (11 handlers)
 [GIN-debug] DELETE /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.RoleHandler.Delete-fm (11 handlers)
-2026/02/17 01:35:45 Server running on port 8080
+2026/02/17 01:42:57 Server running on port 8080
 Server running on port :8080
-2026/02/17 01:35:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/role_repository.go:100
-[0m[33m[5.266ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 4 ORDER BY `roles`.`id` LIMIT 1
+2026/02/17 01:43:03 [32m
+[0m[33m[22.376ms] [34;1m[rows:12][0m SELECT * FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 1
 
-2026/02/17 01:35:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/role_repository.go:103
-[0m[33m[6.700ms] [34;1m[rows:2][0m DELETE FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 4
+2026/02/17 01:43:03 [32m
+[0m[33m[8.055ms] [34;1m[rows:12][0m SELECT * FROM `permissions` WHERE `permissions`.`id` IN (1,2,3,4,5,6,7,8,9,10,11,12)
 
-2026/02/17 01:35:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/role_repository.go:107
-[0m[33m[1.290ms] [34;1m[rows:1][0m DELETE FROM `roles` WHERE `roles`.`id` = 4
-[90m1:35AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m25604666 [36mrequest=[0m{"ip":"::1","method":"DELETE","path":"/api/v1/roles/4","user_agent":"curl/8.7.1"} [36mrequest_id=[0md0073780-4f0c-4b4f-b33e-032aa0ae50a9 [36mresponse=[0m{"body":{"message":"Role deleted successfully"},"latency":25.604666,"status_code":200} [36mtimestamp=[0m2026-02-17T01:35:48+07:00 [36muser_id=[0m1
+2026/02/17 01:43:03 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[36.731ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 1
 
-2026/02/17 01:35:49 [31;1m/Users/hadigunawan/code/go-starter/backend/internal/repository/role_repository.go:52 [35;1mrecord not found
-[0m[33m[7.552ms] [34;1m[rows:0][0m SELECT * FROM `roles` WHERE `roles`.`id` = 4 ORDER BY `roles`.`id` LIMIT 1
-[90m1:35AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m8558833 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/roles/4","user_agent":"curl/8.7.1"} [36mrequest_id=[0m7a51e2b2-96f9-4cb2-805f-b3c81d3bbb05 [36mresponse=[0m{"body":{"error":"record not found"},"latency":8.558833,"status_code":404} [36mtimestamp=[0m2026-02-17T01:35:49+07:00 [36muser_id=[0m1
+2026/02/17 01:43:03 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[82.863ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE email = 'admin@mail.com' ORDER BY `users`.`id` LIMIT 1
+[90m1:43AM[0m [31mERR[0m [1mLogin failed: service error[0m [36merror=[0m[31m[1m"invalid email or password"[0m[0m
+[90m1:43AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m161651166 [36mrequest=[0m{"body":{"email":"***@mail.com","password":"***"},"ip":"::1","method":"POST","path":"/api/v1/auth/login","user_agent":"curl/8.7.1"} [36mrequest_id=[0m7194c822-e456-4cb3-8d42-13dccc6d5629 [36mresponse=[0m{"body":{"error":"Invalid email or password"},"latency":161.651166,"status_code":401} [36mtimestamp=[0m2026-02-17T01:43:03+07:00

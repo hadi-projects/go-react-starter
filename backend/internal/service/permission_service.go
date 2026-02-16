@@ -32,7 +32,8 @@ func NewPermissionService(repo repository.PermissionRepository, cache cache.Cach
 
 func (s *permissionService) Create(req dto.CreatePermissionRequest) (*dto.PermissionResponse, error) {
 	permission := &entity.Permission{
-		Name: req.Name,
+		Name:        req.Name,
+		Description: req.Description,
 	}
 
 	if err := s.repo.Create(permission); err != nil {
@@ -43,10 +44,11 @@ func (s *permissionService) Create(req dto.CreatePermissionRequest) (*dto.Permis
 	s.cache.DeletePattern("permissions:*")
 
 	return &dto.PermissionResponse{
-		ID:        permission.ID,
-		Name:      permission.Name,
-		CreatedAt: permission.CreatedAt,
-		UpdatedAt: permission.UpdatedAt,
+		ID:          permission.ID,
+		Name:        permission.Name,
+		Description: permission.Description,
+		CreatedAt:   permission.CreatedAt,
+		UpdatedAt:   permission.UpdatedAt,
 	}, nil
 }
 
@@ -66,10 +68,11 @@ func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagi
 	var responses []dto.PermissionResponse
 	for _, perm := range permissions {
 		responses = append(responses, dto.PermissionResponse{
-			ID:        perm.ID,
-			Name:      perm.Name,
-			CreatedAt: perm.CreatedAt,
-			UpdatedAt: perm.UpdatedAt,
+			ID:          perm.ID,
+			Name:        perm.Name,
+			Description: perm.Description,
+			CreatedAt:   perm.CreatedAt,
+			UpdatedAt:   perm.UpdatedAt,
 		})
 	}
 
@@ -97,6 +100,7 @@ func (s *permissionService) Update(id uint, req dto.UpdatePermissionRequest) (*d
 	}
 
 	permission.Name = req.Name
+	permission.Description = req.Description
 	if err := s.repo.Update(permission); err != nil {
 		return nil, err
 	}
@@ -105,10 +109,11 @@ func (s *permissionService) Update(id uint, req dto.UpdatePermissionRequest) (*d
 	s.cache.DeletePattern("permissions:*")
 
 	return &dto.PermissionResponse{
-		ID:        permission.ID,
-		Name:      permission.Name,
-		CreatedAt: permission.CreatedAt,
-		UpdatedAt: permission.UpdatedAt,
+		ID:          permission.ID,
+		Name:        permission.Name,
+		Description: permission.Description,
+		CreatedAt:   permission.CreatedAt,
+		UpdatedAt:   permission.UpdatedAt,
 	}, nil
 }
 

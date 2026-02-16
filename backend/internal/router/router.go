@@ -71,10 +71,11 @@ func (r *Router) SetupRouter() *gin.Engine {
 	userHandler := handler.NewUserHandler(userService)
 	permissionHandler := handler.NewPermissionHandler(permissionService)
 	roleHandler := handler.NewRoleHandler(roleService)
+	cacheHandler := handler.NewCacheHandler(r.cache)
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler)
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, cacheHandler)
 	}
 
 	logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Server running")

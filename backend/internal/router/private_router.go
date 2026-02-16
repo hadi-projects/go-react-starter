@@ -12,6 +12,7 @@ func (r *Router) setupPrivateRoutes(
 	userHandler handler.UserHandler,
 	permissionHandler handler.PermissionHandler,
 	roleHandler handler.RoleHandler,
+	cacheHandler handler.CacheHandler,
 ) {
 	auth := v1.Group("/auth")
 	{
@@ -26,6 +27,7 @@ func (r *Router) setupPrivateRoutes(
 		users.GET("/me", middleware.PermissionGuard("get-profile"), userHandler.Me)
 
 		// Admin only for CRUD
+		users.POST("", middleware.PermissionGuard("create-user"), userHandler.Create)
 		users.GET("", middleware.PermissionGuard("get-user"), userHandler.GetAll)
 		users.PUT("/:id", middleware.PermissionGuard("edit-user"), userHandler.Update)
 		users.DELETE("/:id", middleware.PermissionGuard("delete-user"), userHandler.Delete)
@@ -50,5 +52,12 @@ func (r *Router) setupPrivateRoutes(
 		roles.GET("/:id", middleware.PermissionGuard("get-role"), roleHandler.GetByID)
 		roles.PUT("/:id", middleware.PermissionGuard("edit-role"), roleHandler.Update)
 		roles.DELETE("/:id", middleware.PermissionGuard("delete-role"), roleHandler.Delete)
+	}
+
+	// Cache management
+	cache := v1.Group("/cache")
+	cache.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		cache.DELETE("/clear", middleware.PermissionGuard("manage-cache"), cacheHandler.ClearAll)
 	}
 }

@@ -15,6 +15,7 @@ type CacheService interface {
 	Set(key string, value interface{}, ttl time.Duration) error
 	Delete(key string) error
 	DeletePattern(pattern string) error
+	FlushAll() error
 	Close() error
 }
 
@@ -94,6 +95,14 @@ func (r *redisCache) DeletePattern(pattern string) error {
 	}
 	if err := iter.Err(); err != nil {
 		return fmt.Errorf("failed to scan keys: %w", err)
+	}
+	return nil
+}
+
+// FlushAll removes all keys from the current database
+func (r *redisCache) FlushAll() error {
+	if err := r.client.FlushDB(r.ctx).Err(); err != nil {
+		return fmt.Errorf("failed to flush cache: %w", err)
 	}
 	return nil
 }

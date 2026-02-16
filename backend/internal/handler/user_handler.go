@@ -13,6 +13,7 @@ import (
 
 type UserHandler interface {
 	Register(c *gin.Context)
+	Create(c *gin.Context)
 	Me(c *gin.Context)
 	GetAll(c *gin.Context)
 	Update(c *gin.Context)
@@ -43,6 +44,24 @@ func (h *userHandler) Register(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusCreated, "User registered successfully", res)
+}
+
+func (h *userHandler) Create(c *gin.Context) {
+	var req dto.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Create user failed: invalid request body")
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.CreateUser(req)
+	if err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Create user failed: service error")
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusCreated, "User created successfully", res)
 }
 
 func (h *userHandler) Me(c *gin.Context) {

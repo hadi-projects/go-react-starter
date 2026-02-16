@@ -38,10 +38,16 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 	}
 
 	// 3. Generate JWT Token
+	var permissions []string
+	for _, p := range user.Role.Permissions {
+		permissions = append(permissions, p.Name)
+	}
+
 	claims := jwt.MapClaims{
-		"sub":  user.ID,
-		"role": user.Role.Name,
-		"exp":  time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
+		"sub":         user.ID,
+		"role":        user.Role.Name,
+		"permissions": permissions,
+		"exp":         time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

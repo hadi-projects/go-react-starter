@@ -8,11 +8,11 @@
 [GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.GetAll-fm (10 handlers)
 [GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Update-fm (10 handlers)
 [GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Delete-fm (10 handlers)
-[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Create-fm (10 handlers)
-[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.GetAll-fm (10 handlers)
-[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Update-fm (10 handlers)
-[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Delete-fm (10 handlers)
-2026/02/17 01:09:13 Server running on port 8080
+[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.GetAll-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Delete-fm (11 handlers)
+2026/02/17 01:16:46 Server running on port 8080
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
@@ -23,42 +23,56 @@
 [GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.GetAll-fm (10 handlers)
 [GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Update-fm (10 handlers)
 [GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Delete-fm (10 handlers)
-[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Create-fm (10 handlers)
-[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.GetAll-fm (10 handlers)
-[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Update-fm (10 handlers)
-[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Delete-fm (10 handlers)
-2026/02/17 01:09:13 Server running on port 8080
+[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.GetAll-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler.PermissionHandler.Delete-fm (11 handlers)
+2026/02/17 01:16:46 Server running on port 8080
 Server running on port :8080
-2026/02/17 01:09:13 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
-[0m[33m[9.843ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 1
+2026/02/17 01:16:48 [32m
+[0m[33m[13.189ms] [34;1m[rows:12][0m SELECT * FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 1
 
-2026/02/17 01:09:13 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
-[0m[33m[36.403ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE email = 'admin@mail.com' ORDER BY `users`.`id` LIMIT 1
-2026/02/17 01:09:13 Login failed: invalid email or password
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m106383834 [36mrequest=[0m{"body":{"email":"***@mail.com","password":"***"},"ip":"::1","method":"POST","path":"/api/v1/auth/login","user_agent":"curl/8.7.1"} [36mrequest_id=[0mf51b5482-b3d1-43ca-ba88-a9fd13678665 [36mresponse=[0m{"body":{"error":"Invalid email or password"},"latency":106.383834,"status_code":401} [36mtimestamp=[0m2026-02-17T01:09:13+07:00
+2026/02/17 01:16:48 [32m
+[0m[33m[6.897ms] [34;1m[rows:12][0m SELECT * FROM `permissions` WHERE `permissions`.`id` IN (1,2,3,4,5,6,7,8,9,10,11,12)
 
-2026/02/17 01:09:36 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
-[0m[33m[7.425ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 1
+2026/02/17 01:16:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[26.607ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 1
 
-2026/02/17 01:09:36 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
-[0m[33m[23.008ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE email = 'admin@mail.com' ORDER BY `users`.`id` LIMIT 1
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m92001708 [36mrequest=[0m{"body":{"email":"***@mail.com","password":"***"},"ip":"::1","method":"POST","path":"/api/v1/auth/login","user_agent":"curl/8.7.1"} [36mrequest_id=[0m69c2852a-fc1c-41ac-8a1c-6e48b5bed22d [36mresponse=[0m{"body":{"data":{"access_token":"***","refresh_token":"***","user":{"created_at":"2026-02-16T22:58:27.482+07:00","email":"***@mail.com","id":1,"name":"","role_id":1,"updated_at":"2026-02-16T22:58:27.482+07:00"}}},"latency":92.001708,"status_code":200} [36mtimestamp=[0m2026-02-17T01:09:36+07:00
+2026/02/17 01:16:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[55.220ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE email = 'admin@mail.com' ORDER BY `users`.`id` LIMIT 1
+[90m1:16AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m124098625 [36mrequest=[0m{"body":{"email":"***@mail.com","password":"***"},"ip":"::1","method":"POST","path":"/api/v1/auth/login","user_agent":"curl/8.7.1"} [36mrequest_id=[0m23a80880-c952-47cf-b215-9615c48f8241 [36mresponse=[0m{"body":{"data":{"access_token":"***","refresh_token":"***","user":{"created_at":"2026-02-16T22:58:27.482+07:00","email":"***@mail.com","id":1,"name":"","role_id":1,"updated_at":"2026-02-16T22:58:27.482+07:00"}}},"latency":124.098625,"status_code":200} [36mtimestamp=[0m2026-02-17T01:16:48+07:00
 
-2026/02/17 01:09:46 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:30
-[0m[33m[11.102ms] [34;1m[rows:15][0m SELECT * FROM `permissions`
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m11684833 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/permissions","user_agent":"curl/8.7.1"} [36mrequest_id=[0mdd8207ec-57e7-4814-b30e-222bca4f3511 [36mresponse=[0m{"body":{"data":[{"created_at":"2026-02-16T22:58:27.709+07:00","id":1,"name":"create-user","updated_at":"2026-02-16T22:58:27.709+07:00"},{"created_at":"2026-02-16T22:58:27.726+07:00","id":2,"name":"delete-user","updated_at":"2026-02-16T22:58:27.726+07:00"},{"created_at":"2026-02-16T22:58:27.733+07:00","id":3,"name":"edit-user","updated_at":"2026-02-16T22:58:27.733+07:00"},{"created_at":"2026-02-16T22:58:27.738+07:00","id":4,"name":"get-user","updated_at":"2026-02-16T22:58:27.738+07:00"},{"created_at":"2026-02-16T22:58:27.747+07:00","id":5,"name":"create-role","updated_at":"2026-02-16T22:58:27.747+07:00"},{"created_at":"2026-02-16T22:58:27.751+07:00","id":6,"name":"delete-role","updated_at":"2026-02-16T22:58:27.751+07:00"},{"created_at":"2026-02-16T22:58:27.755+07:00","id":7,"name":"edit-role","updated_at":"2026-02-16T22:58:27.755+07:00"},{"created_at":"2026-02-16T22:58:27.761+07:00","id":8,"name":"get-role","updated_at":"2026-02-16T22:58:27.761+07:00"},{"created_at":"2026-02-16T22:58:27.766+07:00","id":9,"name":"create-permission","updated_at":"2026-02-16T22:58:27.766+07:00"},{"created_at":"2026-02-16T22:58:27.773+07:00","id":10,"name":"delete-permission","updated_at":"2026-02-16T22:58:27.773+07:00"},{"created_at":"2026-02-16T22:58:27.778+07:00","id":11,"name":"edit-permission","updated_at":"2026-02-16T22:58:27.778+07:00"},{"created_at":"2026-02-16T22:58:27.79+07:00","id":12,"name":"get-permission","updated_at":"2026-02-16T22:58:27.79+07:00"},{"created_at":"2026-02-16T22:58:27.796+07:00","id":13,"name":"get-audit-log","updated_at":"2026-02-16T22:58:27.796+07:00"},{"created_at":"2026-02-16T22:58:27.811+07:00","id":14,"name":"get-auth-log","updated_at":"2026-02-16T22:58:27.811+07:00"},{"created_at":"2026-02-17T00:43:56.488+07:00","id":15,"name":"get-profile","updated_at":"2026-02-17T00:43:56.488+07:00"}]},"latency":11.684833,"status_code":200} [36mtimestamp=[0m2026-02-17T01:09:46+07:00 [36muser_id=[0m1
+2026/02/17 01:29:34 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:32
+[0m[33m[93.581ms] [34;1m[rows:4][0m SELECT * FROM `users`
+[90m1:29AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m107394375 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/users","user_agent":"curl/8.7.1"} [36mrequest_id=[0m81c3b338-f810-4f5c-975a-af28df9f27e3 [36mresponse=[0m{"body":{"data":[{"created_at":"2026-02-16T22:58:27.482+07:00","email":"***@mail.com","id":1,"name":"","role_id":1,"updated_at":"2026-02-16T22:58:27.482+07:00"},{"created_at":"2026-02-16T22:58:27.569+07:00","email":"***@mail.com","id":2,"name":"","role_id":2,"updated_at":"2026-02-16T22:58:27.569+07:00"},{"created_at":"2026-02-16T22:58:27.704+07:00","email":"***@mail.com","id":3,"name":"","role_id":2,"updated_at":"2026-02-16T22:58:27.704+07:00"},{"created_at":"2026-02-17T00:46:02.938+07:00","email":"***@mail.com","id":5,"name":"NewUser","role_id":3,"updated_at":"2026-02-17T00:46:02.938+07:00"}]},"latency":107.394375,"status_code":200} [36mtimestamp=[0m2026-02-17T01:29:34+07:00 [36muser_id=[0m1
 
-2026/02/17 01:09:48 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:25
-[0m[33m[32.122ms] [34;1m[rows:1][0m INSERT INTO `permissions` (`name`,`created_at`,`updated_at`) VALUES ('test-permission','2026-02-17 01:09:48.009','2026-02-17 01:09:48.009')
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m32353125 [36mrequest=[0m{"body":{"name":"test-permission"},"ip":"::1","method":"POST","path":"/api/v1/permissions","user_agent":"curl/8.7.1"} [36mrequest_id=[0m5baf49a3-e180-4c93-bccd-8b4d66fbadcc [36mresponse=[0m{"body":{"data":{"created_at":"2026-02-17T01:09:48.009+07:00","id":16,"name":"test-permission","updated_at":"2026-02-17T01:09:48.009+07:00"}},"latency":32.353125,"status_code":201} [36mtimestamp=[0m2026-02-17T01:09:48+07:00 [36muser_id=[0m1
+2026/02/17 01:29:36 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:30
+[0m[33m[6.385ms] [34;1m[rows:15][0m SELECT * FROM `permissions`
+[90m1:29AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m6604000 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/permissions","user_agent":"curl/8.7.1"} [36mrequest_id=[0m42bb699b-76c5-440d-a900-2f85283e4779 [36mresponse=[0m{"body":{"data":[{"created_at":"2026-02-16T22:58:27.709+07:00","id":1,"name":"create-user","updated_at":"2026-02-16T22:58:27.709+07:00"},{"created_at":"2026-02-16T22:58:27.726+07:00","id":2,"name":"delete-user","updated_at":"2026-02-16T22:58:27.726+07:00"},{"created_at":"2026-02-16T22:58:27.733+07:00","id":3,"name":"edit-user","updated_at":"2026-02-16T22:58:27.733+07:00"},{"created_at":"2026-02-16T22:58:27.738+07:00","id":4,"name":"get-user","updated_at":"2026-02-16T22:58:27.738+07:00"},{"created_at":"2026-02-16T22:58:27.747+07:00","id":5,"name":"create-role","updated_at":"2026-02-16T22:58:27.747+07:00"},{"created_at":"2026-02-16T22:58:27.751+07:00","id":6,"name":"delete-role","updated_at":"2026-02-16T22:58:27.751+07:00"},{"created_at":"2026-02-16T22:58:27.755+07:00","id":7,"name":"edit-role","updated_at":"2026-02-16T22:58:27.755+07:00"},{"created_at":"2026-02-16T22:58:27.761+07:00","id":8,"name":"get-role","updated_at":"2026-02-16T22:58:27.761+07:00"},{"created_at":"2026-02-16T22:58:27.766+07:00","id":9,"name":"create-permission","updated_at":"2026-02-16T22:58:27.766+07:00"},{"created_at":"2026-02-16T22:58:27.773+07:00","id":10,"name":"delete-permission","updated_at":"2026-02-16T22:58:27.773+07:00"},{"created_at":"2026-02-16T22:58:27.778+07:00","id":11,"name":"edit-permission","updated_at":"2026-02-16T22:58:27.778+07:00"},{"created_at":"2026-02-16T22:58:27.79+07:00","id":12,"name":"get-permission","updated_at":"2026-02-16T22:58:27.79+07:00"},{"created_at":"2026-02-16T22:58:27.796+07:00","id":13,"name":"get-audit-log","updated_at":"2026-02-16T22:58:27.796+07:00"},{"created_at":"2026-02-16T22:58:27.811+07:00","id":14,"name":"get-auth-log","updated_at":"2026-02-16T22:58:27.811+07:00"},{"created_at":"2026-02-17T00:43:56.488+07:00","id":15,"name":"get-profile","updated_at":"2026-02-17T00:43:56.488+07:00"}]},"latency":6.604,"status_code":200} [36mtimestamp=[0m2026-02-17T01:29:36+07:00 [36muser_id=[0m1
 
-2026/02/17 01:09:56 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:36
-[0m[33m[18.714ms] [34;1m[rows:1][0m SELECT * FROM `permissions` WHERE `permissions`.`id` = 16 ORDER BY `permissions`.`id` LIMIT 1
+2026/02/17 01:29:37 [32m
+[0m[33m[4.418ms] [34;1m[rows:1][0m SELECT * FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 3
 
-2026/02/17 01:09:56 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:44
-[0m[33m[17.657ms] [34;1m[rows:1][0m UPDATE `permissions` SET `name`='updated-permission',`created_at`='2026-02-17 01:09:48.009',`updated_at`='2026-02-17 01:09:56.589' WHERE `id` = 16
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m37389000 [36mrequest=[0m{"body":{"name":"updated-permission"},"ip":"::1","method":"PUT","path":"/api/v1/permissions/16","user_agent":"curl/8.7.1"} [36mrequest_id=[0m6645eb83-d96b-4153-874d-07fd01c0f43e [36mresponse=[0m{"body":{"data":{"created_at":"2026-02-17T01:09:48.009+07:00","id":16,"name":"updated-permission","updated_at":"2026-02-17T01:09:56.589+07:00"}},"latency":37.389,"status_code":200} [36mtimestamp=[0m2026-02-17T01:09:56+07:00 [36muser_id=[0m1
+2026/02/17 01:29:37 [32m
+[0m[33m[3.028ms] [34;1m[rows:1][0m SELECT * FROM `permissions` WHERE `permissions`.`id` = 15
 
-2026/02/17 01:09:57 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/permission_repository.go:48
-[0m[33m[8.230ms] [34;1m[rows:1][0m DELETE FROM `permissions` WHERE `permissions`.`id` = 16
-[90m1:09AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m8382125 [36mrequest=[0m{"ip":"::1","method":"DELETE","path":"/api/v1/permissions/16","user_agent":"curl/8.7.1"} [36mrequest_id=[0mc795eea2-23a7-457b-8c15-fd7c945bdb68 [36mresponse=[0m{"body":{"message":"Permission deleted successfully"},"latency":8.382125,"status_code":200} [36mtimestamp=[0m2026-02-17T01:09:57+07:00 [36muser_id=[0m1
+2026/02/17 01:29:37 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[12.905ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 3
+
+2026/02/17 01:29:37 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:47
+[0m[33m[33.854ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE email = 'newuser@mail.com' ORDER BY `users`.`id` LIMIT 1
+[90m1:29AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m55523458 [36mrequest=[0m{"body":{"email":"***@mail.com","password":"***"},"ip":"::1","method":"POST","path":"/api/v1/auth/login","user_agent":"curl/8.7.1"} [36mrequest_id=[0m7a424d18-ee2a-4ccd-822f-9953c9755989 [36mresponse=[0m{"body":{"data":{"access_token":"***","refresh_token":"***","user":{"created_at":"2026-02-17T00:46:02.938+07:00","email":"***@mail.com","id":5,"name":"NewUser","role_id":3,"updated_at":"2026-02-17T00:46:02.938+07:00"}}},"latency":55.523458,"status_code":200} [36mtimestamp=[0m2026-02-17T01:29:37+07:00
+[90m1:29AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m487708 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/users","user_agent":"curl/8.7.1"} [36mrequest_id=[0m17e6421d-7e79-4d13-a05c-ef04b3bacebc [36mresponse=[0m{"body":{"error":"Forbidden: Insufficient permissions"},"latency":0.487708,"status_code":403} [36mtimestamp=[0m2026-02-17T01:29:48+07:00 [36muser_id=[0m5
+
+2026/02/17 01:29:50 [32m
+[0m[33m[4.098ms] [34;1m[rows:1][0m SELECT * FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 3
+
+2026/02/17 01:29:50 [32m
+[0m[33m[8.030ms] [34;1m[rows:1][0m SELECT * FROM `permissions` WHERE `permissions`.`id` = 15
+
+2026/02/17 01:29:50 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:38
+[0m[33m[15.361ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 3
+
+2026/02/17 01:29:50 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:38
+[0m[33m[23.497ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE `users`.`id` = 5 ORDER BY `users`.`id` LIMIT 1
+[90m1:29AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m23651791 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/users/me","user_agent":"curl/8.7.1"} [36mrequest_id=[0mbd726c80-5ea1-45ae-a18c-d8ae0d34f579 [36mresponse=[0m{"body":{"data":{"created_at":"2026-02-17T00:46:02.938+07:00","email":"***@mail.com","id":5,"name":"NewUser","role_id":3,"updated_at":"2026-02-17T00:46:02.938+07:00"}},"latency":23.651791,"status_code":200} [36mtimestamp=[0m2026-02-17T01:29:50+07:00 [36muser_id=[0m5

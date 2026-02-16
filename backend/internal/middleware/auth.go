@@ -46,6 +46,16 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 				c.Set("user_id", uint(subFloat))
 			}
 			c.Set("role", claims["role"])
+
+			if permissions, ok := claims["permissions"].([]interface{}); ok {
+				var perms []string
+				for _, p := range permissions {
+					if strPerm, ok := p.(string); ok {
+						perms = append(perms, strPerm)
+					}
+				}
+				c.Set("permissions", perms)
+			}
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			c.Abort()

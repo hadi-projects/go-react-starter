@@ -1,11 +1,14 @@
 package service
 
 import (
+	"fmt"
 	"math"
+	"time"
 
 	"github.com/hadi-projects/go-react-starter/internal/dto"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"github.com/hadi-projects/go-react-starter/internal/repository"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 )
 
 type RoleService interface {
@@ -18,10 +21,14 @@ type RoleService interface {
 
 type roleService struct {
 	roleRepo repository.RoleRepository
+	cache    cache.CacheService
 }
 
-func NewRoleService(roleRepo repository.RoleRepository) RoleService {
-	return &roleService{roleRepo: roleRepo}
+func NewRoleService(roleRepo repository.RoleRepository, cache cache.CacheService) RoleService {
+	return &roleService{
+		roleRepo: roleRepo,
+		cache:    cache,
+	}
 }
 
 func (s *roleService) Create(req dto.CreateRoleRequest) (*dto.RoleResponse, error) {
@@ -32,6 +39,9 @@ func (s *roleService) Create(req dto.CreateRoleRequest) (*dto.RoleResponse, erro
 	if err := s.roleRepo.Create(role, req.PermissionIDs); err != nil {
 		return nil, err
 	}
+
+	// Invalidate roles list cache
+	s.cache.DeletePattern("roles:*")
 
 	// Fetch again to get permissions populated (or we can construct response manually if we trust repo)
 	// Better to fetch to be sure.
@@ -44,6 +54,13 @@ func (s *roleService) Create(req dto.CreateRoleRequest) (*dto.RoleResponse, erro
 }
 
 func (s *roleService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("roles:page:%d:limit:%d", pagination.GetPage(), pagination.GetLimit())
+	var cached dto.PaginationResponse
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return &cached, nil
+	}
+
 	roles, total, err := s.roleRepo.FindAll(pagination)
 	if err != nil {
 		return nil, err
@@ -54,7 +71,7 @@ func (s *roleService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 		responses = append(responses, *s.mapToResponse(&role))
 	}
 
-	return &dto.PaginationResponse{
+	response := &dto.PaginationResponse{
 		Data: responses,
 		Meta: dto.PaginationMeta{
 			CurrentPage: pagination.GetPage(),
@@ -62,15 +79,35 @@ func (s *roleService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 			TotalItems:  total,
 			Limit:       pagination.GetLimit(),
 		},
-	}, nil
+	}
+
+	// Cache the result
+	ttl := time.Duration(300) * time.Second // Default 5 minutes
+	s.cache.Set(cacheKey, response, ttl)
+
+	return response, nil
 }
 
 func (s *roleService) GetByID(id uint) (*dto.RoleResponse, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("role:%d", id)
+	var cached dto.RoleResponse
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return &cached, nil
+	}
+
 	role, err := s.roleRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return s.mapToResponse(role), nil
+
+	response := s.mapToResponse(role)
+
+	// Cache the result
+	ttl := time.Duration(300) * time.Second
+	s.cache.Set(cacheKey, response, ttl)
+
+	return response, nil
 }
 
 func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleResponse, error) {
@@ -87,6 +124,10 @@ func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleRespo
 		return nil, err
 	}
 
+	// Invalidate role cache and roles list cache
+	s.cache.Delete(fmt.Sprintf("role:%d", id))
+	s.cache.DeletePattern("roles:*")
+
 	updatedRole, err := s.roleRepo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -96,6 +137,10 @@ func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleRespo
 }
 
 func (s *roleService) Delete(id uint) error {
+	// Invalidate role cache and roles list cache
+	s.cache.Delete(fmt.Sprintf("role:%d", id))
+	s.cache.DeletePattern("roles:*")
+
 	return s.roleRepo.Delete(id)
 }
 

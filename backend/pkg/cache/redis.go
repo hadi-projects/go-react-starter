@@ -1,0 +1,104 @@
+package cache
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+)
+
+// CacheService defines the interface for cache operations
+type CacheService interface {
+	Get(key string, dest interface{}) error
+	Set(key string, value interface{}, ttl time.Duration) error
+	Delete(key string) error
+	DeletePattern(pattern string) error
+	Close() error
+}
+
+// redisCache implements CacheService using Redis
+type redisCache struct {
+	client *redis.Client
+	ctx    context.Context
+}
+
+// NewRedisCache creates a new Redis cache service
+func NewRedisCache(host, port, password string, db int) (CacheService, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Password: password,
+		DB:       db,
+	})
+
+	ctx := context.Background()
+
+	// Test connection
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, fmt.Errorf("failed to connect to redis: %w", err)
+	}
+
+	return &redisCache{
+		client: client,
+		ctx:    ctx,
+	}, nil
+}
+
+// Get retrieves a value from cache and unmarshals it into dest
+func (r *redisCache) Get(key string, dest interface{}) error {
+	val, err := r.client.Get(r.ctx, key).Result()
+	if err == redis.Nil {
+		return fmt.Errorf("cache miss: key not found")
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get cache: %w", err)
+	}
+
+	if err := json.Unmarshal([]byte(val), dest); err != nil {
+		return fmt.Errorf("failed to unmarshal cache value: %w", err)
+	}
+
+	return nil
+}
+
+// Set stores a value in cache with the specified TTL
+func (r *redisCache) Set(key string, value interface{}, ttl time.Duration) error {
+	jsonValue, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("failed to marshal value: %w", err)
+	}
+
+	if err := r.client.Set(r.ctx, key, jsonValue, ttl).Err(); err != nil {
+		return fmt.Errorf("failed to set cache: %w", err)
+	}
+
+	return nil
+}
+
+// Delete removes a specific key from cache
+func (r *redisCache) Delete(key string) error {
+	if err := r.client.Del(r.ctx, key).Err(); err != nil {
+		return fmt.Errorf("failed to delete cache: %w", err)
+	}
+	return nil
+}
+
+// DeletePattern removes all keys matching the pattern
+func (r *redisCache) DeletePattern(pattern string) error {
+	iter := r.client.Scan(r.ctx, 0, pattern, 0).Iterator()
+	for iter.Next(r.ctx) {
+		if err := r.client.Del(r.ctx, iter.Val()).Err(); err != nil {
+			return fmt.Errorf("failed to delete key %s: %w", iter.Val(), err)
+		}
+	}
+	if err := iter.Err(); err != nil {
+		return fmt.Errorf("failed to scan keys: %w", err)
+	}
+	return nil
+}
+
+// Close closes the Redis connection
+func (r *redisCache) Close() error {
+	return r.client.Close()
+}

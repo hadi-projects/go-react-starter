@@ -5,4 +5,5 @@ type RedisConfig struct {
 	Port     string
 	Password string
 	DB       int
+	TTL      int // Default cache TTL in seconds
 }

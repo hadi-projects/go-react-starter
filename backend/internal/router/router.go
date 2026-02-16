@@ -16,16 +16,19 @@ import (
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
 	"github.com/hadi-projects/go-react-starter/internal/repository"
 	"github.com/hadi-projects/go-react-starter/internal/service"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 )
 
 type Router struct {
 	config *config.Config
+	cache  cache.CacheService
 }
 
-func NewRouter(config *config.Config) *Router {
+func NewRouter(config *config.Config, cache cache.CacheService) *Router {
 	return &Router{
 		config: config,
+		cache:  cache,
 	}
 }
 
@@ -59,9 +62,9 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	// Services
 	authService := service.NewAuthService(userRepo, r.config)
-	userService := service.NewUserService(userRepo, r.config)
-	permissionService := service.NewPermissionService(permissionRepo)
-	roleService := service.NewRoleService(roleRepo)
+	userService := service.NewUserService(userRepo, r.config, r.cache)
+	permissionService := service.NewPermissionService(permissionRepo, r.cache)
+	roleService := service.NewRoleService(roleRepo, r.cache)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)

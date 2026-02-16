@@ -1,11 +1,14 @@
 package service
 
 import (
+	"fmt"
 	"math"
+	"time"
 
 	"github.com/hadi-projects/go-react-starter/internal/dto"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"github.com/hadi-projects/go-react-starter/internal/repository"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 )
 
 type PermissionService interface {
@@ -16,11 +19,15 @@ type PermissionService interface {
 }
 
 type permissionService struct {
-	repo repository.PermissionRepository
+	repo  repository.PermissionRepository
+	cache cache.CacheService
 }
 
-func NewPermissionService(repo repository.PermissionRepository) PermissionService {
-	return &permissionService{repo: repo}
+func NewPermissionService(repo repository.PermissionRepository, cache cache.CacheService) PermissionService {
+	return &permissionService{
+		repo:  repo,
+		cache: cache,
+	}
 }
 
 func (s *permissionService) Create(req dto.CreatePermissionRequest) (*dto.PermissionResponse, error) {
@@ -32,6 +39,9 @@ func (s *permissionService) Create(req dto.CreatePermissionRequest) (*dto.Permis
 		return nil, err
 	}
 
+	// Invalidate permissions list cache
+	s.cache.DeletePattern("permissions:*")
+
 	return &dto.PermissionResponse{
 		ID:        permission.ID,
 		Name:      permission.Name,
@@ -41,6 +51,13 @@ func (s *permissionService) Create(req dto.CreatePermissionRequest) (*dto.Permis
 }
 
 func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("permissions:page:%d:limit:%d", pagination.GetPage(), pagination.GetLimit())
+	var cached dto.PaginationResponse
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return &cached, nil
+	}
+
 	permissions, total, err := s.repo.FindAll(pagination)
 	if err != nil {
 		return nil, err
@@ -56,7 +73,7 @@ func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagi
 		})
 	}
 
-	return &dto.PaginationResponse{
+	response := &dto.PaginationResponse{
 		Data: responses,
 		Meta: dto.PaginationMeta{
 			CurrentPage: pagination.GetPage(),
@@ -64,7 +81,13 @@ func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagi
 			TotalItems:  total,
 			Limit:       pagination.GetLimit(),
 		},
-	}, nil
+	}
+
+	// Cache the result
+	ttl := time.Duration(300) * time.Second
+	s.cache.Set(cacheKey, response, ttl)
+
+	return response, nil
 }
 
 func (s *permissionService) Update(id uint, req dto.UpdatePermissionRequest) (*dto.PermissionResponse, error) {
@@ -78,6 +101,9 @@ func (s *permissionService) Update(id uint, req dto.UpdatePermissionRequest) (*d
 		return nil, err
 	}
 
+	// Invalidate permissions list cache
+	s.cache.DeletePattern("permissions:*")
+
 	return &dto.PermissionResponse{
 		ID:        permission.ID,
 		Name:      permission.Name,
@@ -87,5 +113,8 @@ func (s *permissionService) Update(id uint, req dto.UpdatePermissionRequest) (*d
 }
 
 func (s *permissionService) Delete(id uint) error {
+	// Invalidate permissions list cache
+	s.cache.DeletePattern("permissions:*")
+
 	return s.repo.Delete(id)
 }

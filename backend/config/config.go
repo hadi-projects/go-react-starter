@@ -30,6 +30,7 @@ func LoadConfig() (config Config) {
 	viper.SetDefault("DB_MAX_IDLE_CONNS", 10)
 	viper.SetDefault("DB_MAX_OPEN_CONNS", 100)
 	viper.SetDefault("DB_MAX_LIFETIME", 60) // minutes
+	viper.SetDefault("REDIS_TTL", 300)      // 5 minutes in seconds
 
 	viper.AddConfigPath(".")
 	viper.SetConfigFile(".env")
@@ -51,6 +52,7 @@ func LoadConfig() (config Config) {
 		"REDIS_PORT",
 		"REDIS_PASSWORD",
 		"REDIS_DB",
+		"REDIS_TTL",
 		"CORS_ALLOWED_ORIGINS",
 		"CORS_ALLOWED_METHODS",
 		"CORS_ALLOWED_HEADERS",
@@ -101,6 +103,7 @@ func LoadConfig() (config Config) {
 		Port:     viper.GetString("REDIS_PORT"),
 		Password: viper.GetString("REDIS_PASSWORD"),
 		DB:       viper.GetInt("REDIS_DB"),
+		TTL:      viper.GetInt("REDIS_TTL"),
 	}
 
 	config.CORS = CORSConfig{

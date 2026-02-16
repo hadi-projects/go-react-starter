@@ -2,12 +2,15 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"math"
+	"time"
 
 	"github.com/hadi-projects/go-react-starter/config"
 	"github.com/hadi-projects/go-react-starter/internal/dto"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"github.com/hadi-projects/go-react-starter/internal/repository"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,12 +25,14 @@ type UserService interface {
 type userService struct {
 	userRepo repository.UserRepository
 	config   *config.Config
+	cache    cache.CacheService
 }
 
-func NewUserService(userRepo repository.UserRepository, config *config.Config) UserService {
+func NewUserService(userRepo repository.UserRepository, config *config.Config, cache cache.CacheService) UserService {
 	return &userService{
 		userRepo: userRepo,
 		config:   config,
+		cache:    cache,
 	}
 }
 
@@ -60,6 +65,9 @@ func (s *userService) Register(req dto.RegisterRequest) (*dto.UserResponse, erro
 		return nil, err
 	}
 
+	// Invalidate users list cache
+	s.cache.DeletePattern("users:*")
+
 	return &dto.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
@@ -71,22 +79,42 @@ func (s *userService) Register(req dto.RegisterRequest) (*dto.UserResponse, erro
 }
 
 func (s *userService) GetMe(userID uint) (*dto.UserResponse, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("user:%d", userID)
+	var cached dto.UserResponse
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return &cached, nil
+	}
+
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.UserResponse{
+	response := &dto.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
 		RoleID:    user.RoleID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-	}, nil
+	}
+
+	// Cache the result
+	ttl := time.Duration(s.config.Redis.TTL) * time.Second
+	s.cache.Set(cacheKey, response, ttl)
+
+	return response, nil
 }
 
 func (s *userService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+	// Try cache first
+	cacheKey := fmt.Sprintf("users:page:%d:limit:%d", pagination.GetPage(), pagination.GetLimit())
+	var cached dto.PaginationResponse
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return &cached, nil
+	}
+
 	users, total, err := s.userRepo.FindAll(pagination)
 	if err != nil {
 		return nil, err
@@ -104,7 +132,7 @@ func (s *userService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 		})
 	}
 
-	return &dto.PaginationResponse{
+	response := &dto.PaginationResponse{
 		Data: userResponses,
 		Meta: dto.PaginationMeta{
 			CurrentPage: pagination.GetPage(),
@@ -112,7 +140,13 @@ func (s *userService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 			TotalItems:  total,
 			Limit:       pagination.GetLimit(),
 		},
-	}, nil
+	}
+
+	// Cache the result
+	ttl := time.Duration(s.config.Redis.TTL) * time.Second
+	s.cache.Set(cacheKey, response, ttl)
+
+	return response, nil
 }
 
 func (s *userService) Update(id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
@@ -142,6 +176,10 @@ func (s *userService) Update(id uint, req dto.UpdateUserRequest) (*dto.UserRespo
 		return nil, err
 	}
 
+	// Invalidate user cache and users list cache
+	s.cache.Delete(fmt.Sprintf("user:%d", id))
+	s.cache.DeletePattern("users:*")
+
 	return &dto.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
@@ -153,5 +191,9 @@ func (s *userService) Update(id uint, req dto.UpdateUserRequest) (*dto.UserRespo
 }
 
 func (s *userService) Delete(id uint) error {
+	// Invalidate user cache and users list cache
+	s.cache.Delete(fmt.Sprintf("user:%d", id))
+	s.cache.DeletePattern("users:*")
+
 	return s.userRepo.Delete(id)
 }

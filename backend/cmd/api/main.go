@@ -5,6 +5,7 @@ import (
 
 	"github.com/hadi-projects/go-react-starter/config"
 	"github.com/hadi-projects/go-react-starter/internal/router"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 )
@@ -18,7 +19,13 @@ func main() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	router := router.NewRouter(&cfg)
+	cacheService, err := cache.NewRedisCache(cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.Password, cfg.Redis.DB)
+	if err != nil {
+		log.Fatal("Failed to connect to Redis: ", err)
+	}
+	defer cacheService.Close()
+
+	router := router.NewRouter(&cfg, cacheService)
 	router.SetupRouter()
 	router.Run()
 }

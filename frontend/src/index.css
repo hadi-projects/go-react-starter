@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply transition-colors duration-200;
+  }
+
+  body {
+    @apply bg-surface text-gray-900 font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  /* MD3 Button Styles */
+  .btn {
+    @apply px-6 py-3 rounded-md3 font-medium text-sm transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 shadow-md3-1;
+    @apply hover:shadow-md3-2 active:shadow-md3-1;
+    @apply focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-200 text-primary-500 hover:bg-secondary-300;
+    @apply shadow-md3-1 hover:shadow-md3-2;
+  }
+
+  .btn-outline {
+    @apply border border-outline text-primary-500 hover:bg-primary-50;
+  }
+
+  /* MD3 Card */
+  .card {
+    @apply bg-white rounded-md3-lg shadow-md3-2 p-6;
+  }
+
+  /* MD3 Text Field */
+  .text-field {
+    @apply w-full px-4 py-3 bg-surface-variant rounded-md3-sm;
+    @apply border-b-2 border-transparent focus:border-primary-500;
+    @apply text-gray-900 placeholder-gray-500;
+    @apply focus:outline-none transition-all duration-200;
+  }
+
+  .text-field-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .text-field-error {
+    @apply border-red-500 focus:border-red-500;
+  }
+
+  .text-field-helper {
+    @apply text-xs text-gray-500 mt-1;
+  }
+
+  .text-field-error-message {
+    @apply text-xs text-red-500 mt-1;
+  }
+}
+
+@layer utilities {
+  .state-layer {
+    @apply relative overflow-hidden;
+  }
+
+  .state-layer::before {
+    content: '';
+    @apply absolute inset-0 bg-current opacity-0 transition-opacity duration-200;
+  }
+
+  .state-layer:hover::before {
+    @apply opacity-[0.08];
+  }
+
+  .state-layer:active::before {
+    @apply opacity-[0.12];
+  }
+}

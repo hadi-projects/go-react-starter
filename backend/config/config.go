@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -77,7 +77,7 @@ func LoadConfig() (config Config) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Warning: .env file not found, using system environment variables")
+		fmt.Println("Warning: .env file not found, using system environment variables")
 	}
 
 	// Manually map to nested structs

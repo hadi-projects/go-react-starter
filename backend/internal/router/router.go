@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +17,7 @@ import (
 	"github.com/hadi-projects/go-react-starter/internal/service"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
+	"github.com/hadi-projects/go-react-starter/pkg/logger"
 )
 
 type Router struct {
@@ -43,7 +43,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	db, err := database.NewMySQLConnection(r.config)
 	if err != nil {
-		log.Fatal("Failed to connect to database: ", err)
+		logger.SystemLogger.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 
 	router.Use(gin.Recovery())
@@ -77,7 +77,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler)
 	}
 
-	log.Printf("Server running on port %s", r.config.App.Port)
+	logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Server running")
 	return router
 }
 
@@ -91,9 +91,9 @@ func (r *Router) Run() {
 	}
 
 	go func() {
-		fmt.Printf("Server running on port :%s", r.config.App.Port)
+		logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Starting HTTP server")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			logger.SystemLogger.Fatal().Err(err).Msg("Failed to start server")
 		}
 	}()
 
@@ -105,7 +105,7 @@ func (r *Router) Run() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown")
+		logger.SystemLogger.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 
 	fmt.Println("Server exited successfully")

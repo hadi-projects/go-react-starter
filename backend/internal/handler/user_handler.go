@@ -46,29 +46,16 @@ func (h *userHandler) Register(c *gin.Context) {
 }
 
 func (h *userHandler) Me(c *gin.Context) {
-	// userIDStr := c.GetString("user_id") // Assuming middleware sets this
-	// If middleware sets it as a number:
-	// userID := c.GetUint("user_id")
-
-	// For now let's assume it comes from claims as float64 (jwt default) or string
-	// Let's rely on middleware parsing it to proper type or just get it from context if set by AuthMiddleware
-
-	// Temporary implementation assuming AuthMiddleware sets "userID" context variable
-	val, exists := c.Get("userID")
+	val, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	var userID uint
-	switch v := val.(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case string:
-		id, _ := strconv.ParseUint(v, 10, 32)
-		userID = uint(id)
+	userID, ok := val.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
 	}
 
 	res, err := h.service.GetMe(userID)

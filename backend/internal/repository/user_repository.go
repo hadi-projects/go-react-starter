@@ -10,6 +10,7 @@ type UserRepository interface {
 	FindAll() ([]entity.User, error)
 	FindByID(id uint) (*entity.User, error)
 	FindByEmail(email string) (*entity.User, error)
+	FindRoleByName(name string) (*entity.Role, error)
 	Update(user *entity.User) error
 	Delete(id uint) error
 }
@@ -23,9 +24,6 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) Create(user *entity.User) error {
-	if user.RoleID == 0 {
-		user.RoleID = 2
-	}
 	return r.db.Create(user).Error
 }
 
@@ -46,11 +44,20 @@ func (r *userRepository) FindByID(id uint) (*entity.User, error) {
 
 func (r *userRepository) FindByEmail(email string) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Where("email = ?", email).First(&user).Error
+	err := r.db.Preload("Role").Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) FindRoleByName(name string) (*entity.Role, error) {
+	var role entity.Role
+	err := r.db.Where("name = ?", name).First(&role).Error
+	if err != nil {
+		return nil, err
+	}
+	return &role, nil
 }
 
 func (r *userRepository) Update(user *entity.User) error {

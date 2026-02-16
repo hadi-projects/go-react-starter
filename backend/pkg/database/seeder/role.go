@@ -26,6 +26,7 @@ var defaultRoles = []RolePermission{
 	{Role: "admin", Permission: "get-permission"},
 	{Role: "auditor", Permission: "get-audit-log"},
 	{Role: "auditor", Permission: "get-auth-log"},
+	{Role: "user", Permission: "get-profile"}, // Basic user role
 }
 
 func SeedRole(db *gorm.DB) {

@@ -39,8 +39,9 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 
 	// 3. Generate JWT Token
 	claims := jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
+		"sub":  user.ID,
+		"role": user.Role.Name,
+		"exp":  time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

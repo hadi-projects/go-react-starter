@@ -1,0 +1,39 @@
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/hadi-projects/go-react-starter/internal/handler.AuthHandler.Login-fm (8 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Register-fm (8 handlers)
+[GIN-debug] GET    /api/v1/users/me          --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Me-fm (10 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.GetAll-fm (10 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Update-fm (10 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Delete-fm (10 handlers)
+2026/02/17 01:04:53 Server running on port 8080
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/hadi-projects/go-react-starter/internal/handler.AuthHandler.Login-fm (8 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Register-fm (8 handlers)
+[GIN-debug] GET    /api/v1/users/me          --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Me-fm (10 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.GetAll-fm (10 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Update-fm (10 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler.UserHandler.Delete-fm (10 handlers)
+2026/02/17 01:04:53 Server running on port 8080
+Server running on port :8080AuthMiddleware: Set user_id=5
+AuthMiddleware: Set role=user
+UserHandler.Me called
+UserHandler.Me: found user_id=5
+
+2026/02/17 01:04:54 [32m
+[0m[33m[7.231ms] [34;1m[rows:1][0m SELECT * FROM `role_has_permissions` WHERE `role_has_permissions`.`role_id` = 3
+
+2026/02/17 01:04:54 [32m
+[0m[33m[6.392ms] [34;1m[rows:1][0m SELECT * FROM `permissions` WHERE `permissions`.`id` = 15
+
+2026/02/17 01:04:54 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:38
+[0m[33m[23.956ms] [34;1m[rows:1][0m SELECT * FROM `roles` WHERE `roles`.`id` = 3
+
+2026/02/17 01:04:54 [32m/Users/hadigunawan/code/go-starter/backend/internal/repository/user_repository.go:38
+[0m[33m[55.379ms] [34;1m[rows:1][0m SELECT * FROM `users` WHERE `users`.`id` = 5 ORDER BY `users`.`id` LIMIT 1
+[90m1:04AM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m58416000 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/users/me","user_agent":"curl/8.7.1"} [36mrequest_id=[0m92b241af-fcd4-4449-a933-32e8ff49adc7 [36mresponse=[0m{"body":{"data":{"created_at":"2026-02-17T00:46:02.938+07:00","email":"***@mail.com","id":5,"name":"NewUser","role_id":3,"updated_at":"2026-02-17T00:46:02.938+07:00"}},"latency":58.416,"status_code":200} [36mtimestamp=[0m2026-02-17T01:04:54+07:00 [36muser_id=[0m5

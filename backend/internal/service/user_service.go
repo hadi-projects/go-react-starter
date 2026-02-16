@@ -42,11 +42,17 @@ func (s *userService) Register(req dto.RegisterRequest) (*dto.UserResponse, erro
 		return nil, err
 	}
 
+	roleID := uint(2) // Default fallback
+	role, err := s.userRepo.FindRoleByName("user")
+	if err == nil {
+		roleID = role.ID
+	}
+
 	user := &entity.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: string(hashedPassword),
-		RoleID:   2, // Default to user role
+		RoleID:   roleID,
 	}
 
 	if err := s.userRepo.Create(user); err != nil {

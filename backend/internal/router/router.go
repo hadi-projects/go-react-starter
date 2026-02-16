@@ -72,12 +72,15 @@ func (r *Router) SetupRouter() *gin.Engine {
 		}
 
 		users := v1.Group("/users")
-		users.Use(middleware.APIKeyMiddleware(r.config.Security.APIKey)) // Protect user routes if needed
+		users.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 		{
-			users.GET("/me", userHandler.Me) // TODO: Add auth middleware
-			users.GET("", userHandler.GetAll)
-			users.PUT("/:id", userHandler.Update)
-			users.DELETE("/:id", userHandler.Delete)
+			// User can access their own profile
+			users.GET("/me", middleware.RoleGuard("user", "admin"), userHandler.Me)
+
+			// Admin only for CRUD
+			users.GET("", middleware.RoleGuard("admin"), userHandler.GetAll)
+			users.PUT("/:id", middleware.RoleGuard("admin"), userHandler.Update)
+			users.DELETE("/:id", middleware.RoleGuard("admin"), userHandler.Delete)
 		}
 	}
 

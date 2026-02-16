@@ -12,7 +12,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadi-projects/go-react-starter/config"
+	"github.com/hadi-projects/go-react-starter/internal/handler"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
+	"github.com/hadi-projects/go-react-starter/internal/repository"
+	"github.com/hadi-projects/go-react-starter/internal/service"
+	"github.com/hadi-projects/go-react-starter/pkg/database"
 )
 
 type Router struct {
@@ -34,6 +38,11 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	router := gin.New()
 
+	db, err := database.NewMySQLConnection(r.config)
+	if err != nil {
+		log.Fatal("Failed to connect to database: ", err)
+	}
+
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORSMiddleware(r.config))
 	router.Use(middleware.RequestLogger())
@@ -43,7 +52,25 @@ func (r *Router) SetupRouter() *gin.Engine {
 	router.Use(middleware.SecureHeaders())
 	router.Use(middleware.XSSProtection())
 
-	r.setupPublicRuotes(router)
+	// Repositories
+	userRepo := repository.NewUserRepository(db)
+
+	// Services
+	authService := service.NewAuthService(userRepo, r.config)
+
+	// Handlers
+	authHandler := handler.NewAuthHandler(authService)
+
+	v1 := router.Group("/api/v1")
+	{
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/login", authHandler.Login)
+		}
+
+		// r.setupUserRoutes(v1)
+		// r.setupTicketRoutes(v1)
+	}
 
 	log.Printf("Server running on port %s", r.config.App.Port)
 	return router

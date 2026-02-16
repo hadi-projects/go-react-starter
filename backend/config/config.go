@@ -15,48 +15,14 @@ type Application struct {
 }
 
 type Config struct {
-	AppPort string `mapstructure:"APP_PORT"`
-	AppName string `mapstructure:"APP_NAME"`
-	APPEnv  string `mapstructure:"APP_ENV"`
-
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUserName string `mapstructure:"DB_USERNAME"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-
-	DBMaxIdleConns int `mapstructure:"DB_MAX_IDLE_CONNS"`
-	DBMaxOpenConns int `mapstructure:"DB_MAX_OPEN_CONNS"`
-	DBMaxLifetime  int `mapstructure:"DB_MAX_LIFETIME"`
-
-	RedisHost     string `mapstructure:"REDIS_HOST"`
-	RedisPort     string `mapstructure:"REDIS_PORT"`
-	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisDB       int    `mapstructure:"REDIS_DB"`
-
-	CORSAllowedOrigins   string `mapstructure:"CORS_ALLOWED_ORIGINS"`
-	CORSAllowedMethods   string `mapstructure:"CORS_ALLOWED_METHODS"`
-	CORSAllowedHeaders   string `mapstructure:"CORS_ALLOWED_HEADERS"`
-	CORSMaxAge           int    `mapstructure:"CORS_MAX_AGE"`
-	CORSExposedHeaders   string `mapstructure:"CORS_EXPOSED_HEADERS"`
-	CORSAllowCredentials bool   `mapstructure:"CORS_ALLOW_CREDENTIALS"`
-
-	JwtSecret               string `mapstructure:"JWT_SECRET"`
-	JwtIssuer               string `mapstructure:"JWT_ISSUER"`
-	JwtAccessExpirationTime string `mapstructure:"JWT_ACCESS_EXPIRATION_TIME"`
-
-	RateLimitRps   int `mapstructure:"RATE_LIMIT_RPS"`
-	RateLimitBurst int `mapstructure:"RATE_LIMIT_BURST"`
-
-	RequestTimeOut int `mapstructure:"REQUEST_TIMEOUT"`
-
-	APIKey string `mapstructure:"API_KEY"`
-
-	BCryptCost int `mapstructure:"BRCYPT_COST"`
-
-	AdminEmail    string `mapstructure:"ADMIN_EMAIL"`
-	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
-	LogDir        string `mapstructure:"LOG_DIR"`
+	App       AppConfig
+	Database  DatabaseConfig
+	Redis     RedisConfig
+	CORS      CORSConfig
+	JWT       JWTConfig
+	RateLimit RateLimitConfig
+	Security  SecurityConfig
+	Log       LogConfig
 }
 
 func LoadConfig() (config Config) {
@@ -109,11 +75,65 @@ func LoadConfig() (config Config) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Warning: .env file not found, using system environtment variables")
+		log.Printf("Warning: .env file not found, using system environment variables")
 	}
 
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatal("Error mapping config: ", err)
+	// Manually map to nested structs
+	config.App = AppConfig{
+		Port: viper.GetString("APP_PORT"),
+		Name: viper.GetString("APP_NAME"),
+		Env:  viper.GetString("APP_ENV"),
 	}
+
+	config.Database = DatabaseConfig{
+		Host:         viper.GetString("DB_HOST"),
+		Port:         viper.GetString("DB_PORT"),
+		UserName:     viper.GetString("DB_USERNAME"),
+		Password:     viper.GetString("DB_PASSWORD"),
+		Name:         viper.GetString("DB_NAME"),
+		MaxIdleConns: viper.GetInt("DB_MAX_IDLE_CONNS"),
+		MaxOpenConns: viper.GetInt("DB_MAX_OPEN_CONNS"),
+		MaxLifetime:  viper.GetInt("DB_MAX_LIFETIME"),
+	}
+
+	config.Redis = RedisConfig{
+		Host:     viper.GetString("REDIS_HOST"),
+		Port:     viper.GetString("REDIS_PORT"),
+		Password: viper.GetString("REDIS_PASSWORD"),
+		DB:       viper.GetInt("REDIS_DB"),
+	}
+
+	config.CORS = CORSConfig{
+		AllowedOrigins:   viper.GetString("CORS_ALLOWED_ORIGINS"),
+		AllowedMethods:   viper.GetString("CORS_ALLOWED_METHODS"),
+		AllowedHeaders:   viper.GetString("CORS_ALLOWED_HEADERS"),
+		MaxAge:           viper.GetInt("CORS_MAX_AGE"),
+		ExposedHeaders:   viper.GetString("CORS_EXPOSED_HEADERS"),
+		AllowCredentials: viper.GetBool("CORS_ALLOW_CREDENTIALS"),
+	}
+
+	config.JWT = JWTConfig{
+		Secret:               viper.GetString("JWT_SECRET"),
+		Issuer:               viper.GetString("JWT_ISSUER"),
+		AccessExpirationTime: viper.GetString("JWT_ACCESS_EXPIRATION_TIME"),
+	}
+
+	config.RateLimit = RateLimitConfig{
+		Rps:   viper.GetInt("RATE_LIMIT_RPS"),
+		Burst: viper.GetInt("RATE_LIMIT_BURST"),
+	}
+
+	config.Security = SecurityConfig{
+		RequestTimeOut: viper.GetInt("REQUEST_TIMEOUT"),
+		APIKey:         viper.GetString("API_KEY"),
+		BCryptCost:     viper.GetInt("BCRYPT_COST"),
+		AdminEmail:     viper.GetString("ADMIN_EMAIL"),
+		AdminPassword:  viper.GetString("ADMIN_PASSWORD"),
+	}
+
+	config.Log = LogConfig{
+		Dir: viper.GetString("LOG_DIR"),
+	}
+
 	return config
 }

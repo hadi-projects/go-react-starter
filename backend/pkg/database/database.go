@@ -13,11 +13,11 @@ import (
 
 func NewMySQLConnection(cfg *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		cfg.DBUserName,
-		cfg.DBPassword,
-		cfg.DBHost,
-		cfg.DBPort,
-		cfg.DBName,
+		cfg.Database.UserName,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Name,
 	)
 
 	dbLogger := logger.New(
@@ -42,9 +42,9 @@ func NewMySQLConnection(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to get sql.DB instance: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(cfg.DBMaxIdleConns)
-	sqlDB.SetMaxOpenConns(cfg.DBMaxOpenConns)
-	sqlDB.SetConnMaxLifetime(time.Duration(cfg.DBMaxLifetime) * time.Minute)
+	sqlDB.SetMaxIdleConns(cfg.Database.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.Database.MaxOpenConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(cfg.Database.MaxLifetime) * time.Minute)
 
 	return db, nil
 }

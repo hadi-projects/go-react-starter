@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -9,15 +9,13 @@ import (
 	"github.com/hadi-projects/go-react-starter/config"
 )
 
-func CORS(config *config.Config) gin.HandlerFunc {
-	corsRules := cors.DefaultConfig()
-
-	corsRules.AllowOrigins = []string{config.CORSAllowedOrigins}
-	corsRules.AllowMethods = []string{http.MethodPost}
-	corsRules.AllowHeaders = []string{config.CORSAllowedHeaders}
-	corsRules.ExposeHeaders = []string{config.CORSAllowedHeaders}
-	corsRules.AllowCredentials = config.CORSAllowCredentials
-	corsRules.MaxAge = time.Duration(config.CORSMaxAge * int(time.Hour))
-
-	return cors.New(corsRules)
+func CORSMiddleware(config *config.Config) gin.HandlerFunc {
+	return cors.New(cors.Config{
+		AllowOrigins:     strings.Split(config.CORS.AllowedOrigins, ","),
+		AllowMethods:     strings.Split(config.CORS.AllowedMethods, ","),
+		AllowHeaders:     strings.Split(config.CORS.AllowedHeaders, ","),
+		ExposeHeaders:    strings.Split(config.CORS.ExposedHeaders, ","),
+		AllowCredentials: config.CORS.AllowCredentials,
+		MaxAge:           time.Duration(config.CORS.MaxAge) * time.Second,
+	})
 }

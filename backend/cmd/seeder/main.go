@@ -16,6 +16,6 @@ func main() {
 		logger.SystemLogger.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 
-	seeder.SeedUser(db, cfg.BCryptCost)
+	seeder.SeedUser(db, cfg.Security.BCryptCost)
 	seeder.SeedRole(db)
 }

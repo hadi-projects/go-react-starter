@@ -19,7 +19,7 @@ var (
 )
 
 func InitLogger(cfg *config.Config) {
-	if err := os.MkdirAll(cfg.LogDir, 0755); err != nil {
+	if err := os.MkdirAll(cfg.Log.Dir, 0755); err != nil {
 		panic(err)
 	}
 
@@ -30,19 +30,25 @@ func InitLogger(cfg *config.Config) {
 	RateLimitLogger = newLogger(*cfg, "rate_limit.log")
 }
 
-func newLogger(cfg config.Config, filename string) zerolog.Logger {
+func newLogger(cfg config.Config, fileName string) zerolog.Logger {
+	// The provided diff changes the file logging mechanism from lumberjack to os.OpenFile
+	// and the console output handling.
+	// It also introduces a potential issue with `io.MultiWriter(writers...)` where `writers` is not defined.
+	// Assuming the intent is to use `output` as the final writer for zerolog.New().
+
+	// Original lumberjack setup:
 	fileLogger := &lumberjack.Logger{
-		Filename:   filepath.Join(cfg.LogDir, filename),
-		MaxSize:    10, // megabytes
-		MaxBackups: 3,  // number of backups
-		MaxAge:     28, // days
+		Filename:   filepath.Join(cfg.Log.Dir, fileName), // Updated to cfg.Log.Dir
+		MaxSize:    10,                                   // megabytes
+		MaxBackups: 3,                                    // number of backups
+		MaxAge:     28,                                   // days
 		Compress:   true,
 	}
 
 	var writers []io.Writer
 	writers = append(writers, fileLogger)
 
-	if cfg.APPEnv == "development" {
+	if cfg.App.Env == "development" { // Updated to cfg.App.Env
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 

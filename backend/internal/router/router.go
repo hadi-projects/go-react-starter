@@ -55,20 +55,23 @@ func (r *Router) SetupRouter() *gin.Engine {
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
+	roleRepo := repository.NewRoleRepository(db)
 
 	// Services
 	authService := service.NewAuthService(userRepo, r.config)
 	userService := service.NewUserService(userRepo, r.config)
 	permissionService := service.NewPermissionService(permissionRepo)
+	roleService := service.NewRoleService(roleRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	permissionHandler := handler.NewPermissionHandler(permissionService)
+	roleHandler := handler.NewRoleHandler(roleService)
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler)
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler)
 	}
 
 	log.Printf("Server running on port %s", r.config.App.Port)

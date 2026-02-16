@@ -11,6 +11,7 @@ func (r *Router) setupPrivateRoutes(
 	authHandler handler.AuthHandler,
 	userHandler handler.UserHandler,
 	permissionHandler handler.PermissionHandler,
+	roleHandler handler.RoleHandler,
 ) {
 	auth := v1.Group("/auth")
 	{
@@ -38,5 +39,16 @@ func (r *Router) setupPrivateRoutes(
 		permissions.GET("", middleware.PermissionGuard("get-permission"), permissionHandler.GetAll)
 		permissions.PUT("/:id", middleware.PermissionGuard("edit-permission"), permissionHandler.Update)
 		permissions.DELETE("/:id", middleware.PermissionGuard("delete-permission"), permissionHandler.Delete)
+	}
+
+	roles := v1.Group("/roles")
+	roles.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	roles.Use(middleware.PermissionGuard("get-role"))
+	{
+		roles.POST("", middleware.PermissionGuard("create-role"), roleHandler.Create)
+		roles.GET("", middleware.PermissionGuard("get-role"), roleHandler.GetAll)
+		roles.GET("/:id", middleware.PermissionGuard("get-role"), roleHandler.GetByID)
+		roles.PUT("/:id", middleware.PermissionGuard("edit-role"), roleHandler.Update)
+		roles.DELETE("/:id", middleware.PermissionGuard("delete-role"), roleHandler.Delete)
 	}
 }

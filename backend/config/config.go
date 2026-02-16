@@ -25,6 +25,10 @@ type Config struct {
 	DBPassword string `mapstructure:"DB_PASSWORD"`
 	DBName     string `mapstructure:"DB_NAME"`
 
+	DBMaxIdleConns int `mapstructure:"DB_MAX_IDLE_CONNS"`
+	DBMaxOpenConns int `mapstructure:"DB_MAX_OPEN_CONNS"`
+	DBMaxLifetime  int `mapstructure:"DB_MAX_LIFETIME"`
+
 	RedisHost     string `mapstructure:"REDIS_HOST"`
 	RedisPort     string `mapstructure:"REDIS_PORT"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
@@ -57,6 +61,10 @@ type Config struct {
 
 func LoadConfig() (config Config) {
 	viper.SetDefault("LOG_DIR", "./storage/logs")
+	viper.SetDefault("DB_MAX_IDLE_CONNS", 10)
+	viper.SetDefault("DB_MAX_OPEN_CONNS", 100)
+	viper.SetDefault("DB_MAX_LIFETIME", 60) // minutes
+
 	viper.AddConfigPath(".")
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
@@ -70,6 +78,9 @@ func LoadConfig() (config Config) {
 		"DB_USERNAME",
 		"DB_PASSWORD",
 		"DB_NAME",
+		"DB_MAX_IDLE_CONNS",
+		"DB_MAX_OPEN_CONNS",
+		"DB_MAX_LIFETIME",
 		"REDIS_HOST",
 		"REDIS_PORT",
 		"REDIS_PASSWORD",

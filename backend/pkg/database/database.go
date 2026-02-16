@@ -42,9 +42,9 @@ func NewMySQLConnection(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to get sql.DB instance: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxIdleConns(cfg.DBMaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.DBMaxOpenConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(cfg.DBMaxLifetime) * time.Minute)
 
 	return db, nil
 }

@@ -3,8 +3,8 @@ package seeder
 import (
 	"strconv"
 
-	"github.com/hadi-projects/go-react-starter/internal/entity"
-	"github.com/hadi-projects/go-react-starter/internal/repository"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
+	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"

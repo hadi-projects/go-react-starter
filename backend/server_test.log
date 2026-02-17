@@ -1,0 +1,58 @@
+redis: 2026/02/17 22:40:58 pool.go:617: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:12345: connect: connection refused
+redis: 2026/02/17 22:40:59 pool.go:617: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:12345: connect: connection refused
+redis: 2026/02/17 22:40:59 pool.go:617: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:12345: connect: connection refused
+redis: 2026/02/17 22:41:00 pool.go:617: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:12345: connect: connection refused
+Warning: Failed to connect to redis: dial tcp [::1]:12345: connect: connection refused. Using NoOpCache.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/generator         --> github.com/hadi-projects/go-react-starter/internal/handler/default.GeneratorHandler.Generate-fm (10 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/hadi-projects/go-react-starter/internal/handler/default.AuthHandler.Login-fm (8 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Register-fm (8 handlers)
+[GIN-debug] GET    /api/v1/logs              --> github.com/hadi-projects/go-react-starter/internal/handler/default.LogHandler.GetLogs-fm (9 handlers)
+[GIN-debug] GET    /api/v1/users/me          --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Me-fm (10 handlers)
+[GIN-debug] POST   /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Create-fm (10 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.GetAll-fm (10 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Update-fm (10 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Delete-fm (10 handlers)
+[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.GetAll-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Delete-fm (11 handlers)
+[GIN-debug] POST   /api/v1/roles             --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/roles             --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.GetAll-fm (11 handlers)
+[GIN-debug] GET    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.GetByID-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Delete-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/cache/clear       --> github.com/hadi-projects/go-react-starter/internal/handler/default.CacheHandler.ClearAll-fm (10 handlers)
+[GIN-debug] GET    /api/v1/cache/status      --> github.com/hadi-projects/go-react-starter/internal/handler/default.CacheHandler.GetStatus-fm (10 handlers)
+[90m10:41PM[0m [32mINF[0m [1mServer running[0m [36mport=[0m8082
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/generator         --> github.com/hadi-projects/go-react-starter/internal/handler/default.GeneratorHandler.Generate-fm (10 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/hadi-projects/go-react-starter/internal/handler/default.AuthHandler.Login-fm (8 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Register-fm (8 handlers)
+[GIN-debug] GET    /api/v1/logs              --> github.com/hadi-projects/go-react-starter/internal/handler/default.LogHandler.GetLogs-fm (9 handlers)
+[GIN-debug] GET    /api/v1/users/me          --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Me-fm (10 handlers)
+[GIN-debug] POST   /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Create-fm (10 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.GetAll-fm (10 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Update-fm (10 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.UserHandler.Delete-fm (10 handlers)
+[GIN-debug] POST   /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/permissions       --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.GetAll-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/permissions/:id   --> github.com/hadi-projects/go-react-starter/internal/handler/default.PermissionHandler.Delete-fm (11 handlers)
+[GIN-debug] POST   /api/v1/roles             --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Create-fm (11 handlers)
+[GIN-debug] GET    /api/v1/roles             --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.GetAll-fm (11 handlers)
+[GIN-debug] GET    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.GetByID-fm (11 handlers)
+[GIN-debug] PUT    /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Update-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/roles/:id         --> github.com/hadi-projects/go-react-starter/internal/handler/default.RoleHandler.Delete-fm (11 handlers)
+[GIN-debug] DELETE /api/v1/cache/clear       --> github.com/hadi-projects/go-react-starter/internal/handler/default.CacheHandler.ClearAll-fm (10 handlers)
+[GIN-debug] GET    /api/v1/cache/status      --> github.com/hadi-projects/go-react-starter/internal/handler/default.CacheHandler.GetStatus-fm (10 handlers)
+[90m10:41PM[0m [32mINF[0m [1mServer running[0m [36mport=[0m8082
+[90m10:41PM[0m [32mINF[0m [1mStarting HTTP server[0m [36mport=[0m8082
+[90m10:41PM[0m [32mINF[0m [1mincoming request[0m [36mlatency=[0m293791 [36mrequest=[0m{"ip":"::1","method":"GET","path":"/api/v1/cache/status","user_agent":"curl/8.7.1"} [36mrequest_id=[0m4fe52ce0-18fd-4f6e-aa5f-71e7d0e4414b [36mresponse=[0m{"body":{"data":null,"meta":{"code":401,"message":"Authorization header is required","status":"error"}},"latency":0.293791,"status_code":401} [36mtimestamp=[0m2026-02-17T22:41:02+07:00
+Server exited successfully

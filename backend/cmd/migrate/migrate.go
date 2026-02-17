@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hadi-projects/go-react-starter/config"
-	"github.com/hadi-projects/go-react-starter/internal/entity"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 )

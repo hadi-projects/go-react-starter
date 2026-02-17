@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/hadi-projects/go-react-starter/internal/handler"
+	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
 )
 
@@ -76,5 +76,6 @@ func (r *Router) setupPrivateRoutes(
 	cache.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
 		cache.DELETE("/clear", middleware.PermissionGuard("manage-cache"), cacheHandler.ClearAll)
+		cache.GET("/status", middleware.PermissionGuard("manage-cache"), cacheHandler.GetStatus)
 	}
 }

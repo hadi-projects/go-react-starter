@@ -11,10 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadi-projects/go-react-starter/config"
-	"github.com/hadi-projects/go-react-starter/internal/handler"
+	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
-	"github.com/hadi-projects/go-react-starter/internal/repository"
-	"github.com/hadi-projects/go-react-starter/internal/service"
+	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
+	service "github.com/hadi-projects/go-react-starter/internal/service/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"

@@ -17,6 +17,7 @@ type CacheService interface {
 	DeletePattern(pattern string) error
 	FlushAll() error
 	Close() error
+	Status() string
 }
 
 // redisCache implements CacheService using Redis
@@ -36,8 +37,10 @@ func NewRedisCache(host, port, password string, db int) (CacheService, error) {
 	ctx := context.Background()
 
 	// Test connection
+	// Test connection
 	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("failed to connect to redis: %w", err)
+		fmt.Printf("Warning: Failed to connect to redis: %v. Using NoOpCache.\n", err)
+		return &NoOpCache{}, nil
 	}
 
 	return &redisCache{
@@ -107,7 +110,43 @@ func (r *redisCache) FlushAll() error {
 	return nil
 }
 
+// Status returns the connection status
+func (r *redisCache) Status() string {
+	return "connected"
+}
+
 // Close closes the Redis connection
 func (r *redisCache) Close() error {
 	return r.client.Close()
+}
+
+// NoOpCache implements CacheService but does nothing
+type NoOpCache struct{}
+
+func (n *NoOpCache) Get(key string, dest interface{}) error {
+	return fmt.Errorf("cache miss: no-op cache")
+}
+
+func (n *NoOpCache) Set(key string, value interface{}, ttl time.Duration) error {
+	return nil
+}
+
+func (n *NoOpCache) Delete(key string) error {
+	return nil
+}
+
+func (n *NoOpCache) DeletePattern(pattern string) error {
+	return nil
+}
+
+func (n *NoOpCache) FlushAll() error {
+	return nil
+}
+
+func (n *NoOpCache) Close() error {
+	return nil
+}
+
+func (n *NoOpCache) Status() string {
+	return "disconnected"
 }

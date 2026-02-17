@@ -123,3 +123,17 @@ func (mr *MockCacheServiceMockRecorder) Set(key, value, ttl any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCacheService)(nil).Set), key, value, ttl)
 }
+
+// Status mocks base method.
+func (m *MockCacheService) Status() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Status")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Status indicates an expected call of Status.
+func (mr *MockCacheServiceMockRecorder) Status() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockCacheService)(nil).Status))
+}

@@ -10,12 +10,6 @@ import Roles from './pages/admin/Roles'
 import Permissions from './pages/admin/Permissions'
 import Logs from './pages/admin/Logs'
 import GeneratorPage from './pages/admin/GeneratorPage'
-import AbcPage from './pages/admin/AbcPage'
-import XyzPage from './pages/admin/XyzPage'
-import NinaPage from './pages/admin/NinaPage'
-import sdsdsdPage from './pages/admin/sdsdsdPage';
-import akusajaPage from './pages/admin/akusajaPage';
-import MakanPage from './pages/admin/MakanPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -37,12 +31,6 @@ function App() {
           <Route path="admin/logs" element={<Navigate to="/admin/logs/all" replace />} />
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
-          <Route path="admin/abc" element={<AbcPage />} />
-          <Route path="admin/xyz" element={<XyzPage />} />
-          <Route path="admin/nina" element={<NinaPage />} />
-										<Route path="admin/sdsdsd" element={<sdsdsdPage />} />
-										<Route path="admin/akusaja" element={<akusajaPage />} />
-										<Route path="admin/makan" element={<MakanPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

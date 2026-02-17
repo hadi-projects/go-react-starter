@@ -4,15 +4,82 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Light Theme - MD3 Expressive (RGB format for Tailwind opacity) */
+  --md-sys-color-primary: 103 80 164;
+  --md-sys-color-on-primary: 255 255 255;
+  --md-sys-color-primary-container: 234 221 255;
+  --md-sys-color-on-primary-container: 33 0 93;
+
+  --md-sys-color-secondary-container: 232 222 248;
+  --md-sys-color-on-secondary-container: 29 25 43;
+
+  --md-sys-color-surface: 254 247 255;
+  --md-sys-color-on-surface: 29 27 32;
+  --md-sys-color-surface-variant: 231 224 236;
+  --md-sys-color-on-surface-variant: 73 69 79;
+  --md-sys-color-surface-container-low: 247 242 250;
+  --md-sys-color-surface-container: 243 237 247;
+  --md-sys-color-surface-container-high: 236 230 240;
+  --md-sys-color-surface-container-highest: 230 224 233;
+
+  --md-sys-color-outline: 121 116 126;
+  --md-sys-color-outline-variant: 202 196 208;
+
+  --md-sys-color-error: 179 38 30;
+  --md-sys-color-on-error: 255 255 255;
+  --md-sys-color-error-container: 249 222 220;
+  --md-sys-color-on-error-container: 65 14 11;
+}
+
+/* Dark Theme - High specificity selector */
+html.dark,
+.dark {
+  --md-sys-color-primary: 208 188 255;
+  --md-sys-color-on-primary: 56 30 114;
+  --md-sys-color-primary-container: 79 55 139;
+  --md-sys-color-on-primary-container: 234 221 255;
+
+  --md-sys-color-secondary-container: 74 68 88;
+  --md-sys-color-on-secondary-container: 232 222 248;
+
+  --md-sys-color-surface: 20 18 24;
+  --md-sys-color-on-surface: 230 225 229;
+  --md-sys-color-surface-variant: 73 69 79;
+  --md-sys-color-on-surface-variant: 202 196 208;
+  --md-sys-color-surface-container-low: 29 27 32;
+  --md-sys-color-surface-container: 33 31 38;
+  --md-sys-color-surface-container-high: 43 41 48;
+  --md-sys-color-surface-container-highest: 51 49 56;
+
+  --md-sys-color-outline: 147 143 153;
+  --md-sys-color-outline-variant: 73 69 79;
+
+  --md-sys-color-error: 242 184 181;
+  --md-sys-color-on-error: 96 20 16;
+  --md-sys-color-error-container: 140 29 24;
+  --md-sys-color-on-error-container: 249 222 220;
+}
+
 @layer base {
+
   * {
     @apply transition-colors duration-200;
   }
 
   body {
-    background-color: theme('colors.surface.DEFAULT');
-    color: theme('colors.surface.on');
+    background-color: rgb(var(--md-sys-color-surface));
+    color: rgb(var(--md-sys-color-on-surface));
     @apply font-sans text-sm;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: rgb(var(--md-sys-color-on-surface));
   }
 
   h1 {
@@ -27,12 +94,6 @@
     @apply text-lg font-semibold;
   }
 
-  h4,
-  h5,
-  h6 {
-    @apply text-base font-semibold;
-  }
-
   p {
     @apply text-sm;
   }
@@ -40,103 +101,97 @@
 
 @layer components {
 
-  /* MD3 Button Styles - Expressive */
+  /* MD3 Button Styles */
   .btn {
     @apply px-6 py-3 rounded-full font-medium text-sm transition-all duration-300;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
   .btn-primary {
-    background-color: theme('colors.primary.500');
-    color: theme('colors.on-primary');
-    @apply hover:bg-primary-600;
+    background-color: rgb(var(--md-sys-color-primary));
+    color: rgb(var(--md-sys-color-on-primary));
+    @apply hover:brightness-110;
     @apply focus:ring-primary-500;
   }
 
   .btn-secondary {
-    background-color: theme('colors.secondary.container');
-    color: theme('colors.secondary.on-container');
-    @apply transition-colors duration-300;
+    background-color: rgb(var(--md-sys-color-secondary-container));
+    color: rgb(var(--md-sys-color-on-secondary-container));
+    @apply hover:brightness-110;
   }
 
   .btn-outline {
-    border: 1px solid theme('colors.outline.DEFAULT');
-    color: theme('colors.primary.500');
-    @apply hover:bg-primary-50;
+    border: 1px solid rgb(var(--md-sys-color-outline));
+    color: rgb(var(--md-sys-color-primary));
+
+    &:hover {
+      background-color: rgb(var(--md-sys-color-primary) / 0.1);
+    }
   }
 
-  /* MD3 Card - Expressive */
+  /* MD3 Card */
   .card {
-    background-color: theme('colors.surface.container-low');
+    background-color: rgb(var(--md-sys-color-surface-container-low));
     @apply rounded-md3-xl p-6 transition-all duration-300;
   }
 
   .card-high {
-    background-color: theme('colors.surface.container-highest');
-    @apply border border-outline-variant;
+    background-color: rgb(var(--md-sys-color-surface-container-highest));
+    border: 1px solid rgb(var(--md-sys-color-outline-variant));
   }
 
-  /* MD3 Text Field - Expressive */
+  /* MD3 Text Field */
   .text-field {
-    background-color: theme('colors.surface.container-high');
-    border: 1px solid theme('colors.outline.DEFAULT');
-    color: theme('colors.surface.on');
-    @apply w-full px-4 py-3 rounded-xl;
-    @apply focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
-    @apply text-sm;
+    background-color: rgb(var(--md-sys-color-surface-container-high));
+    border: 1px solid rgb(var(--md-sys-color-outline));
+    color: rgb(var(--md-sys-color-on-surface));
+    @apply w-full px-4 py-3 rounded-xl focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
+    @apply text-sm focus:outline-none transition-all duration-300;
 
     &::placeholder {
-      color: theme('colors.surface.on-variant');
+      color: rgb(var(--md-sys-color-on-surface-variant));
       opacity: 0.5;
     }
-
-    @apply focus:outline-none transition-all duration-300;
   }
 
   .text-field-label {
-    @apply block text-sm font-medium text-surface-on mb-1.5 px-1;
+    @apply block text-sm font-medium mb-1.5 px-1;
+    color: rgb(var(--md-sys-color-on-surface));
   }
 
   .text-field-error {
-    border-color: theme('colors.error.DEFAULT') !important;
-  }
-
-  .text-field-error:focus,
-  .text-field-error:focus-within {
-    border-color: theme('colors.error.DEFAULT') !important;
-    outline: none !important;
-    box-shadow: 0 0 0 1px theme('colors.error.DEFAULT') !important;
+    border-color: rgb(var(--md-sys-color-error)) !important;
   }
 
   .text-field-error-message {
-    color: theme('colors.error.DEFAULT');
+    color: rgb(var(--md-sys-color-error));
     @apply text-xs mt-1.5 px-1 font-medium;
   }
 
   .text-field-helper {
-    @apply text-xs text-surface-on-variant mt-1.5 px-1;
+    @apply text-xs mt-1.5 px-1;
+    color: rgb(var(--md-sys-color-on-surface-variant));
   }
 
   /* Navigation Specifics */
+  .nav-rail,
+  .nav-drawer {
+    background-color: rgb(var(--md-sys-color-surface-container-low));
+    border-right: 1px solid rgb(var(--md-sys-color-outline-variant));
+    @apply transition-all duration-300;
+  }
+
   .nav-rail {
-    background-color: theme('colors.surface.container-low');
-    border-right: 1px solid theme('colors.outline-variant');
-    @apply w-20 flex flex-col items-center py-4 z-30 transition-all duration-300;
+    @apply w-20 flex flex-col items-center py-4 z-30;
   }
 
   .nav-drawer {
-    background-color: theme('colors.surface.container-low');
-    border-right: 1px solid theme('colors.outline-variant');
-    @apply w-64 flex flex-col z-20 transition-all duration-300;
+    @apply w-64 flex flex-col z-20;
   }
 
   .nav-item-active {
-    background-color: theme('colors.secondary.container');
-    color: theme('colors.secondary.on-container');
-  }
-
-  .nav-pill {
-    @apply flex items-center justify-center w-14 h-8 rounded-full transition-all duration-300;
+    background-color: rgb(var(--md-sys-color-secondary-container));
+    color: rgb(var(--md-sys-color-on-secondary-container));
   }
 }
 

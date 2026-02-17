@@ -29,7 +29,7 @@ const Dashboard = () => {
         queryFn: getDashboardStats,
     });
 
-    // Statistics data with smooth, muted colors
+    // Statistics data with smooth colors - refined for both light and dark modes
     const stats = [
         {
             id: 1,
@@ -40,9 +40,9 @@ const Dashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
             ),
-            gradient: 'from-blue-50 to-indigo-50',
-            iconBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
-            iconColor: 'text-blue-600'
+            gradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10',
+            iconBg: 'bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-800/20 dark:to-indigo-800/20',
+            iconColor: 'text-blue-600 dark:text-blue-400'
         },
         {
             id: 2,
@@ -53,9 +53,9 @@ const Dashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
             ),
-            gradient: 'from-purple-50 to-pink-50',
-            iconBg: 'bg-gradient-to-br from-purple-100 to-pink-100',
-            iconColor: 'text-purple-600'
+            gradient: 'from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10',
+            iconBg: 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-800/20 dark:to-pink-800/20',
+            iconColor: 'text-purple-600 dark:text-purple-400'
         },
         {
             id: 3,
@@ -66,9 +66,9 @@ const Dashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                 </svg>
             ),
-            gradient: 'from-amber-50 to-orange-50',
-            iconBg: 'bg-gradient-to-br from-amber-100 to-orange-100',
-            iconColor: 'text-amber-600'
+            gradient: 'from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10',
+            iconBg: 'bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-800/20 dark:to-orange-800/20',
+            iconColor: 'text-amber-600 dark:text-amber-400'
         }
     ];
 
@@ -105,7 +105,7 @@ const Dashboard = () => {
                         <div
                             key={stat.id}
                             className={`relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br ${stat.gradient} 
-                                      border border-white/50 transition-all duration-300 hover:border-white/80
+                                      border border-outline-variant/30 transition-all duration-300 hover:border-outline-variant/60
                                       hover:-translate-y-1`}
                         >
                             <div className="flex items-start justify-between">

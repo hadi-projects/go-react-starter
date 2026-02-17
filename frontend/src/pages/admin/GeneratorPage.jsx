@@ -63,7 +63,7 @@ const GeneratorPage = () => {
                             type="text"
                             value={config.module_name}
                             onChange={(e) => setConfig({ ...config, module_name: e.target.value })}
-                            className="w-full bg-surface-container-high border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                            className="w-full bg-surface-container-high border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-surface-on"
                             required
                         />
                     </div>
@@ -85,7 +85,7 @@ const GeneratorPage = () => {
                         id="audit_log"
                         checked={config.audit_log}
                         onChange={(e) => setConfig({ ...config, audit_log: e.target.checked })}
-                        className="w-5 h-5 rounded border-outline text-primary-500 focus:ring-primary-500"
+                        className="w-5 h-5 rounded border-outline text-primary focus:ring-primary"
                     />
                     <label htmlFor="audit_log" className="text-sm font-medium text-surface-on">Enable Audit Logging</label>
                 </div>
@@ -107,7 +107,7 @@ const GeneratorPage = () => {
                                         type="text"
                                         value={field.name}
                                         onChange={(e) => handleFieldChange(index, 'name', e.target.value)}
-                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none"
+                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none text-surface-on"
                                         placeholder="field_name"
                                         required
                                     />
@@ -117,7 +117,7 @@ const GeneratorPage = () => {
                                     <select
                                         value={field.type}
                                         onChange={(e) => handleFieldChange(index, 'type', e.target.value)}
-                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none"
+                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none text-surface-on"
                                     >
                                         <option value="string">String</option>
                                         <option value="int">Integer</option>
@@ -133,7 +133,7 @@ const GeneratorPage = () => {
                                         type="text"
                                         value={field.binding}
                                         onChange={(e) => handleFieldChange(index, 'binding', e.target.value)}
-                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none"
+                                        className="w-full bg-surface-container border border-outline rounded-lg px-3 py-2 text-sm focus:outline-none text-surface-on"
                                         placeholder="required"
                                     />
                                 </div>
@@ -143,7 +143,7 @@ const GeneratorPage = () => {
                                             type="checkbox"
                                             checked={field.searchable}
                                             onChange={(e) => handleFieldChange(index, 'searchable', e.target.checked)}
-                                            className="w-4 h-4 rounded border-outline text-primary-500"
+                                            className="w-4 h-4 rounded border-outline text-primary"
                                         />
                                         <span className="text-[11px] font-medium text-surface-on">Search</span>
                                     </label>
@@ -152,7 +152,7 @@ const GeneratorPage = () => {
                                             type="checkbox"
                                             checked={field.unique}
                                             onChange={(e) => handleFieldChange(index, 'unique', e.target.checked)}
-                                            className="w-4 h-4 rounded border-outline text-error-500"
+                                            className="w-4 h-4 rounded border-outline text-error"
                                         />
                                         <span className="text-[11px] font-medium text-surface-on">Unique</span>
                                     </label>
@@ -161,7 +161,7 @@ const GeneratorPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => removeField(index)}
-                                        className="p-2 text-error-500 hover:bg-error-container/20 rounded-full transition-colors"
+                                        className="p-2 text-error hover:bg-error-container/20 rounded-full transition-colors"
                                         disabled={config.fields.length === 1}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

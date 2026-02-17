@@ -96,7 +96,7 @@ const Permissions = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => openEditModal(row)}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
+                        className="text-primary hover:bg-primary-container/20 p-1 rounded transition-colors"
                         title="Edit"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ const Permissions = () => {
                     </button>
                     <button
                         onClick={() => openDeleteDialog(row)}
-                        className="text-red-600 hover:text-red-800 font-medium"
+                        className="text-error hover:bg-error-container/20 p-1 rounded transition-colors"
                         title="Delete"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,8 +138,8 @@ const Permissions = () => {
         <div>
             <div className="mb-6 flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Permissions Management</h1>
-                    <p className="text-gray-600 mt-2">Manage system permissions and access control</p>
+                    <h1 className="text-3xl font-bold text-surface-on">Permissions Management</h1>
+                    <p className="text-surface-on-variant mt-2">Manage system permissions and access control</p>
                 </div>
                 <Button onClick={() => setIsCreateModalOpen(true)}>
                     Add New Permission
@@ -154,10 +154,10 @@ const Permissions = () => {
                         placeholder="Search permissions by name or description..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="text-field"
                     />
                     <svg
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-surface-on-variant"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

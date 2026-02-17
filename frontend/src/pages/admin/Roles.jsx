@@ -104,7 +104,7 @@ const Roles = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleEditRole(row)}
-                        className="text-primary-500 hover:text-primary-600 font-medium text-sm p-1 rounded hover:bg-primary-50 transition-colors"
+                        className="text-primary hover:bg-primary-container/20 p-1 rounded transition-colors"
                         title="Edit Role"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@ const Roles = () => {
                     </button>
                     <button
                         onClick={() => handleDeleteRole(row)}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm p-1 rounded hover:bg-red-50 transition-colors"
+                        className="text-error hover:bg-error-container/20 p-1 rounded transition-colors"
                         title="Delete Role"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,8 +146,8 @@ const Roles = () => {
         <div>
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Roles Management</h1>
-                    <p className="text-gray-600 mt-1">Manage user roles and their associated permissions</p>
+                    <h1 className="text-2xl font-bold text-surface-on">Roles Management</h1>
+                    <p className="text-surface-on-variant mt-1">Manage user roles and their associated permissions</p>
                 </div>
                 <Button onClick={handleCreateRole}>
                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,10 +165,10 @@ const Roles = () => {
                         placeholder="Search roles..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 bg-white border border-outline rounded-md3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="text-field"
                     />
                     <svg
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-surface-on-variant"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

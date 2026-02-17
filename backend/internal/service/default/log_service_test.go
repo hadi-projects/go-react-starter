@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hadi-projects/go-react-starter/config"
-	"github.com/hadi-projects/go-react-starter/internal/dto"
+	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

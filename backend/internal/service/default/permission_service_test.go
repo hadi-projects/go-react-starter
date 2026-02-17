@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/hadi-projects/go-react-starter/internal/dto"
+	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	mock_cache "github.com/hadi-projects/go-react-starter/internal/mock/pkg/cache"
 	mock_repository "github.com/hadi-projects/go-react-starter/internal/mock/repository"

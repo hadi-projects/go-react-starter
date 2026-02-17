@@ -12,7 +12,7 @@ package mock_service
 import (
 	reflect "reflect"
 
-	dto "github.com/hadi-projects/go-react-starter/internal/dto"
+	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	gomock "go.uber.org/mock/gomock"
 )
 

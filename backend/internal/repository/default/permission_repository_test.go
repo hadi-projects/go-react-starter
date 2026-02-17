@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/hadi-projects/go-react-starter/internal/entity"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/mysql"

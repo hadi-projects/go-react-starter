@@ -12,8 +12,8 @@ package mock_repository
 import (
 	reflect "reflect"
 
-	dto "github.com/hadi-projects/go-react-starter/internal/dto"
-	entity "github.com/hadi-projects/go-react-starter/internal/entity"
+	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	gomock "go.uber.org/mock/gomock"
 )
 

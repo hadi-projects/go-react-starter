@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hadi-projects/go-react-starter/internal/dto"
+	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	mock_service "github.com/hadi-projects/go-react-starter/internal/mock/service"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"github.com/rs/zerolog"

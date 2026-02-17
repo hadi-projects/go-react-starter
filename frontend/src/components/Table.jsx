@@ -39,7 +39,7 @@ const Table = ({ columns, data, loading = false }) => {
     }
 
     return (
-        <div className="w-full overflow-x-auto bg-white rounded-md3-lg shadow-md3-1">
+        <div className="w-full overflow-x-auto bg-white rounded-md3-lg border border-outline-variant/30">
             <table className="w-full">
                 <thead className="bg-surface-variant">
                     <tr>

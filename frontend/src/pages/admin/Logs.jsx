@@ -102,7 +102,7 @@ const Logs = () => {
                 <p className="text-gray-600 mt-2">Monitor {logType} activities and trails</p>
             </div>
 
-            <Card className="p-0 overflow-hidden border-none shadow-xl ring-1 ring-gray-200 bg-white/80 backdrop-blur-md">
+            <Card className="p-0 overflow-hidden border border-outline-variant/30 ring-1 ring-gray-200 bg-white/80 backdrop-blur-md">
                 <Table columns={columns} data={paginatedLogs} loading={isLoading} />
                 {!isLoading && allLogs.length > 0 && (
                     <Pagination
@@ -162,7 +162,7 @@ const Logs = () => {
                         {selectedLog.details && Object.keys(selectedLog.details).length > 0 && (
                             <div>
                                 <p className="text-gray-500 text-sm mb-2">Full Details (JSON)</p>
-                                <pre className="p-4 bg-gray-900 text-green-400 rounded-lg overflow-x-auto text-xs font-mono shadow-inner max-h-96">
+                                <pre className="p-4 bg-gray-900 text-green-400 rounded-lg overflow-x-auto text-xs font-mono max-h-96">
                                     {JSON.stringify(selectedLog.details, null, 2)}
                                 </pre>
                             </div>

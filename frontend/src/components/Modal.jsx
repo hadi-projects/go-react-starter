@@ -25,7 +25,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
 
             {/* Modal */}
             <div
-                className={`relative bg-white rounded-md3-lg shadow-md3-3 ${maxWidth} w-full mx-4 max-h-[90vh] overflow-y-auto`}
+                className={`relative bg-white rounded-md3-lg border border-outline-variant/30 ${maxWidth} w-full mx-4 max-h-[90vh] overflow-y-auto`}
             >
                 {/* Header */}
                 {title && (

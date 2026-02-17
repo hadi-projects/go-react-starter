@@ -14,7 +14,17 @@ func (r *Router) setupPrivateRoutes(
 	roleHandler handler.RoleHandler,
 	logHandler handler.LogHandler,
 	cacheHandler handler.CacheHandler,
+	generatorHandler handler.GeneratorHandler,
+	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
+	// Module Generator
+	generator := v1.Group("/generator")
+	generator.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		generator.POST("", middleware.PermissionGuard("create-module"), generatorHandler.Generate)
+	}
+
+	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)

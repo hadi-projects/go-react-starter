@@ -1,0 +1,97 @@
+package handler
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hadi-projects/go-react-starter/internal/dto"
+	"github.com/hadi-projects/go-react-starter/internal/service"
+	"github.com/hadi-projects/go-react-starter/pkg/response"
+)
+
+type {{.ModuleName}}Handler interface {
+	Create(c *gin.Context)
+	GetAll(c *gin.Context)
+	GetByID(c *gin.Context)
+	Update(c *gin.Context)
+	Delete(c *gin.Context)
+}
+
+type {{.ModuleNameLower}}Handler struct {
+	service service.{{.ModuleName}}Service
+}
+
+func New{{.ModuleName}}Handler(service service.{{.ModuleName}}Service) {{.ModuleName}}Handler {
+	return &{{.ModuleNameLower}}Handler{service: service}
+}
+
+func (h *{{.ModuleNameLower}}Handler) Create(c *gin.Context) {
+	var req dto.Create{{.ModuleName}}Request
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.Create(req)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusCreated, "{{.ModuleName}} created successfully", res)
+}
+
+func (h *{{.ModuleNameLower}}Handler) GetAll(c *gin.Context) {
+	var pagination dto.PaginationRequest
+	if err := c.ShouldBindQuery(&pagination); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.GetAll(&pagination)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "{{.ModuleName}}s retrieved successfully", res)
+}
+
+func (h *{{.ModuleNameLower}}Handler) GetByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	res, err := h.service.GetByID(uint(id))
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "{{.ModuleName}} not found")
+		return
+	}
+
+	response.Success(c, http.StatusOK, "{{.ModuleName}} retrieved successfully", res)
+}
+
+func (h *{{.ModuleNameLower}}Handler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req dto.Update{{.ModuleName}}Request
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.Update(uint(id), req)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "{{.ModuleName}} updated successfully", res)
+}
+
+func (h *{{.ModuleNameLower}}Handler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.service.Delete(uint(id)); err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "{{.ModuleName}} deleted successfully", nil)
+}

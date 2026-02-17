@@ -36,7 +36,7 @@ const Landing = () => {
                     </p>
                     <div className="flex justify-center gap-6">
                         <Link to="/register">
-                            <Button className="px-8 py-4 text-lg shadow-md3-3 hover:shadow-md3-4">
+                            <Button className="px-8 py-4 text-lg border border-white/20 hover:bg-white/10">
                                 Get Started Free
                             </Button>
                         </Link>

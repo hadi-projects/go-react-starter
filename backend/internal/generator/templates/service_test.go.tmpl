@@ -1,0 +1,57 @@
+package service
+
+import (
+	"testing"
+
+	"github.com/hadi-projects/go-react-starter/internal/dto"
+	"github.com/hadi-projects/go-react-starter/internal/entity"
+	mock_repository "github.com/hadi-projects/go-react-starter/internal/mock/repository"
+	mock_pkg_cache "github.com/hadi-projects/go-react-starter/internal/mock/pkg/cache"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
+)
+
+type {{.ModuleName}}ServiceTestSuite struct {
+	suite.Suite
+	ctrl      *gomock.Controller
+	mockRepo  *mock_repository.Mock{{.ModuleName}}Repository
+	mockCache *mock_pkg_cache.MockCacheService
+	service   {{.ModuleName}}Service
+}
+
+func (s *{{.ModuleName}}ServiceTestSuite) SetupTest() {
+	s.ctrl = gomock.NewController(s.T())
+	s.mockRepo = mock_repository.NewMock{{.ModuleName}}Repository(s.ctrl)
+	s.mockCache = mock_pkg_cache.NewMockCacheService(s.ctrl)
+	s.service = New{{.ModuleName}}Service(s.mockRepo, s.mockCache)
+}
+
+func (s *{{.ModuleName}}ServiceTestSuite) TearDownTest() {
+	s.ctrl.Finish()
+}
+
+func (s *{{.ModuleName}}ServiceTestSuite) TestCreate_Success() {
+	req := dto.Create{{.ModuleName}}Request{
+		{{- range .Fields}}
+		{{.NameGo}}: {{if eq .TypeGo "string"}}"test"{{else if eq .TypeGo "float64"}}10.5{{else if eq .TypeGo "int"}}5{{else if eq .TypeGo "bool"}}true{{else}}nil{{end}},
+		{{- end}}
+	}
+
+	entity := &entity.{{.ModuleName}}{
+		{{- range .Fields}}
+		{{.NameGo}}: req.{{.NameGo}},
+		{{- end}}
+	}
+
+	s.mockRepo.EXPECT().Create(entity).Return(nil)
+	s.mockCache.EXPECT().DeletePattern("{{.TableName}}:*").Return(nil)
+
+	res, err := s.service.Create(req)
+	assert.NoError(s.T(), err)
+	assert.NotNil(s.T(), res)
+}
+
+func Test{{.ModuleName}}ServiceTestSuite(t *testing.T) {
+	suite.Run(t, new({{.ModuleName}}ServiceTestSuite))
+}

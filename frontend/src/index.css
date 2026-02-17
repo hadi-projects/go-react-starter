@@ -49,15 +49,14 @@
   .btn-primary {
     background-color: theme('colors.primary.500');
     color: theme('colors.on-primary');
-    @apply hover:bg-primary-600 shadow-md3-1;
-    @apply hover:shadow-md3-2 active:shadow-md3-1;
+    @apply hover:bg-primary-600;
     @apply focus:ring-primary-500;
   }
 
   .btn-secondary {
     background-color: theme('colors.secondary.container');
     color: theme('colors.secondary.on-container');
-    @apply hover:shadow-md3-1 transition-shadow duration-300;
+    @apply transition-colors duration-300;
   }
 
   .btn-outline {
@@ -69,12 +68,12 @@
   /* MD3 Card - Expressive */
   .card {
     background-color: theme('colors.surface.container-low');
-    @apply rounded-md3-xl shadow-md3-1 p-6 transition-all duration-300;
+    @apply rounded-md3-xl p-6 transition-all duration-300;
   }
 
   .card-high {
     background-color: theme('colors.surface.container-highest');
-    @apply shadow-md3-3;
+    @apply border border-outline-variant;
   }
 
   /* MD3 Text Field - Expressive */

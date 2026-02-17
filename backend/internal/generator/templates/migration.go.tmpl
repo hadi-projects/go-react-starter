@@ -1,0 +1,10 @@
+package main
+
+import (
+	"github.com/hadi-projects/go-react-starter/internal/entity"
+	"gorm.io/gorm"
+)
+
+func Migrate{{.ModuleName}}(db *gorm.DB) error {
+	return db.AutoMigrate(&entity.{{.ModuleName}}{})
+}

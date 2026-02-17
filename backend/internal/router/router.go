@@ -59,6 +59,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	userRepo := repository.NewUserRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
 	authService := service.NewAuthService(userRepo, r.config)
@@ -66,6 +67,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
+	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -74,10 +76,13 @@ func (r *Router) SetupRouter() *gin.Engine {
 	roleHandler := handler.NewRoleHandler(roleService)
 	logHandler := handler.NewLogHandler(logService)
 	cacheHandler := handler.NewCacheHandler(r.cache)
+	generatorHandler := handler.NewGeneratorHandler(".")
+	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler)
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, generatorHandler) // [GENERATOR_INSERT_HANDLER_PARAM]
+
 	}
 
 	logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Server running")

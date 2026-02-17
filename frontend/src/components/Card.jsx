@@ -7,7 +7,6 @@ const Card = ({
 }) => {
     const classes = `
     card
-    ${elevated ? '' : 'shadow-md3-1'}
     ${className}
   `.trim().replace(/\s+/g, ' ');
 

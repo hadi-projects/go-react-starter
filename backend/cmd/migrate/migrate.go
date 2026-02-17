@@ -22,6 +22,7 @@ func main() {
 		&entity.User{},
 		&entity.Role{},
 		&entity.Permission{},
+		// [GENERATOR_INSERT_MIGRATION]
 	)
 
 	if err != nil {

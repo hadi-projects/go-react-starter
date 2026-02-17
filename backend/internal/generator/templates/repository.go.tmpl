@@ -1,0 +1,76 @@
+package repository
+
+import (
+	"github.com/hadi-projects/go-react-starter/internal/dto"
+	"github.com/hadi-projects/go-react-starter/internal/entity"
+	"gorm.io/gorm"
+)
+
+type {{.ModuleName}}Repository interface {
+	Create(entity *entity.{{.ModuleName}}) error
+	FindAll(pagination *dto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error)
+	FindByID(id uint) (*entity.{{.ModuleName}}, error)
+	Update(entity *entity.{{.ModuleName}}) error
+	Delete(id uint) error
+}
+
+type {{.ModuleNameLower}}Repository struct {
+	db *gorm.DB
+}
+
+func New{{.ModuleName}}Repository(db *gorm.DB) {{.ModuleName}}Repository {
+	return &{{.ModuleNameLower}}Repository{db: db}
+}
+
+func (r *{{.ModuleNameLower}}Repository) Create(entity *entity.{{.ModuleName}}) error {
+	return r.db.Create(entity).Error
+}
+
+func (r *{{.ModuleNameLower}}Repository) FindAll(pagination *dto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error) {
+	var entities []entity.{{.ModuleName}}
+	var total int64
+
+	query := r.db.Model(&entity.{{.ModuleName}}{})
+
+	{{if .HasSearchableFields}}
+	if pagination.Search != "" {
+		{{- range $i, $f := .Fields}}
+		{{- if .Searchable}}
+		{{- if eq $i 0}}
+		query = query.Where("{{.NameSql}} LIKE ?", "%"+pagination.Search+"%")
+		{{- else}}
+		query = query.Or("{{.NameSql}} LIKE ?", "%"+pagination.Search+"%")
+		{{- end}}
+		{{- end}}
+		{{- end}}
+	}
+	{{end}}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (pagination.GetPage() - 1) * pagination.GetLimit()
+	err := query.Limit(pagination.GetLimit()).
+		Offset(offset).
+		Find(&entities).Error
+
+	return entities, total, err
+}
+
+func (r *{{.ModuleNameLower}}Repository) FindByID(id uint) (*entity.{{.ModuleName}}, error) {
+	var entity entity.{{.ModuleName}}
+	err := r.db.First(&entity, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
+func (r *{{.ModuleNameLower}}Repository) Update(entity *entity.{{.ModuleName}}) error {
+	return r.db.Save(entity).Error
+}
+
+func (r *{{.ModuleNameLower}}Repository) Delete(id uint) error {
+	return r.db.Delete(&entity.{{.ModuleName}}{}, id).Error
+}

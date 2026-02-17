@@ -39,7 +39,7 @@ const Sidebar = ({ sections = [], title = "Admin Panel", onLogout }) => {
     };
 
     return (
-        <aside className="nav-drawer flex-shrink-0 animate-fade-in shadow-md3-1">
+        <aside className="nav-drawer flex-shrink-0 animate-fade-in">
             {/* Header */}
             <div className="h-16 flex items-center px-6">
                 <h2 className="text-xl font-semibold text-surface-on">{title}</h2>

@@ -65,3 +65,9 @@ export const clearCache = async () => {
     const response = await apiClient.delete('/cache/clear');
     return response.data;
 };
+
+// Module Generator
+export const generateModule = async (data) => {
+    const response = await apiClient.post('/generator', data);
+    return response.data;
+};

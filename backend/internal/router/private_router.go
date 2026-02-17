@@ -15,6 +15,7 @@ func (r *Router) setupPrivateRoutes(
 	logHandler handler.LogHandler,
 	cacheHandler handler.CacheHandler,
 	generatorHandler handler.GeneratorHandler,
+	abcHandler handler.AbcHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Module Generator
@@ -24,6 +25,15 @@ func (r *Router) setupPrivateRoutes(
 		generator.POST("", middleware.PermissionGuard("create-module"), generatorHandler.Generate)
 	}
 
+	abc := v1.Group("/abc")
+	abc.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		abc.POST("", abcHandler.Create)
+		abc.GET("", abcHandler.GetAll)
+		abc.GET("/:id", abcHandler.GetByID)
+		abc.PUT("/:id", abcHandler.Update)
+		abc.DELETE("/:id", abcHandler.Delete)
+	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")
 	{

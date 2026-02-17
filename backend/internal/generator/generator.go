@@ -12,15 +12,19 @@ import (
 )
 
 type Field struct {
-	Name       string `yaml:"name"`
-	Type       string `yaml:"type"`
-	Binding    string `yaml:"binding"`
-	Searchable bool   `yaml:"searchable"`
-	Unique     bool   `yaml:"unique"`
+	Name       string `yaml:"name" json:"name"`
+	Type       string `yaml:"type" json:"type"`
+	Binding    string `yaml:"binding" json:"binding"`
+	Searchable bool   `yaml:"searchable" json:"searchable"`
+	Unique     bool   `yaml:"unique" json:"unique"`
 }
 
 func (f Field) NameGo() string {
 	return ToCamelCase(f.Name)
+}
+
+func (f Field) NameLowerGo() string {
+	return ToLowerCamelCase(f.Name)
 }
 
 func (f Field) NameJson() string {
@@ -70,10 +74,10 @@ func (f Field) GormType() string {
 }
 
 type ModuleConfig struct {
-	ModuleName string  `yaml:"module_name"`
-	TableName  string  `yaml:"table_name"`
-	AuditLog   bool    `yaml:"audit_log"`
-	Fields     []Field `yaml:"fields"`
+	ModuleName string  `yaml:"module_name" json:"module_name"`
+	TableName  string  `yaml:"table_name" json:"table_name"`
+	AuditLog   bool    `yaml:"audit_log" json:"audit_log"`
+	Fields     []Field `yaml:"fields" json:"fields"`
 }
 
 type Generator struct {
@@ -113,15 +117,19 @@ func (g *Generator) Generate() error {
 		"service.go.tmpl":      filepath.Join(g.BaseDir, "internal/service", strings.ToLower(g.Config.ModuleName)+"_service.go"),
 		"handler.go.tmpl":      filepath.Join(g.BaseDir, "internal/handler", strings.ToLower(g.Config.ModuleName)+"_handler.go"),
 		"service_test.go.tmpl": filepath.Join(g.BaseDir, "internal/service", strings.ToLower(g.Config.ModuleName)+"_service_test.go"),
+		// Frontend UI templates
+		"frontend_api.js.tmpl":   filepath.Join(g.BaseDir, "../frontend/src/api", strings.ToLower(g.Config.ModuleName)+".js"),
+		"frontend_page.jsx.tmpl": filepath.Join(g.BaseDir, "../frontend/src/pages/admin", g.Config.ModuleName+"Page.jsx"),
 	}
 
 	data := map[string]interface{}{
-		"ModuleName":          g.Config.ModuleName,
-		"ModuleNameLower":     strings.ToLower(g.Config.ModuleName),
-		"TableName":           g.Config.TableName,
-		"Fields":              g.Config.Fields,
-		"AuditLog":            g.Config.AuditLog,
-		"HasSearchableFields": g.hasSearchableFields(),
+		"ModuleName":           ToCamelCase(g.Config.ModuleName),
+		"ModuleNameLower":      strings.ToLower(g.Config.ModuleName),
+		"ModuleNameLowerCamel": ToLowerCamelCase(g.Config.ModuleName),
+		"TableName":            g.Config.TableName,
+		"Fields":               g.Config.Fields,
+		"AuditLog":             g.Config.AuditLog,
+		"HasSearchableFields":  g.hasSearchableFields(),
 	}
 
 	for tmplName, outputPath := range templates {
@@ -138,6 +146,10 @@ func (g *Generator) Generate() error {
 		fmt.Printf("Warning: Failed to register migration: %v\n", err)
 	}
 
+	if err := g.registerFrontend(); err != nil {
+		fmt.Printf("Warning: Failed to register frontend: %v\n", err)
+	}
+
 	return nil
 }
 
@@ -148,7 +160,7 @@ func (g *Generator) registerRouter() error {
 	repoInit := fmt.Sprintf("\t%sRepo := repository.New%sRepository(db)\n\t// [GENERATOR_INSERT_REPOSITORY]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName)
 	serviceInit := fmt.Sprintf("\t%sService := service.New%sService(%sRepo, r.cache)\n\t// [GENERATOR_INSERT_SERVICE]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName, strings.ToLower(g.Config.ModuleName))
 	handlerInit := fmt.Sprintf("\t%sHandler := handler.New%sHandler(%sService)\n\t// [GENERATOR_INSERT_HANDLER]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName, strings.ToLower(g.Config.ModuleName))
-	handlerParam := fmt.Sprintf("\t\t\t%sHandler,\n\t\t\t// [GENERATOR_INSERT_HANDLER_PARAM]", strings.ToLower(g.Config.ModuleName))
+	handlerParam := fmt.Sprintf("\t\t%sHandler,\n\t\t// [GENERATOR_INSERT_HANDLER_PARAM]", strings.ToLower(g.Config.ModuleName))
 
 	if err := g.insertAtMarker(routerPath, "// [GENERATOR_INSERT_REPOSITORY]", repoInit); err != nil {
 		return err
@@ -191,6 +203,36 @@ func (g *Generator) registerMigration() error {
 	return g.insertAtMarker(migratePath, "// [GENERATOR_INSERT_MIGRATION]", migrationInit)
 }
 
+func (g *Generator) registerFrontend() error {
+	appPath := filepath.Join(g.BaseDir, "../frontend/src/App.jsx")
+	sidebarPath := filepath.Join(g.BaseDir, "../frontend/src/layouts/AdminLayout.jsx")
+
+	// Inject Route
+	routeImport := fmt.Sprintf("import %sPage from './pages/admin/%sPage';\n// [GENERATOR_INSERT_IMPORT]", g.Config.ModuleName, g.Config.ModuleName)
+	routeDefinition := fmt.Sprintf("\t\t\t\t\t<Route path=\"admin/%s\" element={<%sPage />} />\n\t\t\t\t\t// [GENERATOR_INSERT_ROUTE]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName)
+
+	if err := g.insertAtMarker(appPath, "// [GENERATOR_INSERT_IMPORT]", routeImport); err != nil {
+		return err
+	}
+	if err := g.insertAtMarker(appPath, "// [GENERATOR_INSERT_ROUTE]", routeDefinition); err != nil {
+		return err
+	}
+
+	// Inject Sidebar Item
+	sidebarItem := fmt.Sprintf(`                                { name: '%s', path: '/admin/%s', icon: (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                ) },
+                                // [GENERATOR_INSERT_ADMIN_ITEM]`, g.Config.ModuleName, strings.ToLower(g.Config.ModuleName))
+
+	if err := g.insertAtMarker(sidebarPath, "// [GENERATOR_INSERT_ADMIN_ITEM]", sidebarItem); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *Generator) insertAtMarker(filePath string, marker string, content string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -203,7 +245,8 @@ func (g *Generator) insertAtMarker(filePath string, marker string, content strin
 	}
 
 	// Avoid duplicate insertion
-	if strings.Contains(body, strings.Split(content, "\n")[0]) {
+	firstLine := strings.Split(strings.TrimSpace(content), "\n")[0]
+	if strings.Contains(body, firstLine) {
 		return nil
 	}
 
@@ -215,6 +258,11 @@ func (g *Generator) renderTemplate(tmplName string, outputPath string, data inte
 	tmplPath := filepath.Join(g.BaseDir, "internal/generator/templates", tmplName)
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
+		return err
+	}
+
+	// Ensure directory exists
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
 		return err
 	}
 
@@ -244,4 +292,12 @@ func ToCamelCase(s string) string {
 		parts[i] = strings.Title(parts[i])
 	}
 	return strings.Join(parts, "")
+}
+
+func ToLowerCamelCase(s string) string {
+	if s == "" {
+		return ""
+	}
+	camel := ToCamelCase(s)
+	return strings.ToLower(camel[:1]) + camel[1:]
 }

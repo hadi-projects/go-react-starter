@@ -50,7 +50,6 @@ func (r *Router) SetupRouter() *gin.Engine {
 	router.Use(middleware.CORSMiddleware(r.config))
 	router.Use(middleware.RequestLogger())
 	router.Use(middleware.RequestCancellation(time.Duration(r.config.Security.RequestTimeOut) * time.Second))
-	// router.Use(middleware.APIKeyMiddleware(r.config.Security.APIKey)) // Removed global application
 	router.Use(middleware.RateLimiter(r.config.RateLimit.Rps, r.config.RateLimit.Burst))
 	router.Use(middleware.SecureHeaders())
 	router.Use(middleware.XSSProtection())
@@ -59,6 +58,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	userRepo := repository.NewUserRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+	abcRepo := repository.NewAbcRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -67,6 +67,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
+	abcService := service.NewAbcService(abcRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -77,12 +78,13 @@ func (r *Router) SetupRouter() *gin.Engine {
 	logHandler := handler.NewLogHandler(logService)
 	cacheHandler := handler.NewCacheHandler(r.cache)
 	generatorHandler := handler.NewGeneratorHandler(".")
+	abcHandler := handler.NewAbcHandler(abcService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, generatorHandler) // [GENERATOR_INSERT_HANDLER_PARAM]
-
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, generatorHandler, abcHandler)
+		// [GENERATOR_INSERT_HANDLER_PARAM]
 	}
 
 	logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Server running")
@@ -117,5 +119,4 @@ func (r *Router) Run() {
 	}
 
 	fmt.Println("Server exited successfully")
-
 }

@@ -77,12 +77,14 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 		AccessToken:  signedToken,
 		RefreshToken: "refresh-token-placeholder", // TODO: Implement refresh token
 		User: dto.UserResponse{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			RoleID:    user.RoleID,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
+			ID:          user.ID,
+			Name:        user.Name,
+			Email:       user.Email,
+			RoleID:      user.RoleID,
+			Role:        user.Role.Name,
+			Permissions: permissions,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
 		},
 	}, nil
 }

@@ -14,10 +14,12 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
-	ID        uint      `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	RoleID    uint      `json:"role_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uint      `json:"id"`
+	Name        string    `json:"name"`
+	Email       string    `json:"email"`
+	RoleID      uint      `json:"role_id"`
+	Role        string    `json:"role"`
+	Permissions []string  `json:"permissions"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

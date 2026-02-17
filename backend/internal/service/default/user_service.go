@@ -140,13 +140,22 @@ func (s *userService) GetMe(userID uint) (*dto.UserResponse, error) {
 		return nil, err
 	}
 
+	var permissions []string
+	if user.RoleID != 0 {
+		for _, p := range user.Role.Permissions {
+			permissions = append(permissions, p.Name)
+		}
+	}
+
 	response := &dto.UserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		RoleID:    user.RoleID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		ID:          user.ID,
+		Name:        user.Name,
+		Email:       user.Email,
+		RoleID:      user.RoleID,
+		Role:        user.Role.Name,
+		Permissions: permissions,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
 	}
 
 	// Cache the result

@@ -83,6 +83,10 @@ func (s *logService) readLogFile(filePath string, logType string) ([]dto.LogResp
 
 	var logs []dto.LogResponse
 	scanner := bufio.NewScanner(file)
+	// Increase buffer to 10MB to handle large log lines (system.log can have very long lines)
+	const maxScanTokenSize = 10 * 1024 * 1024 // 10MB
+	buf := make([]byte, maxScanTokenSize)
+	scanner.Buffer(buf, maxScanTokenSize)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.TrimSpace(line) == "" {

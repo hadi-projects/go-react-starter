@@ -5,24 +5,45 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/hadi-projects/go-react-starter/config"
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
+	"github.com/hadi-projects/go-react-starter/pkg/kafka"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/hadi-projects/go-react-starter/pkg/mailer"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
 	Login(req dto.LoginRequest) (*dto.LoginResponse, error)
+	ForgotPassword(req dto.ForgotPasswordRequest) error
+	ResetPassword(req dto.ResetPasswordRequest) error
 }
 
 type authService struct {
-	userRepo repository.UserRepository
-	config   *config.Config
+	userRepo  repository.UserRepository
+	tokenRepo repository.TokenRepository
+	producer  kafka.Producer
+	mailer    mailer.Mailer
+	config    *config.Config
 }
 
-func NewAuthService(userRepo repository.UserRepository, config *config.Config) AuthService {
-	return &authService{userRepo: userRepo, config: config}
+func NewAuthService(
+	userRepo repository.UserRepository,
+	tokenRepo repository.TokenRepository,
+	producer kafka.Producer,
+	mailer mailer.Mailer,
+	config *config.Config,
+) AuthService {
+	return &authService{
+		userRepo:  userRepo,
+		tokenRepo: tokenRepo,
+		producer:  producer,
+		mailer:    mailer,
+		config:    config,
+	}
 }
 
 func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
@@ -87,4 +108,105 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 			UpdatedAt:   user.UpdatedAt,
 		},
 	}, nil
+}
+
+func (s *authService) ForgotPassword(req dto.ForgotPasswordRequest) error {
+	// 1. Find user by email
+	user, err := s.userRepo.FindByEmail(req.Email)
+	if err != nil {
+		// Return nil to avoid enumerating users
+		logger.AuthLogger.Warn().Str("email", req.Email).Msg("ForgotPassword: user not found")
+		return nil
+	}
+
+	// 2. Generate token
+	token := uuid.New().String()
+	expiresAt := time.Now().Add(15 * time.Minute)
+
+	// 3. Save token
+	resetToken := &entity.PasswordResetToken{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	}
+
+	if err := s.tokenRepo.Create(resetToken); err != nil {
+		return err
+	}
+
+	// 4. Publish message to Kafka
+	msg := map[string]string{
+		"email": user.Email,
+		"token": token,
+	}
+
+	// Use configured topic from config
+	topic := s.config.Kafka.Topic
+	if topic == "" {
+		topic = "password-reset"
+	}
+
+	var publishErr error
+	if s.producer != nil {
+		publishErr = s.producer.Publish(topic, msg)
+	} else {
+		publishErr = errors.New("kafka producer is not initialized")
+	}
+
+	if publishErr != nil {
+		logger.SystemLogger.Error().Err(publishErr).Msg("Failed to publish password reset message to Kafka. Falling back to direct email.")
+
+		// Fallback: Send email via goroutine
+		go func() {
+			frontendURL := s.config.Frontend.URL
+			if frontendURL == "" {
+				frontendURL = "http://localhost:5173"
+			}
+			resetLink := frontendURL + "/reset-password?token=" + token
+			body := mailer.GetResetPasswordEmailNative(resetLink)
+			if err := s.mailer.SendEmail(user.Email, "Reset Password Request (Fallback)", body); err != nil {
+				logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send fallback email")
+			} else {
+				logger.SystemLogger.Info().Str("email", user.Email).Msg("Fallback email sent successfully")
+			}
+		}()
+
+		// Return nil to client as the request is accepted
+		return nil
+	}
+
+	return nil
+}
+
+func (s *authService) ResetPassword(req dto.ResetPasswordRequest) error {
+	// 1. Find token
+	resetToken, err := s.tokenRepo.FindByToken(req.Token)
+	if err != nil {
+		return errors.New("invalid or expired token")
+	}
+
+	// 2. Check expiration
+	if time.Now().After(resetToken.ExpiresAt) {
+		return errors.New("invalid or expired token")
+	}
+
+	// 3. Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), s.config.Security.BCryptCost)
+	if err != nil {
+		return err
+	}
+
+	// 4. Update user password
+	user := resetToken.User
+	user.Password = string(hashedPassword)
+	if err := s.userRepo.Update(&user); err != nil {
+		return err
+	}
+
+	// 5. Delete token (and potentially all other tokens for this user)
+	if err := s.tokenRepo.DeleteByUserID(user.ID); err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Failed to delete reset tokens")
+	}
+
+	return nil
 }

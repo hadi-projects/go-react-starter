@@ -22,6 +22,7 @@ func main() {
 		&entity.User{},
 		&entity.Role{},
 		&entity.Permission{},
+		&entity.PasswordResetToken{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

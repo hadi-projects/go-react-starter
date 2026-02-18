@@ -6,6 +6,7 @@ import (
 	"github.com/hadi-projects/go-react-starter/config"
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
+	mock_pkg "github.com/hadi-projects/go-react-starter/internal/mock/pkg"
 	mock_repository "github.com/hadi-projects/go-react-starter/internal/mock/repository"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"github.com/rs/zerolog"
@@ -17,24 +18,34 @@ import (
 
 type AuthServiceTestSuite struct {
 	suite.Suite
-	ctrl     *gomock.Controller
-	mockRepo *mock_repository.MockUserRepository
-	service  AuthService
-	cfg      *config.Config
+	ctrl          *gomock.Controller
+	mockUserRepo  *mock_repository.MockUserRepository
+	mockTokenRepo *mock_repository.MockTokenRepository
+	mockProducer  *mock_pkg.MockProducer
+	mockMailer    *mock_pkg.MockMailer
+	service       AuthService
+	cfg           *config.Config
 }
 
 func (s *AuthServiceTestSuite) SetupTest() {
 	s.ctrl = gomock.NewController(s.T())
-	s.mockRepo = mock_repository.NewMockUserRepository(s.ctrl)
+	s.mockUserRepo = mock_repository.NewMockUserRepository(s.ctrl)
+	s.mockTokenRepo = mock_repository.NewMockTokenRepository(s.ctrl)
+	s.mockProducer = mock_pkg.NewMockProducer(s.ctrl)
+	s.mockMailer = mock_pkg.NewMockMailer(s.ctrl)
 
 	s.cfg = &config.Config{
 		JWT: config.JWTConfig{
 			Secret: "test-secret",
 		},
+		Kafka: config.KafkaConfig{
+			Topic: "test-topic",
+		},
 	}
 
 	logger.AuthLogger = zerolog.Nop()
-	s.service = NewAuthService(s.mockRepo, s.cfg)
+	logger.SystemLogger = zerolog.Nop()
+	s.service = NewAuthService(s.mockUserRepo, s.mockTokenRepo, s.mockProducer, s.mockMailer, s.cfg)
 }
 
 func (s *AuthServiceTestSuite) TearDownTest() {
@@ -59,7 +70,7 @@ func (s *AuthServiceTestSuite) TestLogin_Success() {
 		Password: password,
 	}
 
-	s.mockRepo.EXPECT().FindByEmail(req.Email).Return(user, nil)
+	s.mockUserRepo.EXPECT().FindByEmail(req.Email).Return(user, nil)
 
 	res, err := s.service.Login(req)
 	s.Require().NoError(err)
@@ -80,7 +91,7 @@ func (s *AuthServiceTestSuite) TestLogin_InvalidPassword() {
 		Password: "wrong-password",
 	}
 
-	s.mockRepo.EXPECT().FindByEmail(req.Email).Return(user, nil)
+	s.mockUserRepo.EXPECT().FindByEmail(req.Email).Return(user, nil)
 
 	res, err := s.service.Login(req)
 	assert.Error(s.T(), err)

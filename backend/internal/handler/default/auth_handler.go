@@ -12,6 +12,8 @@ import (
 
 type AuthHandler interface {
 	Login(c *gin.Context)
+	ForgotPassword(c *gin.Context)
+	ResetPassword(c *gin.Context)
 }
 
 type authHandler struct {
@@ -38,4 +40,37 @@ func (h *authHandler) Login(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Login successful", res)
+}
+
+func (h *authHandler) ForgotPassword(c *gin.Context) {
+	var req dto.ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.service.ForgotPassword(req); err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("ForgotPassword failed")
+		// Always return success to avoid leaking internal errors or user existence
+		response.Success(c, http.StatusOK, "If your email is registered, you will receive a password reset link.", nil)
+		return
+	}
+
+	response.Success(c, http.StatusOK, "If your email is registered, you will receive a password reset link.", nil)
+}
+
+func (h *authHandler) ResetPassword(c *gin.Context) {
+	var req dto.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.service.ResetPassword(req); err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("ResetPassword failed")
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Password reset successfully", nil)
 }

@@ -5,14 +5,16 @@ import (
 	"github.com/hadi-projects/go-react-starter/internal/router"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
+	"github.com/hadi-projects/go-react-starter/pkg/kafka"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/hadi-projects/go-react-starter/pkg/mailer"
 )
 
 func main() {
 	cfg := config.LoadConfig()
 	logger.InitLogger(&cfg)
 
-	_, err := database.NewMySQLConnection(&cfg)
+	db, err := database.NewMySQLConnection(&cfg)
 	if err != nil {
 		logger.SystemLogger.Fatal().Err(err).Msg("Failed to connect to database")
 	}
@@ -23,7 +25,17 @@ func main() {
 	}
 	defer cacheService.Close()
 
-	router := router.NewRouter(&cfg, cacheService)
+	kafkaProducer, err := kafka.NewProducer(&cfg)
+	if err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Failed to create Kafka producer")
+		kafkaProducer = nil
+	} else {
+		defer kafkaProducer.Close()
+	}
+
+	mailService := mailer.NewMailer(&cfg)
+
+	router := router.NewRouter(&cfg, db, cacheService, kafkaProducer, mailService)
 	router.SetupRouter()
 	router.Run()
 }

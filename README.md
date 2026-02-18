@@ -2,7 +2,7 @@
 
 A full-stack application starter template featuring a Go (Gin) backend and a React (Vite) frontend, complete with Docker support.
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Backend:** Go (Golang), Gin Framework, GORM
 - **Frontend:** React, Vite, Tailwind CSS
@@ -10,14 +10,14 @@ A full-stack application starter template featuring a Go (Gin) backend and a Rea
 - **Caching:** Redis
 - **Infrastructure:** Docker, Docker Compose, Nginx
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Docker** and **Docker Compose** (Recommended)
 - **Go 1.25+** (For local backend development)
 - **Node.js 20+** (For local frontend development)
 - **Make** (Optional, for using Makefile shortcuts)
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Using Docker (Recommended)
 
@@ -101,7 +101,7 @@ If you prefer to run services individually without Docker:
     npm run dev
     ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── backend/            # Go backend application
@@ -117,7 +117,7 @@ If you prefer to run services individually without Docker:
 └── README.md           # Project documentation
 ```
 
-## 🔧 Environment Variables
+## Environment Variables
 
 Key environment variables used in `backend/.env`:
 
@@ -129,7 +129,7 @@ Key environment variables used in `backend/.env`:
 | `REDIS_HOST` | Redis host (use `redis` in Docker) | `localhost` |
 | `JWT_SECRET` | Secret key for JWT tokens | `secret-jwt-key` |
 
-## 📜 Makefile Commands
+## Makefile Commands
 
 - `make run-backend`: Run backend locally
 - `make run-frontend`: Run frontend locally

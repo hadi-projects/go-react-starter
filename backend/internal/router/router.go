@@ -16,19 +16,27 @@ import (
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	service "github.com/hadi-projects/go-react-starter/internal/service/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
-	"github.com/hadi-projects/go-react-starter/pkg/database"
+	"github.com/hadi-projects/go-react-starter/pkg/kafka"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/hadi-projects/go-react-starter/pkg/mailer"
+	"gorm.io/gorm"
 )
 
 type Router struct {
-	config *config.Config
-	cache  cache.CacheService
+	config        *config.Config
+	db            *gorm.DB
+	cache         cache.CacheService
+	kafkaProducer kafka.Producer
+	mailer        mailer.Mailer
 }
 
-func NewRouter(config *config.Config, cache cache.CacheService) *Router {
+func NewRouter(config *config.Config, db *gorm.DB, cache cache.CacheService, kafkaProducer kafka.Producer, mailer mailer.Mailer) *Router {
 	return &Router{
-		config: config,
-		cache:  cache,
+		config:        config,
+		db:            db,
+		cache:         cache,
+		kafkaProducer: kafkaProducer,
+		mailer:        mailer,
 	}
 }
 
@@ -41,10 +49,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	router := gin.New()
 
-	db, err := database.NewMySQLConnection(r.config)
-	if err != nil {
-		logger.SystemLogger.Fatal().Err(err).Msg("Failed to connect to database")
-	}
+	// Use db from Router struct
+	db := r.db
 
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORSMiddleware(r.config))
@@ -58,10 +64,11 @@ func (r *Router) SetupRouter() *gin.Engine {
 	userRepo := repository.NewUserRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+	tokenRepo := repository.NewTokenRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
-	authService := service.NewAuthService(userRepo, r.config)
+	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config)
 	userService := service.NewUserService(userRepo, r.config, r.cache)
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)

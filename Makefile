@@ -10,6 +10,9 @@ run-migration:
 run-seeder:
 	cd backend && go run ./cmd/seeder/main.go
 
+run-worker:
+	cd backend && go run ./cmd/worker/main.go
+
 generate:
 	cd backend && go run ./cmd/generator/main.go -config $(config) -base .
 

@@ -23,6 +23,26 @@ type Config struct {
 	RateLimit RateLimitConfig
 	Security  SecurityConfig
 	Log       LogConfig
+	Mail      MailConfig
+	Kafka     KafkaConfig
+	Frontend  FrontendConfig
+}
+
+type MailConfig struct {
+	Host        string
+	Port        int
+	User        string
+	Password    string
+	FromAddress string
+}
+
+type KafkaConfig struct {
+	Brokers []string
+	Topic   string
+}
+
+type FrontendConfig struct {
+	URL string
 }
 
 func LoadConfig() (config Config) {
@@ -70,6 +90,14 @@ func LoadConfig() (config Config) {
 		"ADMIN_EMAIL",
 		"ADMIN_PASSWORD",
 		"LOG_DIR",
+		"MAIL_HOST",
+		"MAIL_PORT",
+		"MAIL_USERNAME",
+		"MAIL_PASSWORD",
+		"MAIL_FROM_ADDRESS",
+		"KAFKA_BROKERS",
+		"KAFKA_TOPIC",
+		"FRONTEND_URL",
 	}
 
 	for _, envVar := range envVars {
@@ -136,6 +164,23 @@ func LoadConfig() (config Config) {
 
 	config.Log = LogConfig{
 		Dir: viper.GetString("LOG_DIR"),
+	}
+
+	config.Mail = MailConfig{
+		Host:        viper.GetString("MAIL_HOST"),
+		Port:        viper.GetInt("MAIL_PORT"),
+		User:        viper.GetString("MAIL_USERNAME"),
+		Password:    viper.GetString("MAIL_PASSWORD"),
+		FromAddress: viper.GetString("MAIL_FROM_ADDRESS"),
+	}
+
+	config.Kafka = KafkaConfig{
+		Brokers: viper.GetStringSlice("KAFKA_BROKERS"),
+		Topic:   viper.GetString("KAFKA_TOPIC"),
+	}
+
+	config.Frontend = FrontendConfig{
+		URL: viper.GetString("FRONTEND_URL"),
 	}
 
 	return config

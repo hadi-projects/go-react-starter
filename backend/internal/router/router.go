@@ -11,12 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadi-projects/go-react-starter/config"
-	customHandler "github.com/hadi-projects/go-react-starter/internal/handler"
 	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
-	customRepository "github.com/hadi-projects/go-react-starter/internal/repository"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
-	customService "github.com/hadi-projects/go-react-starter/internal/service"
 	service "github.com/hadi-projects/go-react-starter/internal/service/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/kafka"
@@ -68,8 +65,6 @@ func (r *Router) SetupRouter() *gin.Engine {
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	tokenRepo := repository.NewTokenRepository(db)
-	testtRepo := customRepository.NewTesttRepository(db)
-	popoRepo := customRepository.NewPopoRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -79,8 +74,6 @@ func (r *Router) SetupRouter() *gin.Engine {
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
 	statisticsService := service.NewStatisticsService(db)
-	testtService := customService.NewTesttService(testtRepo, r.cache)
-	popoService := customService.NewPopoService(popoRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -92,8 +85,6 @@ func (r *Router) SetupRouter() *gin.Engine {
 	cacheHandler := handler.NewCacheHandler(r.cache)
 	statisticsHandler := handler.NewStatisticsHandler(statisticsService)
 	generatorHandler := handler.NewGeneratorHandler(".")
-	testtHandler := customHandler.NewTesttHandler(testtService)
-	popoHandler := customHandler.NewPopoHandler(popoService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -108,8 +99,6 @@ func (r *Router) SetupRouter() *gin.Engine {
 			cacheHandler,
 			statisticsHandler,
 			generatorHandler,
-			testtHandler,
-			popoHandler,
 			// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

@@ -5,7 +5,6 @@ import (
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
-	customEntity "github.com/hadi-projects/go-react-starter/internal/entity"
 	// [GENERATOR_INSERT_IMPORT]
 )
 
@@ -25,7 +24,6 @@ func main() {
 		&entity.Role{},
 		&entity.Permission{},
 		&entity.PasswordResetToken{},
-		&customEntity.Popo{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

@@ -16,6 +16,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import TesttPage from './pages/admin/TesttPage';
 import VerifyPage from './pages/admin/VerifyPage';
 import PopoPage from './pages/admin/PopoPage';
+import PopowPage from './pages/admin/PopowPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
 										<Route path="admin/testt" element={<TesttPage />} />
 										<Route path="admin/verify" element={<VerifyPage />} />
 										<Route path="admin/popo" element={<PopoPage />} />
+										<Route path="admin/popow" element={<PopowPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

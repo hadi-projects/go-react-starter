@@ -4,6 +4,10 @@ export const getUsers = async (page = 1, limit = 10, search = '') => {
     const response = await apiClient.get(`/users?page=${page}&limit=${limit}&search=${search}`);
     return response.data;
 };
+export const getMe = async () => {
+    const response = await apiClient.get('/users/me');
+    return response.data;
+};
 // User API
 export const createUser = async (data) => {
     const response = await apiClient.post('/users', data);
@@ -61,6 +65,11 @@ export const deletePermission = async (id) => {
 };
 
 // Cache management
+export const getCacheStatus = async () => {
+    const response = await apiClient.get('/cache/status');
+    return response.data;
+};
+
 export const clearCache = async () => {
     const response = await apiClient.delete('/cache/clear');
     return response.data;

@@ -65,7 +65,7 @@ func (r *Router) setupPrivateRoutes(
 	users.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
 		// User can access their own profile
-		users.GET("/me", middleware.PermissionGuard("get-profile"), userHandler.Me)
+		users.GET("/me", userHandler.Me)
 
 		// Admin only for CRUD
 		users.POST("", middleware.PermissionGuard("create-user"), userHandler.Create)

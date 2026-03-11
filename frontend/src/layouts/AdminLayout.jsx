@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Button from '../components/Button';
-import { getCacheStatus } from '../api/cache';
+import { getCacheStatus, getMe } from '../api/admin';
 import { useTheme } from '../context/ThemeContext';
 
 const AdminLayout = () => {
@@ -12,6 +12,26 @@ const AdminLayout = () => {
     const [user, setUser] = useState(null);
     const [cacheStatus, setCacheStatus] = useState('unknown'); // unknown, connected, disconnected
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Function to refresh user profile and permissions from server
+    const refreshUserData = useCallback(async () => {
+        try {
+            const response = await getMe();
+            if (response.success && response.data) {
+                const updatedUser = response.data;
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+        } catch (error) {
+            console.error("Failed to refresh user data:", error);
+        }
+    }, []);
+
+    // Periodic refresh of user metadata (every 60 seconds)
+    useEffect(() => {
+        const interval = setInterval(refreshUserData, 60000);
+        return () => clearInterval(interval);
+    }, [refreshUserData]);
 
     // Auto-collapse sidebar on small screens
     useEffect(() => {

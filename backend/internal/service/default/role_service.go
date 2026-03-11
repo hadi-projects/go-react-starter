@@ -136,9 +136,10 @@ func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleRespo
 		return nil, err
 	}
 
-	// Invalidate role cache and roles list cache
+	// Invalidate role cache, roles list cache, AND all user caches since permissions changed
 	s.cache.Delete(fmt.Sprintf("role:%d", id))
 	s.cache.DeletePattern("roles:*")
+	s.cache.DeletePattern("user:*")
 
 	logger.AuditLogger.Info().
 		Uint("role_id", role.ID).
@@ -155,9 +156,10 @@ func (s *roleService) Update(id uint, req dto.UpdateRoleRequest) (*dto.RoleRespo
 }
 
 func (s *roleService) Delete(id uint) error {
-	// Invalidate role cache and roles list cache
+	// Invalidate role cache, roles list cache, AND all user caches
 	s.cache.Delete(fmt.Sprintf("role:%d", id))
 	s.cache.DeletePattern("roles:*")
+	s.cache.DeletePattern("user:*")
 
 	logger.AuditLogger.Info().
 		Uint("target_role_id", id).

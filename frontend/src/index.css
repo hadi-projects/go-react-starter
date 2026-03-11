@@ -145,7 +145,7 @@ html.dark,
     background-color: rgb(var(--md-sys-color-surface-container-high));
     border: 1px solid rgb(var(--md-sys-color-outline));
     color: rgb(var(--md-sys-color-on-surface));
-    @apply w-full px-4 py-3 rounded-xl focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
+    @apply w-full px-4 py-3 rounded-[8px] focus:border-primary focus:ring-1 focus:ring-primary;
     @apply text-sm focus:outline-none transition-all duration-300;
 
     &::placeholder {

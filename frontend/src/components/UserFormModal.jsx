@@ -106,14 +106,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
                     />
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="text-field-label">
                             Role ID
                         </label>
                         <select
                             name="role_id"
                             value={formData.role_id}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-outline-variant rounded-md3 focus:outline-none focus:border-primary-500"
+                            className="text-field"
                         >
                             <option value={1}>Admin (1)</option>
                             <option value={2}>User (2)</option>

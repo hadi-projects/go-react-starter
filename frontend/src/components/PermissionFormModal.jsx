@@ -34,28 +34,28 @@ const PermissionFormModal = ({ isOpen, onClose, onSubmit, permission, isLoading 
             <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="permission-name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Name <span className="text-red-500">*</span>
+                        <label htmlFor="permission-name" className="text-field-label">
+                            Name <span className="text-error">*</span>
                         </label>
                         <input
                             type="text"
                             id="permission-name"
                             name="name"
                             required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            className="text-field"
                             placeholder="e.g., create-user"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="permission-description" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="permission-description" className="text-field-label">
                             Description
                         </label>
                         <textarea
                             id="permission-description"
                             name="description"
                             rows="3"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            className="text-field"
                             placeholder="Describe what this permission allows..."
                         />
                     </div>

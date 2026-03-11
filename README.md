@@ -76,7 +76,7 @@ If you prefer to run services individually without Docker:
     ```
 2.  Install dependencies:
     ```bash
-    go mod download
+    go mod tidy
     ```
 3.  Configure environment variables:
     - Copy `.env-example` to `.env` (if not already done).
@@ -121,13 +121,13 @@ If you prefer to run services individually without Docker:
 
 Key environment variables used in `backend/.env`:
 
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `APP_PORT` | Port for the backend server | `8080` |
-| `DB_HOST` | Database host (use `db` in Docker) | `localhost` |
-| `DB_PORT` | Database port | `3306` |
-| `REDIS_HOST` | Redis host (use `redis` in Docker) | `localhost` |
-| `JWT_SECRET` | Secret key for JWT tokens | `secret-jwt-key` |
+| Variable     | Description                        | Default          |
+| :----------- | :--------------------------------- | :--------------- |
+| `APP_PORT`   | Port for the backend server        | `8080`           |
+| `DB_HOST`    | Database host (use `db` in Docker) | `localhost`      |
+| `DB_PORT`    | Database port                      | `3306`           |
+| `REDIS_HOST` | Redis host (use `redis` in Docker) | `localhost`      |
+| `JWT_SECRET` | Secret key for JWT tokens          | `secret-jwt-key` |
 
 ## Makefile Commands
 

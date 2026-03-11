@@ -117,9 +117,9 @@ const RoleFormModal = ({ isOpen, onClose, onSubmit, role, loading = false }) => 
                     />
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                        <label className="text-field-label mb-3">
                             Permissions
-                            {fetchingPermissions && <span className="ml-2 text-xs text-gray-500">(Loading...)</span>}
+                            {fetchingPermissions && <span className="ml-2 text-xs text-surface-on-variant">(Loading...)</span>}
                         </label>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 bg-surface-variant p-4 rounded-md3 max-h-60 overflow-y-auto">
                             {allPermissions.map((permission) => (
@@ -140,13 +140,13 @@ const RoleFormModal = ({ isOpen, onClose, onSubmit, role, loading = false }) => 
                                             </svg>
                                         </span>
                                     </div>
-                                    <span className="text-sm text-gray-700 group-hover:text-primary-500 transition-colors">
+                                    <span className="text-sm text-surface-on group-hover:text-primary transition-colors">
                                         {permission.name}
                                     </span>
                                 </label>
                             ))}
                             {allPermissions.length === 0 && !fetchingPermissions && (
-                                <p className="text-sm text-gray-500 col-span-full italic">No permissions available</p>
+                                <p className="text-sm text-surface-on-variant col-span-full italic">No permissions available</p>
                             )}
                         </div>
                     </div>

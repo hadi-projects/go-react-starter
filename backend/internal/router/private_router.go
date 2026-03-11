@@ -20,8 +20,15 @@ func (r *Router) setupPrivateRoutes(
 	generatorHandler handler.GeneratorHandler,
 	testsajaHandler customHandler.TestsajaHandler,
 	produkHandler customHandler.ProdukHandler,
+	healthHandler handler.HealthHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
+	// Health and Status
+	health := v1.Group("/health")
+	{
+		health.GET("/status", healthHandler.GetStatus)
+	}
+
 	// Module Generator
 	generator := v1.Group("/generator")
 	generator.Use(middleware.AuthMiddleware(r.config.JWT.Secret))

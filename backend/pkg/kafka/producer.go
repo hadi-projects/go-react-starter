@@ -12,6 +12,7 @@ import (
 type Producer interface {
 	Publish(topic string, message interface{}) error
 	Close() error
+	Status() string
 }
 
 type producer struct {
@@ -59,4 +60,11 @@ func (p *producer) Publish(topic string, message interface{}) error {
 
 func (p *producer) Close() error {
 	return p.syncProducer.Close()
+}
+
+func (p *producer) Status() string {
+	if p.syncProducer == nil {
+		return "disconnected"
+	}
+	return "connected"
 }

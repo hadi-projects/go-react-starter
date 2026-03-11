@@ -56,3 +56,16 @@ func (mr *MockProducerMockRecorder) Publish(topic, message interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockProducer)(nil).Publish), topic, message)
 }
+// Status mocks base method.
+func (m *MockProducer) Status() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Status")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Status indicates an expected call of Status.
+func (mr *MockProducerMockRecorder) Status() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockProducer)(nil).Status))
+}

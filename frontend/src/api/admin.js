@@ -70,6 +70,11 @@ export const getCacheStatus = async () => {
     return response.data;
 };
 
+export const getHealthStatus = async () => {
+    const response = await apiClient.get('/health/status');
+    return response.data;
+};
+
 export const clearCache = async () => {
     const response = await apiClient.delete('/cache/clear');
     return response.data;

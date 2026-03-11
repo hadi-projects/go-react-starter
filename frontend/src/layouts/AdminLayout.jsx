@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Button from '../components/Button';
-import { getCacheStatus, getMe } from '../api/admin';
+import { getHealthStatus, getMe } from '../api/admin';
 import { useTheme } from '../context/ThemeContext';
 
 const AdminLayout = () => {
@@ -11,6 +11,7 @@ const AdminLayout = () => {
     const location = useLocation();
     const [user, setUser] = useState(null);
     const [cacheStatus, setCacheStatus] = useState('unknown'); // unknown, connected, disconnected
+    const [kafkaStatus, setKafkaStatus] = useState('unknown'); // unknown, connected, disconnected
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     // Function to refresh user profile and permissions from server
@@ -56,27 +57,28 @@ const AdminLayout = () => {
             setUser(JSON.parse(userData));
         }
 
-        // Fetch cache status only if user has manage-cache permission
-        const fetchCacheStatus = async () => {
+        const fetchHealthStatus = async () => {
             if (!userData) return;
             const parsedUser = JSON.parse(userData);
             if (!parsedUser.permissions?.includes('manage-cache')) return;
             try {
-                const response = await getCacheStatus();
-                setCacheStatus(response.data.status);
+                const response = await getHealthStatus();
+                setCacheStatus(response.data.redis);
+                setKafkaStatus(response.data.kafka);
             } catch (error) {
-                console.error("Failed to fetch cache status:", error);
+                console.error("Failed to fetch health status:", error);
                 setCacheStatus('disconnected');
+                setKafkaStatus('disconnected');
             }
         };
 
-        fetchCacheStatus();
+        fetchHealthStatus();
 
         // Poll every 30 seconds (only if user has permission)
         if (userData) {
             const parsedUser = JSON.parse(userData);
             if (parsedUser.permissions?.includes('manage-cache')) {
-                const interval = setInterval(fetchCacheStatus, 30000);
+                const interval = setInterval(fetchHealthStatus, 30000);
                 return () => clearInterval(interval);
             }
         }
@@ -211,11 +213,17 @@ const AdminLayout = () => {
                             )}
                         </button>
 
-                        {/* Cache Status Indicator - Only visible with manage-cache permission */}
+                        {/* System Status Indicators - Only visible with manage-cache permission */}
                         {user?.permissions?.includes('manage-cache') && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-variant/30 text-surface-on-variant text-xs font-medium" title={`Redis: ${cacheStatus}`}>
-                                <div className={`w-2 h-2 rounded-full ${cacheStatus === 'connected' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]'}`}></div>
-                                <span className="hidden sm:inline">Redis</span>
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-variant/30 text-surface-on-variant text-xs font-medium" title={`Redis: ${cacheStatus}`}>
+                                    <div className={`w-2 h-2 rounded-full ${cacheStatus === 'connected' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]'}`}></div>
+                                    <span className="hidden sm:inline">Redis</span>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-variant/30 text-surface-on-variant text-xs font-medium" title={`Kafka: ${kafkaStatus}`}>
+                                    <div className={`w-2 h-2 rounded-full ${kafkaStatus === 'connected' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]'}`}></div>
+                                    <span className="hidden sm:inline">Kafka</span>
+                                </div>
                             </div>
                         )}
 

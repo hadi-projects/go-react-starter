@@ -99,6 +99,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	generatorHandler := handler.NewGeneratorHandler(".", db)
 	testsajaHandler := customHandler.NewTestsajaHandler(testsajaService)
 	produkHandler := customHandler.NewProdukHandler(produkService)
+	healthHandler := handler.NewHealthHandler(r.cache, r.kafkaProducer)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -108,6 +109,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 			generatorHandler,
 			testsajaHandler,
 			produkHandler,
+			healthHandler,
 			// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

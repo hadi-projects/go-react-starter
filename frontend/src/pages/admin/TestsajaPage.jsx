@@ -23,7 +23,7 @@ const TestsajaPage = () => {
 
     const columns = [
         { header: 'Name', accessor: 'name' },
-        { header: 'Created At', accessor: 'created_at', render: (val) => new Date(val).toLocaleString() },
+        { header: 'Created At', accessor: 'created_at', render: (row) => new Date(row.created_at).toLocaleString() },
     ];
 
     const fetchData = async () => {

@@ -5,11 +5,11 @@ import Card from '../../components/Card';
 import Table from '../../components/Table';
 import Modal from '../../components/Modal';
 import TextField from '../../components/TextField';
-import { 
-    getAllProduks, 
-    createProduk, 
-    updateProduk, 
-    deleteProduk 
+import {
+    getAllProduks,
+    createProduk,
+    updateProduk,
+    deleteProduk
 } from '../../api/produk';
 
 const ProdukPage = () => {
@@ -25,7 +25,7 @@ const ProdukPage = () => {
     const columns = [
         { header: 'Name', accessor: 'name' },
         { header: 'Harga', accessor: 'harga' },
-        { header: 'Created At', accessor: 'created_at', render: (val) => new Date(val).toLocaleString() },
+        { header: 'Created At', accessor: 'created_at', render: (row) => new Date(row.created_at).toLocaleString() },
     ];
 
     const fetchData = async () => {
@@ -103,9 +103,9 @@ const ProdukPage = () => {
             </div>
 
             <Card className="p-0 overflow-hidden">
-                <Table 
-                    columns={columns} 
-                    data={data} 
+                <Table
+                    columns={columns}
+                    data={data}
                     loading={loading}
                     onEdit={handleOpenModal}
                     onDelete={handleDelete}
@@ -123,8 +123,8 @@ const ProdukPage = () => {
                         name="name"
                         value={formData.name.toString()}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        
-                        
+
+
                         required
                     />
                     <TextField
@@ -132,7 +132,7 @@ const ProdukPage = () => {
                         name="harga"
                         value={formData.harga.toString()}
                         onChange={(e) => setFormData({ ...formData, harga: parseInt(e.target.value) || 0 })}
-                        
+
                         type="number"
                         required
                     />

@@ -12,42 +12,44 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type TestsajaServiceTestSuite struct {
+type AdminServiceTestSuite struct {
 	suite.Suite
 	ctrl      *gomock.Controller
-	mockRepo  *mock_repository.MockTestsajaRepository
+	mockRepo  *mock_repository.MockAdminRepository
 	mockCache *mock_pkg_cache.MockCacheService
-	service   TestsajaService
+	service   AdminService
 }
 
-func (s *TestsajaServiceTestSuite) SetupTest() {
+func (s *AdminServiceTestSuite) SetupTest() {
 	s.ctrl = gomock.NewController(s.T())
-	s.mockRepo = mock_repository.NewMockTestsajaRepository(s.ctrl)
+	s.mockRepo = mock_repository.NewMockAdminRepository(s.ctrl)
 	s.mockCache = mock_pkg_cache.NewMockCacheService(s.ctrl)
-	s.service = NewTestsajaService(s.mockRepo, s.mockCache)
+	s.service = NewAdminService(s.mockRepo, s.mockCache)
 }
 
-func (s *TestsajaServiceTestSuite) TearDownTest() {
+func (s *AdminServiceTestSuite) TearDownTest() {
 	s.ctrl.Finish()
 }
 
-func (s *TestsajaServiceTestSuite) TestCreate_Success() {
-	req := dto.CreateTestsajaRequest{
+func (s *AdminServiceTestSuite) TestCreate_Success() {
+	req := dto.CreateAdminRequest{
 		Name: "test",
+		Email: "test",
 	}
 
-	entity := &entity.Testsaja{
+	entity := &entity.Admin{
 		Name: req.Name,
+		Email: req.Email,
 	}
 
 	s.mockRepo.EXPECT().Create(entity).Return(nil)
-	s.mockCache.EXPECT().DeletePattern("testsaja:*").Return(nil)
+	s.mockCache.EXPECT().DeletePattern("admin:*").Return(nil)
 
 	res, err := s.service.Create(req)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), res)
 }
 
-func TestTestsajaServiceTestSuite(t *testing.T) {
-	suite.Run(t, new(TestsajaServiceTestSuite))
+func TestAdminServiceTestSuite(t *testing.T) {
+	suite.Run(t, new(AdminServiceTestSuite))
 }

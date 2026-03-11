@@ -63,7 +63,7 @@ const AdminLayout = () => {
             if (!parsedUser.permissions?.includes('manage-cache')) return;
             try {
                 const response = await getCacheStatus();
-                setCacheStatus(response.data);
+                setCacheStatus(response.data.status);
             } catch (error) {
                 console.error("Failed to fetch cache status:", error);
                 setCacheStatus('disconnected');

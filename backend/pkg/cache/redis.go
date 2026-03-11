@@ -112,6 +112,9 @@ func (r *redisCache) FlushAll() error {
 
 // Status returns the connection status
 func (r *redisCache) Status() string {
+	if err := r.client.Ping(r.ctx).Err(); err != nil {
+		return "disconnected"
+	}
 	return "connected"
 }
 

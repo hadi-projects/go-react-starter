@@ -76,6 +76,7 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 
 	claims := jwt.MapClaims{
 		"sub":         user.ID,
+		"email":       user.Email,
 		"role":        user.Role.Name,
 		"permissions": permissions,
 		"exp":         time.Now().Add(time.Minute * 15).Unix(), // 15 minutes

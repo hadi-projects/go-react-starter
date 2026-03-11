@@ -251,10 +251,10 @@ func maskEmail(email string) string {
 
 	local := parts[0]
 	if len(local) <= 2 {
-		return local[:1] + "***" + parts[1]
+		return local + "@" + parts[1]
 	}
 
-	return "***@" + parts[1]
+	return local[:2] + "**" + local[len(local)-1:] + "@" + parts[1]
 }
 
 func maskPhone(phone string) string {

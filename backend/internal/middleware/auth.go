@@ -46,6 +46,9 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			if subFloat, ok := claims["sub"].(float64); ok {
 				c.Set("user_id", uint(subFloat))
 			}
+			if email, ok := claims["email"].(string); ok {
+				c.Set("user_email", email)
+			}
 			c.Set("role", claims["role"])
 
 			if permissions, ok := claims["permissions"].([]interface{}); ok {

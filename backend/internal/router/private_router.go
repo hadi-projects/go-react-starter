@@ -16,6 +16,7 @@ func (r *Router) setupPrivateRoutes(
 	logHandler handler.LogHandler,
 	cacheHandler handler.CacheHandler,
 	statisticsHandler handler.StatisticsHandler,
+	httpLogHandler handler.HttpLogHandler,
 	generatorHandler handler.GeneratorHandler,
 	testsajaHandler customHandler.TestsajaHandler,
 	produkHandler customHandler.ProdukHandler,
@@ -59,6 +60,7 @@ func (r *Router) setupPrivateRoutes(
 	{
 		// Internal permission check is handled inside GetLogs
 		logs.GET("", logHandler.GetLogs)
+		logs.GET("/http", middleware.PermissionGuard("get-http-log"), httpLogHandler.GetAll)
 	}
 
 	users := v1.Group("/users")

@@ -55,9 +55,12 @@ func (r *Router) SetupRouter() *gin.Engine {
 	// Use db from Router struct
 	db := r.db
 
+	// Repositories initializations for middleware
+	httpLogRepo := repository.NewHttpLogRepository(db)
+
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORSMiddleware(r.config))
-	router.Use(middleware.RequestLogger())
+	router.Use(middleware.RequestLogger(httpLogRepo))
 	router.Use(middleware.RequestCancellation(time.Duration(r.config.Security.RequestTimeOut) * time.Second))
 	router.Use(middleware.RateLimiter(r.config.RateLimit.Rps, r.config.RateLimit.Burst))
 	router.Use(middleware.SecureHeaders())
@@ -79,6 +82,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
 	statisticsService := service.NewStatisticsService(db)
+	httpLogService := service.NewHttpLogService(httpLogRepo)
 	testsajaService := customService.NewTestsajaService(testsajaRepo, r.cache)
 	produkService := customService.NewProdukService(produkRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
@@ -91,6 +95,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	logHandler := handler.NewLogHandler(logService)
 	cacheHandler := handler.NewCacheHandler(r.cache)
 	statisticsHandler := handler.NewStatisticsHandler(statisticsService)
+	httpLogHandler := handler.NewHttpLogHandler(httpLogService)
 	generatorHandler := handler.NewGeneratorHandler(".", db)
 	testsajaHandler := customHandler.NewTestsajaHandler(testsajaService)
 	produkHandler := customHandler.NewProdukHandler(produkService)
@@ -98,13 +103,13 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, statisticsHandler,
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, statisticsHandler, httpLogHandler,
 
 			generatorHandler,
 			testsajaHandler,
 			produkHandler,
+			// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
-		// [GENERATOR_INSERT_HANDLER_PARAM]
 	}
 
 	logger.SystemLogger.Info().Str("port", r.config.App.Port).Msg("Server running")

@@ -6,6 +6,7 @@ import (
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 		&entity.Role{},
 		&entity.Permission{},
 		&entity.PasswordResetToken{},
+		&entity.HttpLog{},
 		&customEntity.Testsaja{},
 		&customEntity.Produk{},
 		// [GENERATOR_INSERT_MIGRATION]
@@ -32,6 +34,23 @@ func main() {
 	if err != nil {
 		logger.SystemLogger.Fatal().Err(err).Msg("Failed to auto-migrate database")
 	}
+
+	// Log this action to the new http_logs table
+	logAction := &entity.HttpLog{
+		RequestID:       uuid.New().String(),
+		Method:          "SYSTEM",
+		Path:            "database:migrate",
+		ClientIP:        "127.0.0.1",
+		UserAgent:       "Go-React-Starter/CLI",
+		RequestHeaders:  "{}",
+		RequestBody:     "{}",
+		StatusCode:      200,
+		ResponseHeaders: "{}",
+		ResponseBody:    `{"message": "Auto-migration completed successfully"}`,
+		Latency:         0,
+		UserEmail:       "system@local",
+	}
+	db.Create(logAction)
 
 	logger.SystemLogger.Info().Msg("Auto-migration completed successfully!")
 }

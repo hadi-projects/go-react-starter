@@ -5,6 +5,8 @@ import (
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/database/seeder"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/google/uuid"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 )
 
 func main() {
@@ -18,4 +20,21 @@ func main() {
 
 	seeder.SeedRole(db)
 	seeder.SeedUser(db, cfg.Security.BCryptCost)
+
+	// Log this action to the new http_logs table
+	logAction := &entity.HttpLog{
+		RequestID:       uuid.New().String(),
+		Method:          "SYSTEM",
+		Path:            "database:seed",
+		ClientIP:        "127.0.0.1",
+		UserAgent:       "Go-React-Starter/CLI",
+		RequestHeaders:  "{}",
+		RequestBody:     "{}",
+		StatusCode:      200,
+		ResponseHeaders: "{}",
+		ResponseBody:    `{"message": "Database seeder completed successfully"}`,
+		Latency:         0,
+		UserEmail:       "system@local",
+	}
+	db.Create(logAction)
 }

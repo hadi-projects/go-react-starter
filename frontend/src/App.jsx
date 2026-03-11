@@ -11,6 +11,7 @@ import Users from './pages/admin/Users'
 import Roles from './pages/admin/Roles'
 import Permissions from './pages/admin/Permissions'
 import Logs from './pages/admin/Logs'
+import HttpLogs from './pages/admin/HttpLogs'
 import GeneratorPage from './pages/admin/GeneratorPage'
 import { ThemeProvider } from './context/ThemeContext'
 import TestsajaPage from './pages/admin/TestsajaPage';
@@ -36,6 +37,7 @@ function App() {
           <Route path="admin/roles" element={<Roles />} />
           <Route path="admin/permissions" element={<Permissions />} />
           <Route path="admin/logs" element={<Navigate to="/admin/logs/all" replace />} />
+          <Route path="admin/logs/http" element={<HttpLogs />} />
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
           <Route path="admin/testsaja" element={<TestsajaPage />} />

@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
+	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"github.com/rs/zerolog"
 )
@@ -50,7 +52,7 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-func RequestLogger() gin.HandlerFunc {
+func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		start := time.Now()
 		path := ctx.Request.URL.Path
@@ -128,7 +130,72 @@ func RequestLogger() gin.HandlerFunc {
 		logEvent.Dict("response", responseDict)
 		logEvent.Msg("incoming request")
 
+		// Async save to database
+		go func() {
+			censoredReqHeaders := censorHeaders(ctx.Request.Header)
+			reqHeadersJSON, _ := json.Marshal(censoredReqHeaders)
+			
+			censoredResHeaders := censorHeaders(ctx.Writer.Header())
+			resHeadersJSON, _ := json.Marshal(censoredResHeaders)
+			
+			var uID *uint
+			if userExists {
+				id := userID.(uint)
+				uID = &id
+			}
+
+			// Get user email if available (set by AuthMiddleware)
+			userEmailStr := ""
+			if email, eExists := ctx.Get("user_email"); eExists {
+				userEmailStr = maskEmail(email.(string))
+			}
+
+			var reqBodyStr string
+			if len(body) > 0 {
+				reqBodyStr = string(censorBody(body))
+			}
+			
+			var resBodyStr string
+			if blw.body.Len() > 0 {
+				resBodyStr = string(censorBody(blw.body.Bytes()))
+			}
+
+			httpLog := &entity.HttpLog{
+				RequestID:       requestID,
+				Method:          method,
+				Path:            path,
+				ClientIP:        clientIP,
+				UserAgent:       userAgent,
+				RequestHeaders:  string(reqHeadersJSON),
+				RequestBody:     reqBodyStr,
+				StatusCode:      statusCode,
+				ResponseHeaders: string(resHeadersJSON),
+				ResponseBody:    resBodyStr,
+				Latency:         latency.Milliseconds(),
+				UserID:          uID,
+				UserEmail:       userEmailStr,
+			}
+			if logRepo != nil {
+				_ = logRepo.Create(httpLog)
+			}
+		}()
 	}
+}
+
+func censorHeaders(headers map[string][]string) map[string][]string {
+	censored := make(map[string][]string)
+	for k, v := range headers {
+		lowerK := strings.ToLower(k)
+		if lowerK == "authorization" || lowerK == "cookie" || lowerK == "set-cookie" || lowerK == "x-csrf-token" {
+			censored[k] = []string{"***"}
+		} else {
+			// Copy slice
+			vc := make([]string, len(v))
+			copy(vc, v)
+			censored[k] = vc
+		}
+	}
+	return censored
 }
 
 func censorBody(body []byte) []byte {

@@ -13,6 +13,8 @@ import Permissions from './pages/admin/Permissions'
 import Logs from './pages/admin/Logs'
 import GeneratorPage from './pages/admin/GeneratorPage'
 import { ThemeProvider } from './context/ThemeContext'
+import TestsajaPage from './pages/admin/TestsajaPage';
+import ProdukPage from './pages/admin/ProdukPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -36,6 +38,8 @@ function App() {
           <Route path="admin/logs" element={<Navigate to="/admin/logs/all" replace />} />
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
+          <Route path="admin/testsaja" element={<TestsajaPage />} />
+										<Route path="admin/produk" element={<ProdukPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

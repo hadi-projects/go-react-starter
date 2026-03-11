@@ -5,35 +5,31 @@ import Card from '../../components/Card';
 import Table from '../../components/Table';
 import Modal from '../../components/Modal';
 import TextField from '../../components/TextField';
-import { 
-    getAll{{.ModuleName}}s, 
-    create{{.ModuleName}}, 
-    update{{.ModuleName}}, 
-    delete{{.ModuleName}} 
-} from '../../api/{{.ModuleNameLowerCamel}}';
+import {
+    getAllTestsajas,
+    createTestsaja,
+    updateTestsaja,
+    deleteTestsaja
+} from '../../api/testsaja';
 
-const {{.ModuleName}}Page = () => {
+const TestsajaPage = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
-        {{- range .Fields}}
-        {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-        {{- end}}
+        name: '',
     });
 
     const columns = [
-        {{- range .Fields}}
-        { header: '{{.NameGo}}', accessor: '{{.NameJson}}' },
-        {{- end}}
+        { header: 'Name', accessor: 'name' },
         { header: 'Created At', accessor: 'created_at', render: (val) => new Date(val).toLocaleString() },
     ];
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await getAll{{.ModuleName}}s();
+            const res = await getAllTestsajas();
             setData(res.data?.data || []);
         } catch (err) {
             toast.error('Failed to fetch data');
@@ -50,16 +46,12 @@ const {{.ModuleName}}Page = () => {
         if (item) {
             setEditingId(item.id);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: item.{{.NameJson}},
-                {{- end}}
+                name: item.name,
             });
         } else {
             setEditingId(null);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-                {{- end}}
+                name: '',
             });
         }
         setIsModalOpen(true);
@@ -69,10 +61,10 @@ const {{.ModuleName}}Page = () => {
         e.preventDefault();
         try {
             if (editingId) {
-                await update{{.ModuleName}}(editingId, formData);
+                await updateTestsaja(editingId, formData);
                 toast.success('Updated successfully');
             } else {
-                await create{{.ModuleName}}(formData);
+                await createTestsaja(formData);
                 toast.success('Created successfully');
             }
             setIsModalOpen(false);
@@ -85,7 +77,7 @@ const {{.ModuleName}}Page = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this item?')) {
             try {
-                await delete{{.ModuleName}}(id);
+                await deleteTestsaja(id);
                 toast.success('Deleted successfully');
                 fetchData();
             } catch (err) {
@@ -98,18 +90,18 @@ const {{.ModuleName}}Page = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">{{.ModuleName}} Management</h1>
-                    <p className="text-sm text-surface-on-variant mt-1">Manage your {{.ModuleNameLower}} instances.</p>
+                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">Testsaja Management</h1>
+                    <p className="text-sm text-surface-on-variant mt-1">Manage your testsaja instances.</p>
                 </div>
                 <Button variant="primary" onClick={() => handleOpenModal()}>
-                    Add {{.ModuleName}}
+                    Add Testsaja
                 </Button>
             </div>
 
             <Card className="p-0 overflow-hidden">
-                <Table 
-                    columns={columns} 
-                    data={data} 
+                <Table
+                    columns={columns}
+                    data={data}
                     loading={loading}
                     onEdit={handleOpenModal}
                     onDelete={handleDelete}
@@ -119,20 +111,18 @@ const {{.ModuleName}}Page = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={editingId ? 'Edit {{.ModuleName}}' : 'Add {{.ModuleName}}'}
+                title={editingId ? 'Edit Testsaja' : 'Add Testsaja'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-                    {{- range .Fields}}
                     <TextField
-                        label="{{.NameGo}}"
-                        name="{{.NameJson}}"
-                        value={formData.{{.NameJson}}.toString()}
-                        onChange={(e) => setFormData({ ...formData, {{.NameJson}}: {{if eq .TypeGo "int"}}parseInt(e.target.value) || 0{{else if eq .TypeGo "float64"}}parseFloat(e.target.value) || 0{{else if eq .TypeGo "bool"}}e.target.checked{{else}}e.target.value{{end}} })}
-                        {{if eq .TypeGo "bool"}}type="checkbox"{{end}}
-                        {{if or (eq .TypeGo "int") (eq .TypeGo "float64")}}type="number"{{end}}
+                        label="Name"
+                        name="name"
+                        value={formData.name.toString()}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+
+
                         required
                     />
-                    {{- end}}
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="tonal" onClick={() => setIsModalOpen(false)}>
                             Cancel
@@ -147,4 +137,4 @@ const {{.ModuleName}}Page = () => {
     );
 };
 
-export default {{.ModuleName}}Page;
+export default TestsajaPage;

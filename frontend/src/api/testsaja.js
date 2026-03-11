@@ -1,28 +1,28 @@
 import axios from './client';
 
-const API_PATH = '/{{.TableName}}';
+const API_PATH = '/testsaja';
 
-export const getAll{{.ModuleName}}s = async (params) => {
+export const getAllTestsajas = async (params) => {
     const response = await axios.get(API_PATH, { params });
     return response.data;
 };
 
-export const get{{.ModuleName}}ById = async (id) => {
+export const getTestsajaById = async (id) => {
     const response = await axios.get(`${API_PATH}/${id}`);
     return response.data;
 };
 
-export const create{{.ModuleName}} = async (data) => {
+export const createTestsaja = async (data) => {
     const response = await axios.post(API_PATH, data);
     return response.data;
 };
 
-export const update{{.ModuleName}} = async (id, data) => {
+export const updateTestsaja = async (id, data) => {
     const response = await axios.put(`${API_PATH}/${id}`, data);
     return response.data;
 };
 
-export const delete{{.ModuleName}} = async (id) => {
+export const deleteTestsaja = async (id) => {
     const response = await axios.delete(`${API_PATH}/${id}`);
     return response.data;
 };

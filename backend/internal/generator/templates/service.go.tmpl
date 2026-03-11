@@ -5,6 +5,7 @@ import (
 	"math"
 	"time"
 
+	defaultDto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	"github.com/hadi-projects/go-react-starter/internal/dto"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"github.com/hadi-projects/go-react-starter/internal/repository"
@@ -14,7 +15,7 @@ import (
 
 type {{.ModuleName}}Service interface {
 	Create(req dto.Create{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error)
-	GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
+	GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error)
 	GetByID(id uint) (*dto.{{.ModuleName}}Response, error)
 	Update(id uint, req dto.Update{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error)
 	Delete(id uint) error
@@ -55,9 +56,9 @@ func (s *{{.ModuleNameLower}}Service) Create(req dto.Create{{.ModuleName}}Reques
 	return s.mapToResponse(entity), nil
 }
 
-func (s *{{.ModuleNameLower}}Service) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (s *{{.ModuleNameLower}}Service) GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error) {
 	cacheKey := fmt.Sprintf("{{.TableName}}:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
-	var cached dto.PaginationResponse
+	var cached defaultDto.PaginationResponse
 	if err := s.cache.Get(cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
@@ -72,9 +73,9 @@ func (s *{{.ModuleNameLower}}Service) GetAll(pagination *dto.PaginationRequest) 
 		responses = append(responses, *s.mapToResponse(&e))
 	}
 
-	response := &dto.PaginationResponse{
+	response := &defaultDto.PaginationResponse{
 		Data: responses,
-		Meta: dto.PaginationMeta{
+		Meta: defaultDto.PaginationMeta{
 			CurrentPage: pagination.GetPage(),
 			TotalPages:  int(math.Ceil(float64(total) / float64(pagination.GetLimit()))),
 			TotalData:   total,

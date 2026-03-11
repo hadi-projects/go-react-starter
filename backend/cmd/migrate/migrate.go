@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hadi-projects/go-react-starter/config"
+	customEntity "github.com/hadi-projects/go-react-starter/internal/entity"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
@@ -23,6 +24,8 @@ func main() {
 		&entity.Role{},
 		&entity.Permission{},
 		&entity.PasswordResetToken{},
+		&customEntity.Testsaja{},
+		&customEntity.Produk{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

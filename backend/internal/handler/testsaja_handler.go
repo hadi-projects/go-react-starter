@@ -11,7 +11,7 @@ import (
 	"github.com/hadi-projects/go-react-starter/pkg/response"
 )
 
-type {{.ModuleName}}Handler interface {
+type TestsajaHandler interface {
 	Create(c *gin.Context)
 	GetAll(c *gin.Context)
 	GetByID(c *gin.Context)
@@ -19,16 +19,16 @@ type {{.ModuleName}}Handler interface {
 	Delete(c *gin.Context)
 }
 
-type {{.ModuleNameLower}}Handler struct {
-	service service.{{.ModuleName}}Service
+type testsajaHandler struct {
+	service service.TestsajaService
 }
 
-func New{{.ModuleName}}Handler(service service.{{.ModuleName}}Service) {{.ModuleName}}Handler {
-	return &{{.ModuleNameLower}}Handler{service: service}
+func NewTestsajaHandler(service service.TestsajaService) TestsajaHandler {
+	return &testsajaHandler{service: service}
 }
 
-func (h *{{.ModuleNameLower}}Handler) Create(c *gin.Context) {
-	var req dto.Create{{.ModuleName}}Request
+func (h *testsajaHandler) Create(c *gin.Context) {
+	var req dto.CreateTestsajaRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
@@ -40,10 +40,10 @@ func (h *{{.ModuleNameLower}}Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "{{.ModuleName}} created successfully", res)
+	response.Success(c, http.StatusCreated, "Testsaja created successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) GetAll(c *gin.Context) {
+func (h *testsajaHandler) GetAll(c *gin.Context) {
 	var pagination defaultDto.PaginationRequest
 	if err := c.ShouldBindQuery(&pagination); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
@@ -56,23 +56,23 @@ func (h *{{.ModuleNameLower}}Handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}}s retrieved successfully", res)
+	response.Success(c, http.StatusOK, "Testsajas retrieved successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) GetByID(c *gin.Context) {
+func (h *testsajaHandler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	res, err := h.service.GetByID(uint(id))
 	if err != nil {
-		response.Error(c, http.StatusNotFound, "{{.ModuleName}} not found")
+		response.Error(c, http.StatusNotFound, "Testsaja not found")
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} retrieved successfully", res)
+	response.Success(c, http.StatusOK, "Testsaja retrieved successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) Update(c *gin.Context) {
+func (h *testsajaHandler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var req dto.Update{{.ModuleName}}Request
+	var req dto.UpdateTestsajaRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
@@ -84,15 +84,15 @@ func (h *{{.ModuleNameLower}}Handler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} updated successfully", res)
+	response.Success(c, http.StatusOK, "Testsaja updated successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) Delete(c *gin.Context) {
+func (h *testsajaHandler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := h.service.Delete(uint(id)); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} deleted successfully", nil)
+	response.Success(c, http.StatusOK, "Testsaja deleted successfully", nil)
 }

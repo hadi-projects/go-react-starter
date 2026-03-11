@@ -1,14 +1,14 @@
 package repository
 
 import (
-	"github.com/hadi-projects/go-react-starter/internal/dto"
+	defaultDto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"gorm.io/gorm"
 )
 
 type {{.ModuleName}}Repository interface {
 	Create(entity *entity.{{.ModuleName}}) error
-	FindAll(pagination *dto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error)
+	FindAll(pagination *defaultDto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error)
 	FindByID(id uint) (*entity.{{.ModuleName}}, error)
 	Update(entity *entity.{{.ModuleName}}) error
 	Delete(id uint) error
@@ -26,7 +26,7 @@ func (r *{{.ModuleNameLower}}Repository) Create(entity *entity.{{.ModuleName}}) 
 	return r.db.Create(entity).Error
 }
 
-func (r *{{.ModuleNameLower}}Repository) FindAll(pagination *dto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error) {
+func (r *{{.ModuleNameLower}}Repository) FindAll(pagination *defaultDto.PaginationRequest) ([]entity.{{.ModuleName}}, int64, error) {
 	var entities []entity.{{.ModuleName}}
 	var total int64
 

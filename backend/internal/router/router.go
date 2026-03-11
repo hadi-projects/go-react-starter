@@ -11,9 +11,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadi-projects/go-react-starter/config"
+	customHandler "github.com/hadi-projects/go-react-starter/internal/handler"
 	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
+	customeRepository "github.com/hadi-projects/go-react-starter/internal/repository"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
+	customService "github.com/hadi-projects/go-react-starter/internal/service"
 	service "github.com/hadi-projects/go-react-starter/internal/service/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/kafka"
@@ -65,6 +68,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	tokenRepo := repository.NewTokenRepository(db)
+	testsajaRepo := customeRepository.NewTestsajaRepository(db)
+	produkRepo := customeRepository.NewProdukRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -74,6 +79,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
 	statisticsService := service.NewStatisticsService(db)
+	testsajaService := customService.NewTestsajaService(testsajaRepo, r.cache)
+	produkService := customService.NewProdukService(produkRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -84,12 +91,19 @@ func (r *Router) SetupRouter() *gin.Engine {
 	logHandler := handler.NewLogHandler(logService)
 	cacheHandler := handler.NewCacheHandler(r.cache)
 	statisticsHandler := handler.NewStatisticsHandler(statisticsService)
-	generatorHandler := handler.NewGeneratorHandler(".")
+	generatorHandler := handler.NewGeneratorHandler(".", db)
+	testsajaHandler := customHandler.NewTestsajaHandler(testsajaService)
+	produkHandler := customHandler.NewProdukHandler(produkService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
 	{
-		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, statisticsHandler, generatorHandler)
+		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, statisticsHandler,
+
+			generatorHandler,
+			testsajaHandler,
+			produkHandler,
+		)
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 	}
 

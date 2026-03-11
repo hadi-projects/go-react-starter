@@ -6,34 +6,32 @@ import Table from '../../components/Table';
 import Modal from '../../components/Modal';
 import TextField from '../../components/TextField';
 import { 
-    getAll{{.ModuleName}}s, 
-    create{{.ModuleName}}, 
-    update{{.ModuleName}}, 
-    delete{{.ModuleName}} 
-} from '../../api/{{.ModuleNameLowerCamel}}';
+    getAllProduks, 
+    createProduk, 
+    updateProduk, 
+    deleteProduk 
+} from '../../api/produk';
 
-const {{.ModuleName}}Page = () => {
+const ProdukPage = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
-        {{- range .Fields}}
-        {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-        {{- end}}
+        name: '',
+        harga: 0,
     });
 
     const columns = [
-        {{- range .Fields}}
-        { header: '{{.NameGo}}', accessor: '{{.NameJson}}' },
-        {{- end}}
+        { header: 'Name', accessor: 'name' },
+        { header: 'Harga', accessor: 'harga' },
         { header: 'Created At', accessor: 'created_at', render: (val) => new Date(val).toLocaleString() },
     ];
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await getAll{{.ModuleName}}s();
+            const res = await getAllProduks();
             setData(res.data?.data || []);
         } catch (err) {
             toast.error('Failed to fetch data');
@@ -50,16 +48,14 @@ const {{.ModuleName}}Page = () => {
         if (item) {
             setEditingId(item.id);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: item.{{.NameJson}},
-                {{- end}}
+                name: item.name,
+                harga: item.harga,
             });
         } else {
             setEditingId(null);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-                {{- end}}
+                name: '',
+                harga: 0,
             });
         }
         setIsModalOpen(true);
@@ -69,10 +65,10 @@ const {{.ModuleName}}Page = () => {
         e.preventDefault();
         try {
             if (editingId) {
-                await update{{.ModuleName}}(editingId, formData);
+                await updateProduk(editingId, formData);
                 toast.success('Updated successfully');
             } else {
-                await create{{.ModuleName}}(formData);
+                await createProduk(formData);
                 toast.success('Created successfully');
             }
             setIsModalOpen(false);
@@ -85,7 +81,7 @@ const {{.ModuleName}}Page = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this item?')) {
             try {
-                await delete{{.ModuleName}}(id);
+                await deleteProduk(id);
                 toast.success('Deleted successfully');
                 fetchData();
             } catch (err) {
@@ -98,11 +94,11 @@ const {{.ModuleName}}Page = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">{{.ModuleName}} Management</h1>
-                    <p className="text-sm text-surface-on-variant mt-1">Manage your {{.ModuleNameLower}} instances.</p>
+                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">Produk Management</h1>
+                    <p className="text-sm text-surface-on-variant mt-1">Manage your produk instances.</p>
                 </div>
                 <Button variant="primary" onClick={() => handleOpenModal()}>
-                    Add {{.ModuleName}}
+                    Add Produk
                 </Button>
             </div>
 
@@ -119,20 +115,27 @@ const {{.ModuleName}}Page = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={editingId ? 'Edit {{.ModuleName}}' : 'Add {{.ModuleName}}'}
+                title={editingId ? 'Edit Produk' : 'Add Produk'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-                    {{- range .Fields}}
                     <TextField
-                        label="{{.NameGo}}"
-                        name="{{.NameJson}}"
-                        value={formData.{{.NameJson}}.toString()}
-                        onChange={(e) => setFormData({ ...formData, {{.NameJson}}: {{if eq .TypeGo "int"}}parseInt(e.target.value) || 0{{else if eq .TypeGo "float64"}}parseFloat(e.target.value) || 0{{else if eq .TypeGo "bool"}}e.target.checked{{else}}e.target.value{{end}} })}
-                        {{if eq .TypeGo "bool"}}type="checkbox"{{end}}
-                        {{if or (eq .TypeGo "int") (eq .TypeGo "float64")}}type="number"{{end}}
+                        label="Name"
+                        name="name"
+                        value={formData.name.toString()}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        
+                        
                         required
                     />
-                    {{- end}}
+                    <TextField
+                        label="Harga"
+                        name="harga"
+                        value={formData.harga.toString()}
+                        onChange={(e) => setFormData({ ...formData, harga: parseInt(e.target.value) || 0 })}
+                        
+                        type="number"
+                        required
+                    />
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="tonal" onClick={() => setIsModalOpen(false)}>
                             Cancel
@@ -147,4 +150,4 @@ const {{.ModuleName}}Page = () => {
     );
 };
 
-export default {{.ModuleName}}Page;
+export default ProdukPage;

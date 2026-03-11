@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Button from '../../components/Button';
 import { generateModule } from '../../api/admin';
 
 const GeneratorPage = () => {
+    const navigate = useNavigate();
     const [config, setConfig] = useState({
         module_name: '',
         table_name: '',
@@ -39,6 +41,14 @@ const GeneratorPage = () => {
         try {
             await generateModule(config);
             toast.success('Module generated successfully! Please restart the backend if needed.');
+
+            // Redirect to the new module's page
+            // Convert to lowercase for the URL path
+            const routePath = `/admin/${config.module_name.toLowerCase()}`;
+            navigate(routePath);
+
+            // Note: A full page reload might be necessary if the frontend needs to fetch new routes,
+            // but we'll try client-side navigation first. If backend needs restart, this will fail gracefully.
         } catch (error) {
             toast.error(error.response?.data?.meta?.message || 'Failed to generate module');
         } finally {

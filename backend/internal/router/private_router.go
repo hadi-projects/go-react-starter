@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	customHandler "github.com/hadi-projects/go-react-starter/internal/handler"
 	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
 )
@@ -16,6 +17,8 @@ func (r *Router) setupPrivateRoutes(
 	cacheHandler handler.CacheHandler,
 	statisticsHandler handler.StatisticsHandler,
 	generatorHandler handler.GeneratorHandler,
+	testsajaHandler customHandler.TestsajaHandler,
+	produkHandler customHandler.ProdukHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Module Generator
@@ -23,6 +26,24 @@ func (r *Router) setupPrivateRoutes(
 	generator.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
 		generator.POST("", middleware.PermissionGuard("create-module"), generatorHandler.Generate)
+	}
+	testsaja := v1.Group("/testsaja")
+	testsaja.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		testsaja.POST("", testsajaHandler.Create)
+		testsaja.GET("", testsajaHandler.GetAll)
+		testsaja.GET("/:id", testsajaHandler.GetByID)
+		testsaja.PUT("/:id", testsajaHandler.Update)
+		testsaja.DELETE("/:id", testsajaHandler.Delete)
+	}
+	produk := v1.Group("/produk")
+	produk.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		produk.POST("", produkHandler.Create)
+		produk.GET("", produkHandler.GetAll)
+		produk.GET("/:id", produkHandler.GetByID)
+		produk.PUT("/:id", produkHandler.Update)
+		produk.DELETE("/:id", produkHandler.Delete)
 	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")

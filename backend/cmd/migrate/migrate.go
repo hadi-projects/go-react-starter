@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/google/uuid"
 	"github.com/hadi-projects/go-react-starter/config"
 	customEntity "github.com/hadi-projects/go-react-starter/internal/entity"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -28,6 +28,7 @@ func main() {
 		&entity.HttpLog{},
 		&customEntity.Testsaja{},
 		&customEntity.Produk{},
+		&customEntity.Testdua{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

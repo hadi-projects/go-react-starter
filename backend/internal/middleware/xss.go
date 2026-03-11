@@ -15,6 +15,7 @@ var xssPatterns = []*regexp.Regexp{
 
 func XSSProtection() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		AddToTrace(c, "XSSProtection")
 		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("X-Content-Type-Options", "nosniff")
 

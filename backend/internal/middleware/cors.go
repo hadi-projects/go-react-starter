@@ -10,7 +10,7 @@ import (
 )
 
 func CORSMiddleware(config *config.Config) gin.HandlerFunc {
-	return cors.New(cors.Config{
+	handler := cors.New(cors.Config{
 		AllowOrigins:     strings.Split(config.CORS.AllowedOrigins, ","),
 		AllowMethods:     strings.Split(config.CORS.AllowedMethods, ","),
 		AllowHeaders:     strings.Split(config.CORS.AllowedHeaders, ","),
@@ -18,4 +18,9 @@ func CORSMiddleware(config *config.Config) gin.HandlerFunc {
 		AllowCredentials: config.CORS.AllowCredentials,
 		MaxAge:           time.Duration(config.CORS.MaxAge) * time.Second,
 	})
+
+	return func(c *gin.Context) {
+		AddToTrace(c, "CORSMiddleware")
+		handler(c)
+	}
 }

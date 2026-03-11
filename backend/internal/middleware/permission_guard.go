@@ -9,6 +9,7 @@ import (
 
 func PermissionGuard(requiredPermission string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		AddToTrace(c, "PermissionGuard("+requiredPermission+")")
 		permissionsInterface, exists := c.Get("permissions")
 		if !exists {
 			response.Error(c, http.StatusForbidden, "Permissions not found in context")

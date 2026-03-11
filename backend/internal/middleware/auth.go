@@ -12,6 +12,7 @@ import (
 
 func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		AddToTrace(c, "AuthMiddleware")
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			response.Error(c, http.StatusUnauthorized, "Authorization header is required")

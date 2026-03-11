@@ -61,6 +61,7 @@ func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 		userAgent := ctx.Request.UserAgent()
 
 		requestID := uuid.New().String()
+		AddToTrace(ctx, "Request Started")
 
 		ctx.Set("request_id", requestID)
 		ctx.Header("X-Request-ID", requestID)
@@ -75,6 +76,8 @@ func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 		ctx.Writer = blw
 
 		ctx.Next()
+
+		AddToTrace(ctx, "Response Sent")
 
 		latency := time.Since(start)
 		statusCode := ctx.Writer.Status()
@@ -119,10 +122,15 @@ func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 			Dur("latency", latency)
 
 		if blw.body.Len() > 0 {
-			resBody := blw.body.Bytes()
-			if json.Valid(resBody) {
-				censoredBody := censorBody(resBody)
-				responseDict.RawJSON("body", censoredBody)
+			// Skip logging response body for logs endpoint to avoid recursive explosion
+			if !strings.Contains(path, "/logs") && blw.body.Len() < 1024*1024 { // 1MB limit for terminal log
+				resBody := blw.body.Bytes()
+				if json.Valid(resBody) {
+					censoredBody := censorBody(resBody)
+					responseDict.RawJSON("body", censoredBody)
+				}
+			} else {
+				responseDict.Str("body", "[skipped or too large]")
 			}
 		}
 
@@ -156,8 +164,10 @@ func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 			}
 			
 			var resBodyStr string
-			if blw.body.Len() > 0 {
+			if blw.body.Len() > 0 && !strings.Contains(path, "/logs") && blw.body.Len() < 512*1024 { // 512KB limit for DB
 				resBodyStr = string(censorBody(blw.body.Bytes()))
+			} else if blw.body.Len() > 0 {
+				resBodyStr = "[skipped or too large]"
 			}
 
 			httpLog := &entity.HttpLog{
@@ -174,6 +184,7 @@ func RequestLogger(logRepo repository.HttpLogRepository) gin.HandlerFunc {
 				Latency:         latency.Milliseconds(),
 				UserID:          uID,
 				UserEmail:       userEmailStr,
+				MiddlewareTrace: GetTraceString(ctx),
 			}
 			if logRepo != nil {
 				_ = logRepo.Create(httpLog)

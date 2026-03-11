@@ -316,6 +316,25 @@ const HttpLogs = () => {
                                     {selectedLog.request_id} | {selectedLog.user_agent}
                                 </p>
                             </div>
+                            {selectedLog.middleware_trace && (
+                                <div className="col-span-2 md:col-span-4 border-t border-outline-variant/30 pt-2">
+                                    <p className="text-xs text-surface-on-variant mb-2">Middleware Trace</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedLog.middleware_trace.split(' -> ').map((trace, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">
+                                                    {trace}
+                                                </span>
+                                                {index < selectedLog.middleware_trace.split(' -> ').length - 1 && (
+                                                    <svg className="w-3 h-3 text-surface-on-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Tabs */}

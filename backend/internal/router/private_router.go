@@ -21,6 +21,7 @@ func (r *Router) setupPrivateRoutes(
 	testsajaHandler customHandler.TestsajaHandler,
 	produkHandler customHandler.ProdukHandler,
 	healthHandler handler.HealthHandler,
+	testduaHandler customHandler.TestduaHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Health and Status
@@ -52,6 +53,15 @@ func (r *Router) setupPrivateRoutes(
 		produk.GET("/:id", produkHandler.GetByID)
 		produk.PUT("/:id", produkHandler.Update)
 		produk.DELETE("/:id", produkHandler.Delete)
+	}
+	testdua := v1.Group("/testdua")
+	testdua.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		testdua.POST("", testduaHandler.Create)
+		testdua.GET("", testduaHandler.GetAll)
+		testdua.GET("/:id", testduaHandler.GetByID)
+		testdua.PUT("/:id", testduaHandler.Update)
+		testdua.DELETE("/:id", testduaHandler.Delete)
 	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")

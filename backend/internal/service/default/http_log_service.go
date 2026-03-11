@@ -1,9 +1,13 @@
 package service
 
 import (
+	"fmt"
+	"time"
+
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 )
 
 type HttpLogService interface {
@@ -12,11 +16,15 @@ type HttpLogService interface {
 }
 
 type httpLogService struct {
-	repo repository.HttpLogRepository
+	repo  repository.HttpLogRepository
+	cache cache.CacheService
 }
 
-func NewHttpLogService(repo repository.HttpLogRepository) HttpLogService {
-	return &httpLogService{repo: repo}
+func NewHttpLogService(repo repository.HttpLogRepository, cache cache.CacheService) HttpLogService {
+	return &httpLogService{
+		repo:  repo,
+		cache: cache,
+	}
 }
 
 func (s *httpLogService) Create(log *entity.HttpLog) error {
@@ -24,6 +32,25 @@ func (s *httpLogService) Create(log *entity.HttpLog) error {
 }
 
 func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse, int64, error) {
+	// Try to get from cache
+	cacheKey := fmt.Sprintf("http_logs:%d:%d:%s:%s:%d",
+		query.GetPage(),
+		query.GetLimit(),
+		query.Method,
+		query.Path,
+		query.StatusCode,
+	)
+
+	type cacheData struct {
+		Responses []dto.HttpLogResponse `json:"responses"`
+		Total     int64                 `json:"total"`
+	}
+
+	var cached cacheData
+	if err := s.cache.Get(cacheKey, &cached); err == nil {
+		return cached.Responses, cached.Total, nil
+	}
+
 	logs, total, err := s.repo.FindAll(query)
 	if err != nil {
 		return nil, 0, err
@@ -46,9 +73,16 @@ func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse,
 			Latency:         l.Latency,
 			UserID:          l.UserID,
 			UserEmail:       l.UserEmail,
+			MiddlewareTrace: l.MiddlewareTrace,
 			CreatedAt:       l.CreatedAt,
 		})
 	}
+
+	// Save to cache with short TTL (10 seconds)
+	_ = s.cache.Set(cacheKey, cacheData{
+		Responses: responses,
+		Total:     total,
+	}, 10*time.Second)
 
 	return responses, total, nil
 }

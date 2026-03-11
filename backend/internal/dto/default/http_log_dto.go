@@ -43,5 +43,6 @@ type HttpLogResponse struct {
 	Latency         int64     `json:"latency"`
 	UserID          *uint     `json:"user_id,omitempty"`
 	UserEmail       string    `json:"user_email,omitempty"`
+	MiddlewareTrace string    `json:"middleware_trace,omitempty"`
 	CreatedAt       time.Time `json:"created_at"`
 }

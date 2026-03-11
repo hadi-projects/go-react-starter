@@ -19,6 +19,7 @@ var (
 
 func SecureHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		AddToTrace(c, "SecureHeaders")
 		c.Header("X-Frame-Options", "DENY")
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")

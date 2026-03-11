@@ -21,6 +21,7 @@ var (
 
 func RateLimiter(rps int, burst int) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		AddToTrace(ctx, "RateLimiter")
 		ip := ctx.ClientIP()
 
 		mu.Lock()

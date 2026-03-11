@@ -16,6 +16,7 @@ import GeneratorPage from './pages/admin/GeneratorPage'
 import { ThemeProvider } from './context/ThemeContext'
 import TestsajaPage from './pages/admin/TestsajaPage';
 import ProdukPage from './pages/admin/ProdukPage';
+import TestduaPage from './pages/admin/TestduaPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="admin/generator" element={<GeneratorPage />} />
           <Route path="admin/testsaja" element={<TestsajaPage />} />
 										<Route path="admin/produk" element={<ProdukPage />} />
+										<Route path="admin/testdua" element={<TestduaPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

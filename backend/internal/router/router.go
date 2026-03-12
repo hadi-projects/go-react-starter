@@ -82,6 +82,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	wisudaRepo := customRepository.NewWisudaRepository(db)
 		arsipRepo := customRepository.NewArsipRepository(db)
 		minaRepo := customRepository.NewMinaRepository(db)
+		blogRepo := customRepository.NewBlogRepository(db)
+		newsRepo := customRepository.NewNewsRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -103,6 +105,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	wisudaService := customService.NewWisudaService(wisudaRepo, r.cache)
 		arsipService := customService.NewArsipService(arsipRepo, r.cache)
 		minaService := customService.NewMinaService(minaRepo, r.cache)
+		blogService := customService.NewBlogService(blogRepo, r.cache)
+		newsService := customService.NewNewsService(newsRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -127,6 +131,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	wisudaHandler := customHandler.NewWisudaHandler(wisudaService)
 		arsipHandler := customHandler.NewArsipHandler(arsipService)
 		minaHandler := customHandler.NewMinaHandler(minaService)
+		blogHandler := customHandler.NewBlogHandler(blogService)
+		newsHandler := customHandler.NewNewsHandler(newsService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -144,6 +150,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 			wisudaHandler,
 				arsipHandler,
 				minaHandler,
+				blogHandler,
+				newsHandler,
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

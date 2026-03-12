@@ -21,6 +21,8 @@ import MainnnPage from './pages/admin/MainnnPage';
 import WisudaPage from './pages/admin/WisudaPage';
 import ArsipPage from './pages/admin/ArsipPage';
 import MinaPage from './pages/admin/MinaPage';
+import BlogPage from './pages/admin/BlogPage';
+import NewsPage from './pages/admin/NewsPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -52,6 +54,8 @@ function App() {
 										<Route path="admin/wisuda" element={<WisudaPage />} />
 										<Route path="admin/arsip" element={<ArsipPage />} />
 										<Route path="admin/mina" element={<MinaPage />} />
+										<Route path="admin/blog" element={<BlogPage />} />
+										<Route path="admin/news" element={<NewsPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

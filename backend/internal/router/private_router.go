@@ -30,6 +30,8 @@ func (r *Router) setupPrivateRoutes(
 	wisudaHandler customHandler.WisudaHandler,
 		arsipHandler customHandler.ArsipHandler,
 		minaHandler customHandler.MinaHandler,
+		blogHandler customHandler.BlogHandler,
+		newsHandler customHandler.NewsHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Health and Status
@@ -132,6 +134,26 @@ func (r *Router) setupPrivateRoutes(
 		mina.GET("/:id", minaHandler.GetByID)
 		mina.PUT("/:id", minaHandler.Update)
 		mina.DELETE("/:id", minaHandler.Delete)
+	}
+		blog := v1.Group("/blog")
+	blog.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		blog.POST("", blogHandler.Create)
+		blog.GET("", blogHandler.GetAll)
+		blog.GET("/export", blogHandler.Export)
+		blog.GET("/:id", blogHandler.GetByID)
+		blog.PUT("/:id", blogHandler.Update)
+		blog.DELETE("/:id", blogHandler.Delete)
+	}
+		news := v1.Group("/news")
+	news.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		news.POST("", newsHandler.Create)
+		news.GET("", newsHandler.GetAll)
+		news.GET("/export", newsHandler.Export)
+		news.GET("/:id", newsHandler.GetByID)
+		news.PUT("/:id", newsHandler.Update)
+		news.DELETE("/:id", newsHandler.Delete)
 	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")

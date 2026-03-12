@@ -16,52 +16,51 @@ import (
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 )
 
-type {{.ModuleName}}Service interface {
-	Create(req dto.Create{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error)
+type NewsService interface {
+	Create(req dto.CreateNewsRequest) (*dto.NewsResponse, error)
 	GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error)
-	GetByID(id uint) (*dto.{{.ModuleName}}Response, error)
-	Update(id uint, req dto.Update{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error)
+	GetByID(id uint) (*dto.NewsResponse, error)
+	Update(id uint, req dto.UpdateNewsRequest) (*dto.NewsResponse, error)
 	Delete(id uint) error
 	Export(format string) ([]byte, error)
 }
 
-type {{.ModuleNameLower}}Service struct {
-	repo  repository.{{.ModuleName}}Repository
+type newsService struct {
+	repo  repository.NewsRepository
 	cache cache.CacheService
 }
 
-func New{{.ModuleName}}Service(repo repository.{{.ModuleName}}Repository, cache cache.CacheService) {{.ModuleName}}Service {
-	return &{{.ModuleNameLower}}Service{
+func NewNewsService(repo repository.NewsRepository, cache cache.CacheService) NewsService {
+	return &newsService{
 		repo:  repo,
 		cache: cache,
 	}
 }
 
-func (s *{{.ModuleNameLower}}Service) Create(req dto.Create{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error) {
-	entity := &entity.{{.ModuleName}}{
-		{{- range .Fields}}
-		{{.NameGo}}: req.{{.NameGo}},
-		{{- end}}
+func (s *newsService) Create(req dto.CreateNewsRequest) (*dto.NewsResponse, error) {
+	entity := &entity.News{
+		Name: req.Name,
+		Content: req.Content,
 	}
 
 	if err := s.repo.Create(entity); err != nil {
 		return nil, err
 	}
 
-	s.cache.DeletePattern("{{.TableName}}:*")
+	s.cache.DeletePattern("news:*")
 
-	{{if .AuditLog}}
+	
 	logger.AuditLogger.Info().
-		Uint("{{.ModuleNameLower}}_id", entity.ID).
-		Str("action", "{{.ModuleNameLower}}_creation").
-		Msg("{{.ModuleNameLower}} created")
-	{{end}}
+		Uint("news_id", entity.ID).
+		Str("action", "news_creation").
+		Msg("news created")
+	
 
 	return s.mapToResponse(entity), nil
 }
 
-func (s *{{.ModuleNameLower}}Service) GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error) {
-	cacheKey := fmt.Sprintf("{{.TableName}}:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
+func (s *newsService) GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error) {
+	cacheKey := fmt.Sprintf("news:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
 	var cached defaultDto.PaginationResponse
 	if err := s.cache.Get(cacheKey, &cached); err == nil {
 		return &cached, nil
@@ -72,7 +71,7 @@ func (s *{{.ModuleNameLower}}Service) GetAll(pagination *defaultDto.PaginationRe
 		return nil, err
 	}
 
-	var responses []dto.{{.ModuleName}}Response
+	var responses []dto.NewsResponse
 	for _, e := range entities {
 		responses = append(responses, *s.mapToResponse(&e))
 	}
@@ -91,9 +90,9 @@ func (s *{{.ModuleNameLower}}Service) GetAll(pagination *defaultDto.PaginationRe
 	return response, nil
 }
 
-func (s *{{.ModuleNameLower}}Service) GetByID(id uint) (*dto.{{.ModuleName}}Response, error) {
-	cacheKey := fmt.Sprintf("{{.TableName}}:%d", id)
-	var cached dto.{{.ModuleName}}Response
+func (s *newsService) GetByID(id uint) (*dto.NewsResponse, error) {
+	cacheKey := fmt.Sprintf("news:%d", id)
+	var cached dto.NewsResponse
 	if err := s.cache.Get(cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
@@ -108,54 +107,48 @@ func (s *{{.ModuleNameLower}}Service) GetByID(id uint) (*dto.{{.ModuleName}}Resp
 	return response, nil
 }
 
-func (s *{{.ModuleNameLower}}Service) Update(id uint, req dto.Update{{.ModuleName}}Request) (*dto.{{.ModuleName}}Response, error) {
+func (s *newsService) Update(id uint, req dto.UpdateNewsRequest) (*dto.NewsResponse, error) {
 	entity, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
-
-	{{- range .Fields}}
-	{{- if eq .Type "string"}}
-	if req.{{.NameGo}} != "" {
-		entity.{{.NameGo}} = req.{{.NameGo}}
+	if req.Name != "" {
+		entity.Name = req.Name
 	}
-	{{- else}}
-	entity.{{.NameGo}} = req.{{.NameGo}}
-	{{- end}}
-	{{- end}}
+	entity.Content = req.Content
 
 	if err := s.repo.Update(entity); err != nil {
 		return nil, err
 	}
 
-	s.cache.Delete(fmt.Sprintf("{{.TableName}}:%d", id))
-	s.cache.DeletePattern("{{.TableName}}:*")
+	s.cache.Delete(fmt.Sprintf("news:%d", id))
+	s.cache.DeletePattern("news:*")
 
-	{{if .AuditLog}}
+	
 	logger.AuditLogger.Info().
-		Uint("{{.ModuleNameLower}}_id", entity.ID).
-		Str("action", "{{.ModuleNameLower}}_update").
-		Msg("{{.ModuleNameLower}} updated")
-	{{end}}
+		Uint("news_id", entity.ID).
+		Str("action", "news_update").
+		Msg("news updated")
+	
 
 	return s.mapToResponse(entity), nil
 }
 
-func (s *{{.ModuleNameLower}}Service) Delete(id uint) error {
-	s.cache.Delete(fmt.Sprintf("{{.TableName}}:%d", id))
-	s.cache.DeletePattern("{{.TableName}}:*")
+func (s *newsService) Delete(id uint) error {
+	s.cache.Delete(fmt.Sprintf("news:%d", id))
+	s.cache.DeletePattern("news:*")
 
-	{{if .AuditLog}}
+	
 	logger.AuditLogger.Info().
-		Uint("{{.ModuleNameLower}}_id", id).
-		Str("action", "{{.ModuleNameLower}}_deletion").
-		Msg("{{.ModuleNameLower}} deleted")
-	{{end}}
+		Uint("news_id", id).
+		Str("action", "news_deletion").
+		Msg("news deleted")
+	
 
 	return s.repo.Delete(id)
 }
 
-func (s *{{.ModuleNameLower}}Service) Export(format string) ([]byte, error) {
+func (s *newsService) Export(format string) ([]byte, error) {
 	pagination := &defaultDto.PaginationRequest{
 		Page:  1,
 		Limit: 1000000,
@@ -172,19 +165,18 @@ func (s *{{.ModuleNameLower}}Service) Export(format string) ([]byte, error) {
 	return s.generateExcel(entities)
 }
 
-func (s *{{.ModuleNameLower}}Service) generateCSV(entities []entity.{{.ModuleName}}) ([]byte, error) {
+func (s *newsService) generateCSV(entities []entity.News) ([]byte, error) {
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 
-	header := []string{"ID", {{range .Fields}}"{{.NameGo}}", {{end}}"Created At"}
+	header := []string{"ID", "Name", "Content", "Created At"}
 	writer.Write(header)
 
 	for _, e := range entities {
 		row := []string{
 			fmt.Sprintf("%d", e.ID),
-			{{- range .Fields}}
-			fmt.Sprintf("%v", e.{{.NameGo}}),
-			{{- end}}
+			fmt.Sprintf("%v", e.Name),
+			fmt.Sprintf("%v", e.Content),
 			e.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 		writer.Write(row)
@@ -194,12 +186,12 @@ func (s *{{.ModuleNameLower}}Service) generateCSV(entities []entity.{{.ModuleNam
 	return buf.Bytes(), nil
 }
 
-func (s *{{.ModuleNameLower}}Service) generateExcel(entities []entity.{{.ModuleName}}) ([]byte, error) {
+func (s *newsService) generateExcel(entities []entity.News) ([]byte, error) {
 	f := excelize.NewFile()
 	sheet := "Sheet1"
 	f.SetSheetName("Sheet1", sheet)
 
-	header := []string{"ID", {{range .Fields}}"{{.NameGo}}", {{end}}"Created At"}
+	header := []string{"ID", "Name", "Content", "Created At"}
 	for i, h := range header {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -210,10 +202,11 @@ func (s *{{.ModuleNameLower}}Service) generateExcel(entities []entity.{{.ModuleN
 		f.SetCellValue(sheet, fmt.Sprintf("A%d", rowNum), e.ID)
 		
 		var cell string
-		{{- range $j, $f := .Fields}}
-		cell, _ = excelize.CoordinatesToCellName({{$j}}+2, rowNum)
-		f.SetCellValue(sheet, cell, e.{{$f.NameGo}})
-		{{- end}}
+		cell, _ = excelize.CoordinatesToCellName(0+2, rowNum)
+		f.SetCellValue(sheet, cell, e.Name)
+		
+		cell, _ = excelize.CoordinatesToCellName(1+2, rowNum)
+		f.SetCellValue(sheet, cell, e.Content)
 		
 		lastCell, _ := excelize.CoordinatesToCellName(len(header), rowNum)
 		f.SetCellValue(sheet, lastCell, e.CreatedAt.Format("2006-01-02 15:04:05"))
@@ -226,12 +219,11 @@ func (s *{{.ModuleNameLower}}Service) generateExcel(entities []entity.{{.ModuleN
 	return buf.Bytes(), nil
 }
 
-func (s *{{.ModuleNameLower}}Service) mapToResponse(entity *entity.{{.ModuleName}}) *dto.{{.ModuleName}}Response {
-	return &dto.{{.ModuleName}}Response{
+func (s *newsService) mapToResponse(entity *entity.News) *dto.NewsResponse {
+	return &dto.NewsResponse{
 		ID:        entity.ID,
-		{{- range .Fields}}
-		{{.NameGo}}: entity.{{.NameGo}},
-		{{- end}}
+		Name: entity.Name,
+		Content: entity.Content,
 		CreatedAt: entity.CreatedAt,
 		UpdatedAt: entity.UpdatedAt,
 	}

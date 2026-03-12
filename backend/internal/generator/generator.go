@@ -59,7 +59,7 @@ func (f Field) GormType() string {
 	case "string":
 		return "type:varchar(255);not null"
 	case "wysiwyg":
-		return "type:text"
+		return "type:longtext"
 	case "int":
 		return "type:int"
 	case "float":

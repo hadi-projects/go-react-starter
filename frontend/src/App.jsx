@@ -17,6 +17,9 @@ import { ThemeProvider } from './context/ThemeContext'
 import TestsajaPage from './pages/admin/TestsajaPage';
 import ProdukPage from './pages/admin/ProdukPage';
 import TestduaPage from './pages/admin/TestduaPage';
+import MainnnPage from './pages/admin/MainnnPage';
+import WisudaPage from './pages/admin/WisudaPage';
+import ArsipPage from './pages/admin/ArsipPage';
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -42,8 +45,11 @@ function App() {
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
           <Route path="admin/testsaja" element={<TestsajaPage />} />
-										<Route path="admin/produk" element={<ProdukPage />} />
-										<Route path="admin/testdua" element={<TestduaPage />} />
+          <Route path="admin/produk" element={<ProdukPage />} />
+          <Route path="admin/testdua" element={<TestduaPage />} />
+										<Route path="admin/mainnn" element={<MainnnPage />} />
+										<Route path="admin/wisuda" element={<WisudaPage />} />
+										<Route path="admin/arsip" element={<ArsipPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

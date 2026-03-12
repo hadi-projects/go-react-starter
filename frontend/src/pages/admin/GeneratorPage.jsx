@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Button from '../../components/Button';
+import IconPicker from '../../components/IconPicker';
 import { generateModule } from '../../api/admin';
 
 const GeneratorPage = () => {
@@ -10,6 +11,7 @@ const GeneratorPage = () => {
         module_name: '',
         table_name: '',
         audit_log: true,
+        icon: '',
         fields: [
             { name: 'name', type: 'string', binding: 'required', searchable: true, unique: false }
         ]
@@ -99,6 +101,11 @@ const GeneratorPage = () => {
                     />
                     <label htmlFor="audit_log" className="text-sm font-medium text-surface-on">Enable Audit Logging</label>
                 </div>
+
+                <IconPicker 
+                    selectedIcon={config.icon} 
+                    onSelect={(path) => setConfig({ ...config, icon: path })} 
+                />
 
                 <div className="space-y-4">
                     <div className="flex justify-between items-center px-1">

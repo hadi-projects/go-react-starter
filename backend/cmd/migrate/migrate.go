@@ -31,6 +31,10 @@ func main() {
 		&customEntity.Testsaja{},
 		&customEntity.Produk{},
 		&customEntity.Testdua{},
+		&customEntity.Admin{},
+		&customEntity.Mainnn{},
+		&customEntity.Wisuda{},
+				&customEntity.Arsip{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

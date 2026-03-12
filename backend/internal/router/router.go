@@ -14,7 +14,7 @@ import (
 	customHandler "github.com/hadi-projects/go-react-starter/internal/handler"
 	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
-	customeRepository "github.com/hadi-projects/go-react-starter/internal/repository"
+	customRepository "github.com/hadi-projects/go-react-starter/internal/repository"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	customService "github.com/hadi-projects/go-react-starter/internal/service"
 	service "github.com/hadi-projects/go-react-starter/internal/service/default"
@@ -73,11 +73,14 @@ func (r *Router) SetupRouter() *gin.Engine {
 	permissionRepo := repository.NewPermissionRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	tokenRepo := repository.NewTokenRepository(db)
-	testsajaRepo := customeRepository.NewTestsajaRepository(db)
-	produkRepo := customeRepository.NewProdukRepository(db)
-	testduaRepo := customeRepository.NewTestduaRepository(db)
-	cookRepo := customeRepository.NewCookRepository(db)
-	adminRepo := customeRepository.NewAdminRepository(db)
+	testsajaRepo := customRepository.NewTestsajaRepository(db)
+	produkRepo := customRepository.NewProdukRepository(db)
+	testduaRepo := customRepository.NewTestduaRepository(db)
+	cookRepo := customRepository.NewCookRepository(db)
+	adminRepo := customRepository.NewAdminRepository(db)
+	mainnnRepo := customRepository.NewMainnnRepository(db)
+	wisudaRepo := customRepository.NewWisudaRepository(db)
+		arsipRepo := customRepository.NewArsipRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -95,6 +98,9 @@ func (r *Router) SetupRouter() *gin.Engine {
 	testduaService := customService.NewTestduaService(testduaRepo, r.cache)
 	cookService := customService.NewCookService(cookRepo, r.cache)
 	adminService := customService.NewAdminService(adminRepo, r.cache)
+	mainnnService := customService.NewMainnnService(mainnnRepo, r.cache)
+	wisudaService := customService.NewWisudaService(wisudaRepo, r.cache)
+		arsipService := customService.NewArsipService(arsipRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -115,6 +121,9 @@ func (r *Router) SetupRouter() *gin.Engine {
 	testduaHandler := customHandler.NewTestduaHandler(testduaService)
 	cookHandler := customHandler.NewCookHandler(cookService)
 	adminHandler := customHandler.NewAdminHandler(adminService)
+	mainnnHandler := customHandler.NewMainnnHandler(mainnnService)
+	wisudaHandler := customHandler.NewWisudaHandler(wisudaService)
+		arsipHandler := customHandler.NewArsipHandler(arsipService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -128,6 +137,9 @@ func (r *Router) SetupRouter() *gin.Engine {
 			testduaHandler,
 			cookHandler,
 			adminHandler,
+			mainnnHandler,
+			wisudaHandler,
+				arsipHandler,
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

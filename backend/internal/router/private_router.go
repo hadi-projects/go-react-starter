@@ -26,6 +26,9 @@ func (r *Router) setupPrivateRoutes(
 	testduaHandler customHandler.TestduaHandler,
 	cookHandler customHandler.CookHandler,
 	adminHandler customHandler.AdminHandler,
+	mainnnHandler customHandler.MainnnHandler,
+	wisudaHandler customHandler.WisudaHandler,
+		arsipHandler customHandler.ArsipHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Health and Status
@@ -90,6 +93,35 @@ func (r *Router) setupPrivateRoutes(
 		admin.DELETE("/:id", adminHandler.Delete)
 		admin.GET("/export", adminHandler.Export)
 	}
+	mainnn := v1.Group("/mainnn")
+	mainnn.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		mainnn.POST("", mainnnHandler.Create)
+		mainnn.GET("", mainnnHandler.GetAll)
+		mainnn.GET("/:id", mainnnHandler.GetByID)
+		mainnn.PUT("/:id", mainnnHandler.Update)
+		mainnn.DELETE("/:id", mainnnHandler.Delete)
+	}
+		wisuda := v1.Group("/wisuda")
+	wisuda.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		wisuda.POST("", wisudaHandler.Create)
+		wisuda.GET("", wisudaHandler.GetAll)
+		wisuda.GET("/export", wisudaHandler.Export)
+		wisuda.GET("/:id", wisudaHandler.GetByID)
+		wisuda.PUT("/:id", wisudaHandler.Update)
+		wisuda.DELETE("/:id", wisudaHandler.Delete)
+	}
+		arsip := v1.Group("/arsip")
+	arsip.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		arsip.POST("", arsipHandler.Create)
+		arsip.GET("", arsipHandler.GetAll)
+		arsip.GET("/export", arsipHandler.Export)
+		arsip.GET("/:id", arsipHandler.GetByID)
+		arsip.PUT("/:id", arsipHandler.Update)
+		arsip.DELETE("/:id", arsipHandler.Delete)
+	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")
 	{
@@ -110,7 +142,7 @@ func (r *Router) setupPrivateRoutes(
 		logs.GET("/http/export", middleware.PermissionGuard("get-http-log"), httpLogHandler.Export)
 		logs.GET("/system", middleware.PermissionGuard("get-http-log"), systemLogHandler.GetAll) // Use same permission for now
 		logs.GET("/system/export", middleware.PermissionGuard("get-http-log"), systemLogHandler.Export)
-		logs.GET("/audit", middleware.PermissionGuard("get-http-log"), auditLogHandler.GetAll)   // Use same permission for now
+		logs.GET("/audit", middleware.PermissionGuard("get-http-log"), auditLogHandler.GetAll) // Use same permission for now
 		logs.GET("/audit/export", middleware.PermissionGuard("get-http-log"), auditLogHandler.Export)
 	}
 

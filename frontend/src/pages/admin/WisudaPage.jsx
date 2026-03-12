@@ -8,14 +8,14 @@ import Pagination from '../../components/Pagination';
 import TextField from '../../components/TextField';
 import usePermission from '../../hooks/usePermission';
 import { 
-    getAll{{.ModuleName}}s, 
-    create{{.ModuleName}}, 
-    update{{.ModuleName}}, 
-    delete{{.ModuleName}},
-    export{{.ModuleName}}
-} from '../../api/{{.ModuleNameLowerCamel}}';
+    getAllWisudas, 
+    createWisuda, 
+    updateWisuda, 
+    deleteWisuda,
+    exportWisuda
+} from '../../api/wisuda';
 
-const {{.ModuleName}}Page = () => {
+const WisudaPage = () => {
     const can = usePermission();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -29,9 +29,7 @@ const {{.ModuleName}}Page = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [formData, setFormData] = useState({
-        {{- range .Fields}}
-        {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-        {{- end}}
+        name: '',
     });
 
     // Debounce search term
@@ -45,9 +43,7 @@ const {{.ModuleName}}Page = () => {
 
     const columns = [
         { header: 'ID', accessor: 'id' },
-        {{- range .Fields}}
-        { header: '{{.NameGo}}', accessor: '{{.NameJson}}' },
-        {{- end}}
+        { header: 'Name', accessor: 'name' },
         { header: 'Created At', accessor: 'created_at', render: (row) => new Date(row.created_at).toLocaleString() },
     ];
 
@@ -55,7 +51,7 @@ const {{.ModuleName}}Page = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await getAll{{.ModuleName}}s({ 
+                const res = await getAllWisudas({ 
                     page: currentPage, 
                     limit: itemsPerPage,
                     search: debouncedSearch 
@@ -75,16 +71,12 @@ const {{.ModuleName}}Page = () => {
         if (item) {
             setEditingId(item.id);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: item.{{.NameJson}},
-                {{- end}}
+                name: item.name,
             });
         } else {
             setEditingId(null);
             setFormData({
-                {{- range .Fields}}
-                {{.NameJson}}: {{if eq .TypeGo "int"}}0{{else if eq .TypeGo "float64"}}0.0{{else if eq .TypeGo "bool"}}false{{else}}''{{end}},
-                {{- end}}
+                name: '',
             });
         }
         setIsModalOpen(true);
@@ -94,10 +86,10 @@ const {{.ModuleName}}Page = () => {
         e.preventDefault();
         try {
             if (editingId) {
-                await update{{.ModuleName}}(editingId, formData);
+                await updateWisuda(editingId, formData);
                 toast.success('Updated successfully');
             } else {
-                await create{{.ModuleName}}(formData);
+                await createWisuda(formData);
                 toast.success('Created successfully');
             }
             setIsModalOpen(false);
@@ -110,7 +102,7 @@ const {{.ModuleName}}Page = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this item?')) {
             try {
-                await delete{{.ModuleName}}(id);
+                await deleteWisuda(id);
                 toast.success('Deleted successfully');
                 setRefreshTrigger(t => t + 1);
             } catch (err) {
@@ -122,11 +114,11 @@ const {{.ModuleName}}Page = () => {
     const handleExport = async (format) => {
         setIsExporting(true);
         try {
-            const response = await export{{.ModuleName}}(format);
+            const response = await exportWisuda(format);
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            const filename = format === 'csv' ? '{{.ModuleNameLower}}.csv' : '{{.ModuleNameLower}}.xlsx';
+            const filename = format === 'csv' ? 'wisuda.csv' : 'wisuda.xlsx';
             link.setAttribute('download', filename);
             document.body.appendChild(link);
             link.click();
@@ -140,16 +132,16 @@ const {{.ModuleName}}Page = () => {
     };
 
     const tableActions = [
-        ...(can('update-{{.TableName}}') ? [{ label: 'Edit', onClick: handleOpenModal }] : []),
-        ...(can('delete-{{.TableName}}') ? [{ label: 'Delete', onClick: (row) => handleDelete(row.id), className: 'text-error' }] : []),
+        ...(can('update-wisuda') ? [{ label: 'Edit', onClick: handleOpenModal }] : []),
+        ...(can('delete-wisuda') ? [{ label: 'Delete', onClick: (row) => handleDelete(row.id), className: 'text-error' }] : []),
     ];
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">{{.ModuleName}} Management</h1>
-                    <p className="text-sm text-surface-on-variant mt-1">Manage your {{.ModuleNameLower}} instances.</p>
+                    <h1 className="text-2xl font-bold text-surface-on tracking-tight">Wisuda Management</h1>
+                    <p className="text-sm text-surface-on-variant mt-1">Manage your wisuda instances.</p>
                 </div>
                 <div className="flex gap-2">
                     <div className="flex bg-surface-variant/20 p-1 rounded-lg shrink-0">
@@ -170,9 +162,9 @@ const {{.ModuleName}}Page = () => {
                             CSV
                         </button>
                     </div>
-                    {can('create-{{.TableName}}') && (
+                    {can('create-wisuda') && (
                         <Button variant="primary" onClick={() => handleOpenModal()}>
-                            Add {{.ModuleName}}
+                            Add Wisuda
                         </Button>
                     )}
                 </div>
@@ -223,20 +215,18 @@ const {{.ModuleName}}Page = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={editingId ? 'Edit {{.ModuleName}}' : 'Add {{.ModuleName}}'}
+                title={editingId ? 'Edit Wisuda' : 'Add Wisuda'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-                    {{- range .Fields}}
                     <TextField
-                        label="{{.NameGo}}"
-                        name="{{.NameJson}}"
-                        value={formData.{{.NameJson}}.toString()}
-                        onChange={(e) => setFormData({ ...formData, {{.NameJson}}: {{if eq .TypeGo "int"}}parseInt(e.target.value) || 0{{else if eq .TypeGo "float64"}}parseFloat(e.target.value) || 0{{else if eq .TypeGo "bool"}}e.target.checked{{else}}e.target.value{{end}} })}
-                        {{if eq .TypeGo "bool"}}type="checkbox"{{end}}
-                        {{if or (eq .TypeGo "int") (eq .TypeGo "float64")}}type="number"{{end}}
+                        label="Name"
+                        name="name"
+                        value={formData.name.toString()}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        
+                        
                         required
                     />
-                    {{- end}}
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="tonal" onClick={() => setIsModalOpen(false)}>
                             Cancel
@@ -251,4 +241,4 @@ const {{.ModuleName}}Page = () => {
     );
 };
 
-export default {{.ModuleName}}Page;
+export default WisudaPage;

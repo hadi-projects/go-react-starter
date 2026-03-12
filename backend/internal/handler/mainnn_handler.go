@@ -11,7 +11,7 @@ import (
 	"github.com/hadi-projects/go-react-starter/pkg/response"
 )
 
-type {{.ModuleName}}Handler interface {
+type MainnnHandler interface {
 	Create(c *gin.Context)
 	GetAll(c *gin.Context)
 	GetByID(c *gin.Context)
@@ -20,16 +20,16 @@ type {{.ModuleName}}Handler interface {
 	Export(c *gin.Context)
 }
 
-type {{.ModuleNameLower}}Handler struct {
-	service service.{{.ModuleName}}Service
+type mainnnHandler struct {
+	service service.MainnnService
 }
 
-func New{{.ModuleName}}Handler(service service.{{.ModuleName}}Service) {{.ModuleName}}Handler {
-	return &{{.ModuleNameLower}}Handler{service: service}
+func NewMainnnHandler(service service.MainnnService) MainnnHandler {
+	return &mainnnHandler{service: service}
 }
 
-func (h *{{.ModuleNameLower}}Handler) Create(c *gin.Context) {
-	var req dto.Create{{.ModuleName}}Request
+func (h *mainnnHandler) Create(c *gin.Context) {
+	var req dto.CreateMainnnRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
@@ -41,10 +41,10 @@ func (h *{{.ModuleNameLower}}Handler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "{{.ModuleName}} created successfully", res)
+	response.Success(c, http.StatusCreated, "Mainnn created successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) GetAll(c *gin.Context) {
+func (h *mainnnHandler) GetAll(c *gin.Context) {
 	var pagination defaultDto.PaginationRequest
 	if err := c.ShouldBindQuery(&pagination); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
@@ -57,23 +57,23 @@ func (h *{{.ModuleNameLower}}Handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}}s retrieved successfully", res)
+	response.Success(c, http.StatusOK, "Mainnns retrieved successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) GetByID(c *gin.Context) {
+func (h *mainnnHandler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	res, err := h.service.GetByID(uint(id))
 	if err != nil {
-		response.Error(c, http.StatusNotFound, "{{.ModuleName}} not found")
+		response.Error(c, http.StatusNotFound, "Mainnn not found")
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} retrieved successfully", res)
+	response.Success(c, http.StatusOK, "Mainnn retrieved successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) Update(c *gin.Context) {
+func (h *mainnnHandler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var req dto.Update{{.ModuleName}}Request
+	var req dto.UpdateMainnnRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
@@ -85,20 +85,20 @@ func (h *{{.ModuleNameLower}}Handler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} updated successfully", res)
+	response.Success(c, http.StatusOK, "Mainnn updated successfully", res)
 }
 
-func (h *{{.ModuleNameLower}}Handler) Delete(c *gin.Context) {
+func (h *mainnnHandler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := h.service.Delete(uint(id)); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "{{.ModuleName}} deleted successfully", nil)
+	response.Success(c, http.StatusOK, "Mainnn deleted successfully", nil)
 }
 
-func (h *{{.ModuleNameLower}}Handler) Export(c *gin.Context) {
+func (h *mainnnHandler) Export(c *gin.Context) {
 	format := c.DefaultQuery("format", "excel")
 	res, err := h.service.Export(format)
 	if err != nil {
@@ -106,7 +106,7 @@ func (h *{{.ModuleNameLower}}Handler) Export(c *gin.Context) {
 		return
 	}
 
-	filename := "{{.ModuleNameLower}}." + format
+	filename := "mainnn." + format
 	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	if format == "csv" {
 		contentType = "text/csv"

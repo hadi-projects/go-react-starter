@@ -77,6 +77,7 @@ type ModuleConfig struct {
 	ModuleName string  `yaml:"module_name" json:"module_name"`
 	TableName  string  `yaml:"table_name" json:"table_name"`
 	AuditLog   bool    `yaml:"audit_log" json:"audit_log"`
+	Icon       string  `yaml:"icon" json:"icon"`
 	Fields     []Field `yaml:"fields" json:"fields"`
 }
 
@@ -157,9 +158,9 @@ func (g *Generator) registerRouter() error {
 	routerPath := filepath.Join(g.BaseDir, "internal/router/router.go")
 	privateRouterPath := filepath.Join(g.BaseDir, "internal/router/private_router.go")
 
-	repoInit := fmt.Sprintf("\t%sRepo := repository.New%sRepository(db)\n\t// [GENERATOR_INSERT_REPOSITORY]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName)
-	serviceInit := fmt.Sprintf("\t%sService := service.New%sService(%sRepo, r.cache)\n\t// [GENERATOR_INSERT_SERVICE]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName, strings.ToLower(g.Config.ModuleName))
-	handlerInit := fmt.Sprintf("\t%sHandler := handler.New%sHandler(%sService)\n\t// [GENERATOR_INSERT_HANDLER]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName, strings.ToLower(g.Config.ModuleName))
+	repoInit := fmt.Sprintf("\t%sRepo := customRepository.New%sRepository(db)\n\t// [GENERATOR_INSERT_REPOSITORY]", strings.ToLower(g.Config.ModuleName), ToCamelCase(g.Config.ModuleName))
+	serviceInit := fmt.Sprintf("\t%sService := customService.New%sService(%sRepo, r.cache)\n\t// [GENERATOR_INSERT_SERVICE]", strings.ToLower(g.Config.ModuleName), ToCamelCase(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName))
+	handlerInit := fmt.Sprintf("\t%sHandler := customHandler.New%sHandler(%sService)\n\t// [GENERATOR_INSERT_HANDLER]", strings.ToLower(g.Config.ModuleName), ToCamelCase(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName))
 	handlerParam := fmt.Sprintf("\t\t%sHandler,\n\t\t// [GENERATOR_INSERT_HANDLER_PARAM]", strings.ToLower(g.Config.ModuleName))
 
 	if err := g.insertAtMarker(routerPath, "// [GENERATOR_INSERT_REPOSITORY]", repoInit); err != nil {
@@ -175,17 +176,18 @@ func (g *Generator) registerRouter() error {
 		return err
 	}
 
-	handlerParamPrivate := fmt.Sprintf("\t%sHandler handler.%sHandler,\n\t// [GENERATOR_INSERT_HANDLER_PARAM]", strings.ToLower(g.Config.ModuleName), g.Config.ModuleName)
+	handlerParamPrivate := fmt.Sprintf("\t%sHandler customHandler.%sHandler,\n\t// [GENERATOR_INSERT_HANDLER_PARAM]", strings.ToLower(g.Config.ModuleName), ToCamelCase(g.Config.ModuleName))
 	groupInit := fmt.Sprintf(`	%s := v1.Group("/%s")
 	%s.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
 		%s.POST("", %sHandler.Create)
 		%s.GET("", %sHandler.GetAll)
+		%s.GET("/export", %sHandler.Export)
 		%s.GET("/:id", %sHandler.GetByID)
 		%s.PUT("/:id", %sHandler.Update)
 		%s.DELETE("/:id", %sHandler.Delete)
 	}
-	// [GENERATOR_INSERT_GROUP]`, strings.ToLower(g.Config.ModuleName), g.Config.TableName, strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName))
+	// [GENERATOR_INSERT_GROUP]`, strings.ToLower(g.Config.ModuleName), g.Config.TableName, strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName))
 
 	if err := g.insertAtMarker(privateRouterPath, "// [GENERATOR_INSERT_HANDLER_PARAM]", handlerParamPrivate); err != nil {
 		return err
@@ -199,7 +201,7 @@ func (g *Generator) registerRouter() error {
 
 func (g *Generator) registerMigration() error {
 	migratePath := filepath.Join(g.BaseDir, "cmd/migrate/migrate.go")
-	migrationInit := fmt.Sprintf("\t\t&entity.%s{},\n\t\t// [GENERATOR_INSERT_MIGRATION]", g.Config.ModuleName)
+	migrationInit := fmt.Sprintf("\t\t&customEntity.%s{},\n\t\t// [GENERATOR_INSERT_MIGRATION]", ToCamelCase(g.Config.ModuleName))
 	return g.insertAtMarker(migratePath, "// [GENERATOR_INSERT_MIGRATION]", migrationInit)
 }
 
@@ -219,12 +221,20 @@ func (g *Generator) registerFrontend() error {
 	}
 
 	// Inject Sidebar Item
+	iconSvg := g.Config.Icon
+	if iconSvg == "" {
+		iconSvg = `<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />`
+	} else if !strings.Contains(iconSvg, "<path") {
+		// If it's just the 'd' attribute, wrap it
+		iconSvg = fmt.Sprintf(`<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="%s" />`, iconSvg)
+	}
+
 	sidebarItem := fmt.Sprintf(`                                { label: '%s', path: '/admin/%s', permission: 'get-%s', icon: (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        %s
                                     </svg>
                                 ) },
-                                // [GENERATOR_INSERT_ADMIN_ITEM]`, ToCamelCase(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName))
+                                // [GENERATOR_INSERT_ADMIN_ITEM]`, ToCamelCase(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), strings.ToLower(g.Config.ModuleName), iconSvg)
 
 	if err := g.insertAtMarker(sidebarPath, "// [GENERATOR_INSERT_ADMIN_ITEM]", sidebarItem); err != nil {
 		return err

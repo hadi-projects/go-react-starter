@@ -1,33 +1,33 @@
 import axios from './client';
 
-const API_PATH = '/{{.TableName}}';
+const API_PATH = '/arsip';
 
-export const getAll{{.ModuleName}}s = async (params) => {
+export const getAllArsips = async (params) => {
     const response = await axios.get(API_PATH, { params });
     return response.data;
 };
 
-export const get{{.ModuleName}}ById = async (id) => {
+export const getArsipById = async (id) => {
     const response = await axios.get(`${API_PATH}/${id}`);
     return response.data;
 };
 
-export const create{{.ModuleName}} = async (data) => {
+export const createArsip = async (data) => {
     const response = await axios.post(API_PATH, data);
     return response.data;
 };
 
-export const update{{.ModuleName}} = async (id, data) => {
+export const updateArsip = async (id, data) => {
     const response = await axios.put(`${API_PATH}/${id}`, data);
     return response.data;
 };
 
-export const delete{{.ModuleName}} = async (id) => {
+export const deleteArsip = async (id) => {
     const response = await axios.delete(`${API_PATH}/${id}`);
     return response.data;
 };
 
-export const export{{.ModuleName}} = async (format = 'excel') => {
+export const exportArsip = async (format = 'excel') => {
     return axios.get(`${API_PATH}/export?format=${format}`, {
         responseType: 'blob',
     });

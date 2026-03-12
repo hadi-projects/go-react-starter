@@ -1,6 +1,8 @@
 package service
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"time"
 
@@ -9,11 +11,13 @@ import (
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/xuri/excelize/v2"
 )
 
 type SystemLogService interface {
 	Create(log *entity.SystemLog) error
 	GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogResponse, int64, error)
+	Export(query *dto.SystemLogQuery, format string) ([]byte, string, error)
 }
 
 type systemLogService struct {
@@ -88,4 +92,86 @@ func (s *systemLogService) GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogRes
 	}, 10*time.Second)
 
 	return responses, total, nil
+}
+
+func (s *systemLogService) Export(query *dto.SystemLogQuery, format string) ([]byte, string, error) {
+	exportQuery := *query
+	exportQuery.Limit = 1000000
+
+	logs, _, err := s.repo.FindAll(&exportQuery)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(logs)
+	}
+	return s.generateExcel(logs)
+}
+
+func (s *systemLogService) generateCSV(logs []entity.SystemLog) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	header := []string{"ID", "Time", "Request ID", "Method", "Path", "Status", "Latency"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	for _, l := range logs {
+		row := []string{
+			fmt.Sprintf("%d", l.ID),
+			l.CreatedAt.Format("2006-01-02 15:04:05"),
+			l.RequestID,
+			l.Method,
+			l.Path,
+			fmt.Sprintf("%d", l.StatusCode),
+			fmt.Sprintf("%dms", l.Latency),
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "system_logs.csv", nil
+}
+
+func (s *systemLogService) generateExcel(logs []entity.SystemLog) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	sheet := "System Logs"
+	index, _ := f.NewSheet(sheet)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	headers := []string{"ID", "Time", "Request ID", "Method", "Path", "Status", "Latency"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, l := range logs {
+		row := []interface{}{
+			l.ID,
+			l.CreatedAt.Format("2006-01-02 15:04:05"),
+			l.RequestID,
+			l.Method,
+			l.Path,
+			l.StatusCode,
+			l.Latency,
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "system_logs.xlsx", nil
 }

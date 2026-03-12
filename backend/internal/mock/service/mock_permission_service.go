@@ -99,3 +99,18 @@ func (mr *MockPermissionServiceMockRecorder) Update(ctx, id, req any) *gomock.Ca
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPermissionService)(nil).Update), ctx, id, req)
 }
+// Export mocks base method.
+func (m *MockPermissionService) Export(ctx context.Context, format string) ([]byte, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Export", ctx, format)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// Export indicates an expected call of Export.
+func (mr *MockPermissionServiceMockRecorder) Export(ctx, format any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Export", reflect.TypeOf((*MockPermissionService)(nil).Export), ctx, format)
+}

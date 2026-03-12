@@ -6,7 +6,7 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import UserFormModal from '../../components/UserFormModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import { getUsers, createUser, updateUser, deleteUser, getRoles } from '../../api/admin';
+import { getUsers, createUser, updateUser, deleteUser, getRoles, exportUsers } from '../../api/admin';
 
 const Users = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +17,7 @@ const Users = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     // Debounce search term
     useEffect(() => {
@@ -88,6 +89,25 @@ const Users = () => {
         setIsDeleteDialogOpen(true);
     };
 
+    const handleExport = async (format) => {
+        setIsExporting(true);
+        try {
+            const response = await exportUsers(format);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const filename = format === 'csv' ? 'users.csv' : 'users.xlsx';
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error('Export failed:', err);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     // Create role lookup map
     const rolesMap = {};
     if (rolesData?.data) {
@@ -127,9 +147,29 @@ const Users = () => {
                     <h1 className="text-3xl font-bold text-surface-on">Users Management</h1>
                     <p className="text-surface-on-variant mt-2">Manage user accounts and roles</p>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                    Add New User
-                </Button>
+                <div className="flex gap-2">
+                    <div className="flex bg-surface-variant/20 p-1 rounded-lg">
+                        <button
+                            onClick={() => handleExport('excel')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Excel
+                        </button>
+                        <button
+                            onClick={() => handleExport('csv')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            CSV
+                        </button>
+                    </div>
+                    <Button onClick={() => setIsCreateModalOpen(true)}>
+                        Add New User
+                    </Button>
+                </div>
             </div>
 
             {/* Search Input */}

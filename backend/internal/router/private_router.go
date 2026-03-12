@@ -24,6 +24,8 @@ func (r *Router) setupPrivateRoutes(
 	produkHandler customHandler.ProdukHandler,
 	healthHandler handler.HealthHandler,
 	testduaHandler customHandler.TestduaHandler,
+	cookHandler customHandler.CookHandler,
+	adminHandler customHandler.AdminHandler,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Health and Status
@@ -46,6 +48,7 @@ func (r *Router) setupPrivateRoutes(
 		testsaja.GET("/:id", testsajaHandler.GetByID)
 		testsaja.PUT("/:id", testsajaHandler.Update)
 		testsaja.DELETE("/:id", testsajaHandler.Delete)
+		testsaja.GET("/export", testsajaHandler.Export)
 	}
 	produk := v1.Group("/produk")
 	produk.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
@@ -55,6 +58,7 @@ func (r *Router) setupPrivateRoutes(
 		produk.GET("/:id", produkHandler.GetByID)
 		produk.PUT("/:id", produkHandler.Update)
 		produk.DELETE("/:id", produkHandler.Delete)
+		produk.GET("/export", produkHandler.Export)
 	}
 	testdua := v1.Group("/testdua")
 	testdua.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
@@ -64,6 +68,27 @@ func (r *Router) setupPrivateRoutes(
 		testdua.GET("/:id", testduaHandler.GetByID)
 		testdua.PUT("/:id", testduaHandler.Update)
 		testdua.DELETE("/:id", testduaHandler.Delete)
+		testdua.GET("/export", testduaHandler.Export)
+	}
+	cook := v1.Group("/cook")
+	cook.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		cook.POST("", cookHandler.Create)
+		cook.GET("", cookHandler.GetAll)
+		cook.GET("/:id", cookHandler.GetByID)
+		cook.PUT("/:id", cookHandler.Update)
+		cook.DELETE("/:id", cookHandler.Delete)
+		cook.GET("/export", cookHandler.Export)
+	}
+	admin := v1.Group("/admin/module") // Use /admin/module to avoid conflict with /admin/*
+	admin.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		admin.POST("", adminHandler.Create)
+		admin.GET("", adminHandler.GetAll)
+		admin.GET("/:id", adminHandler.GetByID)
+		admin.PUT("/:id", adminHandler.Update)
+		admin.DELETE("/:id", adminHandler.Delete)
+		admin.GET("/export", adminHandler.Export)
 	}
 	// [GENERATOR_INSERT_GROUP]
 	auth := v1.Group("/auth")
@@ -80,9 +105,13 @@ func (r *Router) setupPrivateRoutes(
 	{
 		// Internal permission check is handled inside GetLogs
 		logs.GET("", logHandler.GetLogs)
+		logs.GET("/export", logHandler.Export) // Combined logs export
 		logs.GET("/http", middleware.PermissionGuard("get-http-log"), httpLogHandler.GetAll)
+		logs.GET("/http/export", middleware.PermissionGuard("get-http-log"), httpLogHandler.Export)
 		logs.GET("/system", middleware.PermissionGuard("get-http-log"), systemLogHandler.GetAll) // Use same permission for now
+		logs.GET("/system/export", middleware.PermissionGuard("get-http-log"), systemLogHandler.Export)
 		logs.GET("/audit", middleware.PermissionGuard("get-http-log"), auditLogHandler.GetAll)   // Use same permission for now
+		logs.GET("/audit/export", middleware.PermissionGuard("get-http-log"), auditLogHandler.Export)
 	}
 
 	users := v1.Group("/users")
@@ -94,6 +123,7 @@ func (r *Router) setupPrivateRoutes(
 		// Admin only for CRUD
 		users.POST("", middleware.PermissionGuard("create-user"), userHandler.Create)
 		users.GET("", middleware.PermissionGuard("get-user"), userHandler.GetAll)
+		users.GET("/export", middleware.PermissionGuard("get-user"), userHandler.Export)
 		users.PUT("/:id", middleware.PermissionGuard("edit-user"), userHandler.Update)
 		users.DELETE("/:id", middleware.PermissionGuard("delete-user"), userHandler.Delete)
 	}
@@ -104,6 +134,7 @@ func (r *Router) setupPrivateRoutes(
 	{
 		permissions.POST("", middleware.PermissionGuard("create-permission"), permissionHandler.Create)
 		permissions.GET("", middleware.PermissionGuard("get-permission"), permissionHandler.GetAll)
+		permissions.GET("/export", middleware.PermissionGuard("get-permission"), permissionHandler.Export)
 		permissions.PUT("/:id", middleware.PermissionGuard("edit-permission"), permissionHandler.Update)
 		permissions.DELETE("/:id", middleware.PermissionGuard("delete-permission"), permissionHandler.Delete)
 	}
@@ -114,6 +145,7 @@ func (r *Router) setupPrivateRoutes(
 	{
 		roles.POST("", middleware.PermissionGuard("create-role"), roleHandler.Create)
 		roles.GET("", middleware.PermissionGuard("get-role"), roleHandler.GetAll)
+		roles.GET("/export", middleware.PermissionGuard("get-role"), roleHandler.Export)
 		roles.GET("/:id", middleware.PermissionGuard("get-role"), roleHandler.GetByID)
 		roles.PUT("/:id", middleware.PermissionGuard("edit-role"), roleHandler.Update)
 		roles.DELETE("/:id", middleware.PermissionGuard("delete-role"), roleHandler.Delete)

@@ -2,6 +2,8 @@ package service
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -11,10 +13,12 @@ import (
 
 	"github.com/hadi-projects/go-react-starter/config"
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
+	"github.com/xuri/excelize/v2"
 )
 
 type LogService interface {
 	GetLogs(query dto.LogQuery) ([]dto.LogResponse, error)
+	Export(query dto.LogQuery, format string) ([]byte, string, error)
 }
 
 type logService struct {
@@ -165,4 +169,83 @@ func (s *logService) readLogFile(filePath string, logType string) ([]dto.LogResp
 	}
 
 	return logs, nil
+}
+
+func (s *logService) Export(query dto.LogQuery, format string) ([]byte, string, error) {
+	logs, err := s.GetLogs(query)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(logs)
+	}
+	return s.generateExcel(logs)
+}
+
+func (s *logService) generateCSV(logs []dto.LogResponse) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	header := []string{"Time", "Type", "Source", "Action", "Message", "Email", "Request ID"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	for _, l := range logs {
+		row := []string{
+			l.Time.Format("2006-01-02 15:04:05"),
+			l.Type,
+			l.Source,
+			l.Action,
+			l.Message,
+			l.Email,
+			l.RequestID,
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "system_logs.csv", nil
+}
+
+func (s *logService) generateExcel(logs []dto.LogResponse) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	sheet := "Logs"
+	index, _ := f.NewSheet(sheet)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	headers := []string{"Time", "Type", "Source", "Action", "Message", "Email", "Request ID"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, l := range logs {
+		row := []interface{}{
+			l.Time.Format("2006-01-02 15:04:05"),
+			l.Type,
+			l.Source,
+			l.Action,
+			l.Message,
+			l.Email,
+			l.RequestID,
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "system_logs.xlsx", nil
 }

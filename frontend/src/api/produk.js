@@ -26,3 +26,9 @@ export const deleteProduk = async (id) => {
     const response = await axios.delete(`${API_PATH}/${id}`);
     return response.data;
 };
+
+export const exportProduk = async (format = 'excel') => {
+    return axios.get(`${API_PATH}/export?format=${format}`, {
+        responseType: 'blob',
+    });
+};

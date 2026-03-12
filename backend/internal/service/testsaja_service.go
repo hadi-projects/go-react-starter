@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
 	"math"
 	"time"
@@ -12,6 +14,7 @@ import (
 	"github.com/hadi-projects/go-react-starter/internal/repository"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/xuri/excelize/v2"
 )
 
 type TestsajaService interface {
@@ -20,6 +23,7 @@ type TestsajaService interface {
 	GetByID(id uint) (*dto.TestsajaResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateTestsajaRequest) (*dto.TestsajaResponse, error)
 	Delete(ctx context.Context, id uint) error
+	Export(ctx context.Context, format string) ([]byte, string, error)
 }
 
 type testsajaService struct {
@@ -138,6 +142,82 @@ func (s *testsajaService) Delete(ctx context.Context, id uint) error {
 	logger.LogAudit(ctx, "DELETE", "TESTSAJA", fmt.Sprintf("%d", id), "")
 
 	return s.repo.Delete(id)
+}
+
+func (s *testsajaService) Export(ctx context.Context, format string) ([]byte, string, error) {
+	pagination := &defaultDto.PaginationRequest{
+		Page:  1,
+		Limit: 1000000,
+	}
+
+	entities, _, err := s.repo.FindAll(pagination)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(entities)
+	}
+	return s.generateExcel(entities)
+}
+
+func (s *testsajaService) generateCSV(entities []entity.Testsaja) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	header := []string{"ID", "Name", "Created At"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	for _, e := range entities {
+		row := []string{
+			fmt.Sprintf("%d", e.ID),
+			e.Name,
+			e.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "testsaja.csv", nil
+}
+
+func (s *testsajaService) generateExcel(entities []entity.Testsaja) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	sheet := "Testsaja"
+	index, _ := f.NewSheet(sheet)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	headers := []string{"ID", "Name", "Created At"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, e := range entities {
+		row := []interface{}{
+			e.ID,
+			e.Name,
+			e.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "testsaja.xlsx", nil
 }
 
 func (s *testsajaService) mapToResponse(entity *entity.Testsaja) *dto.TestsajaResponse {

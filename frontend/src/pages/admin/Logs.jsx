@@ -15,6 +15,7 @@ const Logs = () => {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState(''); // Categorical filter: 'database', 'redis', etc.
+    const [isExporting, setIsExporting] = useState(false);
 
     // Reset page to 1 when log type changes
     useEffect(() => {
@@ -154,13 +155,60 @@ const Logs = () => {
         );
     };
 
+    const handleExport = async (format) => {
+        setIsExporting(true);
+        try {
+            let response;
+            if (logType === 'system') {
+                response = await logApi.exportSystemLogs(format);
+            } else if (logType === 'audit') {
+                response = await logApi.exportAuditLogs(format);
+            } else {
+                response = await logApi.exportLogs(format);
+            }
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const filename = format === 'csv' ? `${logType}_logs.csv` : `${logType}_logs.xlsx`;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error('Export failed:', err);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className="animate-fade-in">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold text-surface-on tracking-tight">
-                    {logType.charAt(0).toUpperCase() + logType.slice(1)} Logs
-                </h1>
-                <p className="text-surface-on-variant mt-2">Monitor {logType} activities and trails</p>
+            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-surface-on tracking-tight">
+                        {logType.charAt(0).toUpperCase() + logType.slice(1)} Logs
+                    </h1>
+                    <p className="text-surface-on-variant mt-2">Monitor {logType} activities and trails</p>
+                </div>
+                <div className="flex bg-surface-variant/20 p-1 rounded-lg shrink-0">
+                    <button
+                        onClick={() => handleExport('excel')}
+                        className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                        disabled={isExporting}
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Excel
+                    </button>
+                    <button
+                        onClick={() => handleExport('csv')}
+                        className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                        disabled={isExporting}
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        CSV
+                    </button>
+                </div>
             </div>
 
             <Card className="mb-6 p-4 flex flex-col md:flex-row gap-4 items-start md:items-center bg-surface border border-outline-variant/30">

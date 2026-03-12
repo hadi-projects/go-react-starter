@@ -26,3 +26,9 @@ export const deleteTestsaja = async (id) => {
     const response = await axios.delete(`${API_PATH}/${id}`);
     return response.data;
 };
+
+export const exportTestsaja = async (format = 'excel') => {
+    return axios.get(`${API_PATH}/export?format=${format}`, {
+        responseType: 'blob',
+    });
+};

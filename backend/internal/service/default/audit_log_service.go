@@ -1,6 +1,8 @@
 package service
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"time"
 
@@ -9,11 +11,13 @@ import (
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/xuri/excelize/v2"
 )
 
 type AuditLogService interface {
 	Create(log *entity.AuditLog) error
 	GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogResponse, int64, error)
+	Export(query *dto.AuditLogQuery, format string) ([]byte, string, error)
 }
 
 type auditLogService struct {
@@ -86,4 +90,90 @@ func (s *auditLogService) GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogRespon
 	}, 10*time.Second)
 
 	return responses, total, nil
+}
+
+func (s *auditLogService) Export(query *dto.AuditLogQuery, format string) ([]byte, string, error) {
+	exportQuery := *query
+	exportQuery.Limit = 1000000
+
+	logs, _, err := s.repo.FindAll(&exportQuery)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(logs)
+	}
+	return s.generateExcel(logs)
+}
+
+func (s *auditLogService) generateCSV(logs []entity.AuditLog) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	header := []string{"ID", "Time", "Request ID", "User ID", "Email", "Action", "Module", "Target ID", "Metadata"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	for _, l := range logs {
+		row := []string{
+			fmt.Sprintf("%d", l.ID),
+			l.CreatedAt.Format("2006-01-02 15:04:05"),
+			l.RequestID,
+			fmt.Sprintf("%d", l.UserID),
+			l.UserEmail,
+			l.Action,
+			l.Module,
+			l.TargetID,
+			l.Metadata,
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "audit_logs.csv", nil
+}
+
+func (s *auditLogService) generateExcel(logs []entity.AuditLog) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	sheet := "Audit Logs"
+	index, _ := f.NewSheet(sheet)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	headers := []string{"ID", "Time", "Request ID", "User ID", "Email", "Action", "Module", "Target ID", "Metadata"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, l := range logs {
+		row := []interface{}{
+			l.ID,
+			l.CreatedAt.Format("2006-01-02 15:04:05"),
+			l.RequestID,
+			l.UserID,
+			l.UserEmail,
+			l.Action,
+			l.Module,
+			l.TargetID,
+			l.Metadata,
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "audit_logs.xlsx", nil
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,6 +19,7 @@ type UserHandler interface {
 	GetAll(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
+	Export(c *gin.Context)
 }
 
 type userHandler struct {
@@ -157,4 +159,31 @@ func (h *userHandler) Delete(c *gin.Context) {
 		return
 	}
 	response.Success(c, http.StatusOK, "User deleted successfully", nil)
+}
+
+func (h *userHandler) Export(c *gin.Context) {
+	format := c.DefaultQuery("format", "excel")
+	if format != "csv" && format != "excel" {
+		response.Error(c, http.StatusBadRequest, "Invalid format. Supported: csv, excel")
+		return
+	}
+
+	data, filename, err := h.service.Export(c.Request.Context(), format)
+	if err != nil {
+		logger.WithCtx(c, logger.SystemLogger).Error().Err(err).Msg("Export users failed")
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	if format == "csv" {
+		contentType = "text/csv"
+	}
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Length", fmt.Sprintf("%d", len(data)))
+	c.Data(http.StatusOK, contentType, data)
 }

@@ -76,6 +76,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	testsajaRepo := customeRepository.NewTestsajaRepository(db)
 	produkRepo := customeRepository.NewProdukRepository(db)
 	testduaRepo := customeRepository.NewTestduaRepository(db)
+	cookRepo := customeRepository.NewCookRepository(db)
+	adminRepo := customeRepository.NewAdminRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -91,6 +93,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	testsajaService := customService.NewTestsajaService(testsajaRepo, r.cache)
 	produkService := customService.NewProdukService(produkRepo, r.cache)
 	testduaService := customService.NewTestduaService(testduaRepo, r.cache)
+	cookService := customService.NewCookService(cookRepo, r.cache)
+	adminService := customService.NewAdminService(adminRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -109,6 +113,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	produkHandler := customHandler.NewProdukHandler(produkService)
 	healthHandler := handler.NewHealthHandler(r.cache, r.kafkaProducer)
 	testduaHandler := customHandler.NewTestduaHandler(testduaService)
+	cookHandler := customHandler.NewCookHandler(cookService)
+	adminHandler := customHandler.NewAdminHandler(adminService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -120,6 +126,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 			produkHandler,
 			healthHandler,
 			testduaHandler,
+			cookHandler,
+			adminHandler,
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

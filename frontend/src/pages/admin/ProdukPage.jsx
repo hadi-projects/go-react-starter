@@ -11,7 +11,8 @@ import {
     getAllProduks,
     createProduk,
     updateProduk,
-    deleteProduk
+    deleteProduk,
+    exportProduk
 } from '../../api/produk';
 
 const ProdukPage = () => {
@@ -24,6 +25,7 @@ const ProdukPage = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [paginationMeta, setPaginationMeta] = useState({ total_data: 0, total_pages: 1 });
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [isExporting, setIsExporting] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         harga: 0,
@@ -98,6 +100,26 @@ const ProdukPage = () => {
         }
     };
 
+    const handleExport = async (format) => {
+        setIsExporting(true);
+        try {
+            const response = await exportProduk(format);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const filename = format === 'csv' ? 'produk.csv' : 'produk.xlsx';
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error('Export failed:', err);
+            toast.error('Export failed');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     const tableActions = [
         ...(can('update-produk') ? [{ label: 'Edit', onClick: handleOpenModal }] : []),
         ...(can('delete-produk') ? [{ label: 'Delete', onClick: (row) => handleDelete(row.id), className: 'text-error' }] : []),
@@ -110,11 +132,31 @@ const ProdukPage = () => {
                     <h1 className="text-2xl font-bold text-surface-on tracking-tight">Produk Management</h1>
                     <p className="text-sm text-surface-on-variant mt-1">Manage your produk instances.</p>
                 </div>
-                {can('create-produk') && (
-                    <Button variant="primary" onClick={() => handleOpenModal()}>
-                        Add Produk
-                    </Button>
-                )}
+                <div className="flex gap-2">
+                    <div className="flex bg-surface-variant/20 p-1 rounded-lg shrink-0">
+                        <button
+                            onClick={() => handleExport('excel')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Excel
+                        </button>
+                        <button
+                            onClick={() => handleExport('csv')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            CSV
+                        </button>
+                    </div>
+                    {can('create-produk') && (
+                        <Button variant="primary" onClick={() => handleOpenModal()}>
+                            Add Produk
+                        </Button>
+                    )}
+                </div>
             </div>
 
             <Card className="p-0 overflow-hidden">

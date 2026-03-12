@@ -6,7 +6,7 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import PermissionFormModal from '../../components/PermissionFormModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import { getPermissions, createPermission, updatePermission, deletePermission } from '../../api/admin';
+import { getPermissions, createPermission, updatePermission, deletePermission, exportPermissions } from '../../api/admin';
 
 const Permissions = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +17,7 @@ const Permissions = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedPermission, setSelectedPermission] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -72,6 +73,25 @@ const Permissions = () => {
         deleteMutation.mutate(selectedPermission.id);
     };
 
+    const handleExport = async (format) => {
+        setIsExporting(true);
+        try {
+            const response = await exportPermissions(format);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const filename = format === 'csv' ? 'permissions.csv' : 'permissions.xlsx';
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error('Export failed:', err);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     const openEditModal = (permission) => {
         setSelectedPermission(permission);
         setIsEditModalOpen(true);
@@ -116,9 +136,29 @@ const Permissions = () => {
                     <h1 className="text-3xl font-bold text-surface-on">Permissions Management</h1>
                     <p className="text-surface-on-variant mt-2">Manage system permissions and access control</p>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                    Add New Permission
-                </Button>
+                <div className="flex gap-2">
+                    <div className="flex bg-surface-variant/20 p-1 rounded-lg">
+                        <button
+                            onClick={() => handleExport('excel')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Excel
+                        </button>
+                        <button
+                            onClick={() => handleExport('csv')}
+                            className="px-3 py-1.5 text-xs font-semibold hover:bg-surface-variant/30 rounded-md transition-all flex items-center gap-1.5 text-surface-on disabled:opacity-50"
+                            disabled={isExporting}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            CSV
+                        </button>
+                    </div>
+                    <Button onClick={() => setIsCreateModalOpen(true)}>
+                        Add New Permission
+                    </Button>
+                </div>
             </div>
 
             {/* Search Input */}

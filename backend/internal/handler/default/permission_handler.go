@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -16,6 +17,7 @@ type PermissionHandler interface {
 	GetAll(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
+	Export(c *gin.Context)
 }
 
 type permissionHandler struct {
@@ -114,4 +116,28 @@ func (h *permissionHandler) Delete(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Permission deleted successfully", nil)
+}
+
+func (h *permissionHandler) Export(c *gin.Context) {
+	format := c.DefaultQuery("format", "excel")
+	if format != "csv" && format != "excel" {
+		response.Error(c, http.StatusBadRequest, "Invalid format. Supported: csv, excel")
+		return
+	}
+
+	data, filename, err := h.service.Export(c.Request.Context(), format)
+	if err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Export permissions failed")
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	if format == "csv" {
+		contentType = "text/csv"
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Type", contentType)
+	c.Data(http.StatusOK, contentType, data)
 }

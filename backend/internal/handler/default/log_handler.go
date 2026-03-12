@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ import (
 
 type LogHandler interface {
 	GetLogs(ctx *gin.Context)
+	Export(ctx *gin.Context)
 }
 
 type logHandler struct {
@@ -70,4 +72,28 @@ func (h *logHandler) GetLogs(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, http.StatusOK, "Logs retrieved successfully", logs)
+}
+
+func (h *logHandler) Export(ctx *gin.Context) {
+	var query dto.LogQuery
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		response.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	format := ctx.DefaultQuery("format", "excel")
+	data, filename, err := h.logService.Export(query, format)
+	if err != nil {
+		response.Error(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	if format == "csv" {
+		contentType = "text/csv"
+	}
+
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	ctx.Header("Content-Type", contentType)
+	ctx.Data(http.StatusOK, contentType, data)
 }

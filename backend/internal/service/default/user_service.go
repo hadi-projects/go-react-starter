@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"math"
@@ -13,6 +15,7 @@ import (
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/xuri/excelize/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,6 +26,7 @@ type UserService interface {
 	GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error)
 	Delete(ctx context.Context, id uint) error
+	Export(ctx context.Context, format string) ([]byte, string, error)
 }
 
 type userService struct {
@@ -270,4 +274,95 @@ func (s *userService) Delete(ctx context.Context, id uint) error {
 	logger.LogAudit(ctx, "DELETE", "USER", fmt.Sprintf("%d", id), "")
 
 	return s.userRepo.Delete(id)
+}
+
+func (s *userService) Export(ctx context.Context, format string) ([]byte, string, error) {
+	pagination := &dto.PaginationRequest{
+		Page:  1,
+		Limit: 1000000, // Export all users
+	}
+
+	users, _, err := s.userRepo.FindAll(pagination)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(users)
+	}
+	return s.generateExcel(users)
+}
+
+func (s *userService) generateCSV(users []entity.User) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	// Header
+	header := []string{"ID", "Name", "Email", "Role", "Created At"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	// Data
+	for _, user := range users {
+		row := []string{
+			fmt.Sprintf("%d", user.ID),
+			user.Name,
+			user.Email,
+			user.Role.Name,
+			user.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "users.csv", nil
+}
+
+func (s *userService) generateExcel(users []entity.User) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	sheet := "Users"
+	index, err := f.NewSheet(sheet)
+	if err != nil {
+		return nil, "", err
+	}
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	// Header
+	headers := []string{"ID", "Name", "Email", "Role", "Created At"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	// Data
+	for i, user := range users {
+		row := []interface{}{
+			user.ID,
+			user.Name,
+			user.Email,
+			user.Role.Name,
+			user.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "users.xlsx", nil
 }

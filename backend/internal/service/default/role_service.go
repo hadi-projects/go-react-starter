@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
 	"math"
 	"time"
@@ -11,6 +13,7 @@ import (
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
+	"github.com/xuri/excelize/v2"
 )
 
 type RoleService interface {
@@ -19,6 +22,7 @@ type RoleService interface {
 	GetByID(id uint) (*dto.RoleResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateRoleRequest) (*dto.RoleResponse, error)
 	Delete(ctx context.Context, id uint) error
+	Export(ctx context.Context, format string) ([]byte, string, error)
 }
 
 type roleService struct {
@@ -171,6 +175,84 @@ func (s *roleService) Delete(ctx context.Context, id uint) error {
 	logger.LogAudit(ctx, "DELETE", "ROLE", fmt.Sprintf("%d", id), "")
 
 	return s.roleRepo.Delete(id)
+}
+
+func (s *roleService) Export(ctx context.Context, format string) ([]byte, string, error) {
+	pagination := &dto.PaginationRequest{
+		Page:  1,
+		Limit: 1000000,
+	}
+
+	roles, _, err := s.roleRepo.FindAll(pagination)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if format == "csv" {
+		return s.generateCSV(roles)
+	}
+	return s.generateExcel(roles)
+}
+
+func (s *roleService) generateCSV(roles []entity.Role) ([]byte, string, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+
+	header := []string{"ID", "Name", "Description", "Created At"}
+	if err := writer.Write(header); err != nil {
+		return nil, "", err
+	}
+
+	for _, role := range roles {
+		row := []string{
+			fmt.Sprintf("%d", role.ID),
+			role.Name,
+			role.Description,
+			role.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		if err := writer.Write(row); err != nil {
+			return nil, "", err
+		}
+	}
+
+	writer.Flush()
+	return buf.Bytes(), "roles.csv", nil
+}
+
+func (s *roleService) generateExcel(roles []entity.Role) ([]byte, string, error) {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	sheet := "Roles"
+	index, _ := f.NewSheet(sheet)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1")
+
+	headers := []string{"ID", "Name", "Description", "Created At"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, role := range roles {
+		row := []interface{}{
+			role.ID,
+			role.Name,
+			role.Description,
+			role.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+		for j, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return buf.Bytes(), "roles.xlsx", nil
 }
 
 func (s *roleService) mapToResponse(role *entity.Role) *dto.RoleResponse {

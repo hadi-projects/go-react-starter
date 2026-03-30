@@ -112,6 +112,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 			generatorHandler,
 			produkHandler,
 			healthHandler,
+			middleware.NewPermissionGuard(r.cache, permissionRepo),
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)
 	}

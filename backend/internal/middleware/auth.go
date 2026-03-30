@@ -71,19 +71,14 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			}
 			c.Request = c.Request.WithContext(ctx)
 
-			if permissions, ok := claims["permissions"].([]interface{}); ok {
-				var perms []string
-				for _, p := range permissions {
-					if strPerm, ok := p.(string); ok {
-						perms = append(perms, strPerm)
-					}
-				}
-				c.Set("permissions", perms)
-				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware set permissions count=%d", len(perms))
+			if permissionsMaskFloat, ok := claims["permissions_mask"].(float64); ok {
+				permissionsMask := uint64(permissionsMaskFloat)
+				c.Set("permissions_mask", permissionsMask)
+				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware set permissions_mask=%d", permissionsMask)
 			} else {
-				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware permissions claim missing or invalid type: %T", claims["permissions"])
-				// Set empty slice to avoid "not found" error in guard
-				c.Set("permissions", []string{})
+				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware permissions_mask claim missing or invalid type: %T", claims["permissions_mask"])
+				// Set empty mask to avoid "not found" error in guard
+				c.Set("permissions_mask", uint64(0))
 			}
 		} else {
 			response.Error(c, http.StatusUnauthorized, "Invalid token claims")

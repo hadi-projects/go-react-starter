@@ -7,6 +7,7 @@ import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import TextField from '../../components/TextField';
 import usePermission from '../../hooks/usePermission';
+import { PERMS } from '../../utils/permissions';
 import {
     getAllProduks,
     createProduk,
@@ -121,8 +122,8 @@ const ProdukPage = () => {
     };
 
     const tableActions = [
-        ...(can('update-produk') ? [{ label: 'Edit', onClick: handleOpenModal }] : []),
-        ...(can('delete-produk') ? [{ label: 'Delete', onClick: (row) => handleDelete(row.id), className: 'text-error' }] : []),
+        ...(can(PERMS.UPDATE_PRODUK) ? [{ label: 'Edit', onClick: handleOpenModal }] : []),
+        ...(can(PERMS.DELETE_PRODUK) ? [{ label: 'Delete', onClick: (row) => handleDelete(row.id), className: 'text-error' }] : []),
     ];
 
     return (
@@ -151,7 +152,7 @@ const ProdukPage = () => {
                             CSV
                         </button>
                     </div>
-                    {can('create-produk') && (
+                    {can(PERMS.CREATE_PRODUK) && (
                         <Button variant="primary" onClick={() => handleOpenModal()}>
                             Add Produk
                         </Button>

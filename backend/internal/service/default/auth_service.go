@@ -71,12 +71,14 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	user = fullUser
 
 	// 4. Generate JWT Tokens
-	var permissions []string
+	var permissionsMask uint64
 	for _, p := range user.Role.Permissions {
-		permissions = append(permissions, p.Name)
+		if p.ID <= 64 {
+			permissionsMask |= (1 << (p.ID - 1))
+		}
 	}
 
-	accessToken, err := s.generateAccessToken(user, permissions)
+	accessToken, err := s.generateAccessToken(user, permissionsMask)
 	if err != nil {
 		return nil, err
 	}
@@ -109,26 +111,24 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshTokenStr,
-		User: dto.UserResponse{
-			ID:          user.ID,
-			Name:        user.Name,
-			Email:       user.Email,
-			RoleID:      user.RoleID,
-			Role:        user.Role.Name,
-			Permissions: permissions,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
+		User: dto.AuthUserResponse{
+			ID:              user.ID,
+			Name:            user.Name,
+			Email:           user.Email,
+			RoleID:          user.RoleID,
+			Role:            user.Role.Name,
+			PermissionsMask: permissionsMask,
 		},
 	}, nil
 }
 
-func (s *authService) generateAccessToken(user *entity.User, permissions []string) (string, error) {
+func (s *authService) generateAccessToken(user *entity.User, permissionsMask uint64) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":         user.ID,
 		"email":       user.Email,
-		"role":        user.Role.Name,
-		"permissions": permissions,
-		"exp":         time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
+		"role":             user.Role.Name,
+		"permissions_mask": permissionsMask,
+		"exp":              time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -149,12 +149,14 @@ func (s *authService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 	}
 
 	// 3. Generate new Access Token
-	var permissions []string
+	var permissionsMask uint64
 	for _, p := range rt.User.Role.Permissions {
-		permissions = append(permissions, p.Name)
+		if p.ID <= 64 {
+			permissionsMask |= (1 << (p.ID - 1))
+		}
 	}
 
-	accessToken, err := s.generateAccessToken(&rt.User, permissions)
+	accessToken, err := s.generateAccessToken(&rt.User, permissionsMask)
 	if err != nil {
 		return nil, err
 	}
@@ -163,15 +165,13 @@ func (s *authService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: rt.Token, // Reuse same refresh token
-		User: dto.UserResponse{
-			ID:          rt.User.ID,
-			Name:        rt.User.Name,
-			Email:       rt.User.Email,
-			RoleID:      rt.User.RoleID,
-			Role:        rt.User.Role.Name,
-			Permissions: permissions,
-			CreatedAt:   rt.User.CreatedAt,
-			UpdatedAt:   rt.User.UpdatedAt,
+		User: dto.AuthUserResponse{
+			ID:              rt.User.ID,
+			Name:            rt.User.Name,
+			Email:           rt.User.Email,
+			RoleID:          rt.User.RoleID,
+			Role:            rt.User.Role.Name,
+			PermissionsMask: permissionsMask,
 		},
 	}, nil
 }

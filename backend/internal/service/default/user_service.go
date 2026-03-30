@@ -22,7 +22,7 @@ import (
 type UserService interface {
 	Register(ctx context.Context, req dto.RegisterRequest) (*dto.UserResponse, error)
 	CreateUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error)
-	GetMe(ctx context.Context, userID uint) (*dto.UserResponse, error)
+	GetMe(ctx context.Context, userID uint) (*dto.AuthUserResponse, error)
 	GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error)
 	Delete(ctx context.Context, id uint) error
@@ -134,10 +134,10 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 	}, nil
 }
 
-func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.UserResponse, error) {
+func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.AuthUserResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("user:%d", userID)
-	var cached dto.UserResponse
+	var cached dto.AuthUserResponse
 	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
@@ -147,22 +147,22 @@ func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.UserResponse
 		return nil, err
 	}
 
-	var permissions []string
+	var permissionsMask uint64
 	if user.RoleID != 0 {
 		for _, p := range user.Role.Permissions {
-			permissions = append(permissions, p.Name)
+			if p.ID <= 64 {
+				permissionsMask |= (1 << (p.ID - 1))
+			}
 		}
 	}
 
-	response := &dto.UserResponse{
-		ID:          user.ID,
-		Name:        user.Name,
-		Email:       user.Email,
-		RoleID:      user.RoleID,
-		Role:        user.Role.Name,
-		Permissions: permissions,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
+	response := &dto.AuthUserResponse{
+		ID:              user.ID,
+		Name:            user.Name,
+		Email:           user.Email,
+		RoleID:          user.RoleID,
+		Role:            user.Role.Name,
+		PermissionsMask: permissionsMask,
 	}
 
 	// Cache the result

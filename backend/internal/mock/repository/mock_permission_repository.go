@@ -101,6 +101,21 @@ func (mr *MockPermissionRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockPermissionRepository)(nil).FindByID), ctx, id)
 }
 
+// FindByName mocks base method.
+func (m *MockPermissionRepository) FindByName(ctx context.Context, name string) (*entity.Permission, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByName", ctx, name)
+	ret0, _ := ret[0].(*entity.Permission)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByName indicates an expected call of FindByName.
+func (mr *MockPermissionRepositoryMockRecorder) FindByName(ctx, name any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockPermissionRepository)(nil).FindByName), ctx, name)
+}
+
 // Update mocks base method.
 func (m *MockPermissionRepository) Update(ctx context.Context, permission *entity.Permission) error {
 	m.ctrl.T.Helper()

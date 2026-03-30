@@ -143,11 +143,11 @@ Key environment variables used in `backend/.env`:
 
 ## BUGS
 1. login with invalid password will crash the query OK
-2. Request id empty on system logs
+2. Request id empty on system logs OK
 3. email input background color only on login page
 4. permission ubah ke bitwise operator
 
-    
+
 ## TODO
 1. Implement reset password OK
 2. implement remember me OK
@@ -155,3 +155,5 @@ Key environment variables used in `backend/.env`:
 4. Storage with one time link and user accesspermission
 5. web description untuk set title, favicon, seo
 6. reset 2fa secret key
+7. module api key
+8. native event for notifications

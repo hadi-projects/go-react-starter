@@ -8,8 +8,23 @@
  */
 const usePermission = () => {
     const userData = localStorage.getItem('user');
-    const permissions = userData ? (JSON.parse(userData).permissions || []) : [];
-    return (permission) => permissions.includes(permission);
+    let mask = 0n;
+    if (userData) {
+        try {
+            const parsed = JSON.parse(userData);
+            if (parsed.permissions_mask) {
+                mask = BigInt(parsed.permissions_mask);
+            }
+        } catch (e) {
+            console.error("Failed to parse user data or mask", e);
+        }
+    }
+    
+    // requiredPermission is now a BigInt constant from PERMS
+    return (requiredPermission) => {
+        if (!requiredPermission) return true;
+        return (mask & requiredPermission) !== 0n;
+    };
 };
 
 export default usePermission;

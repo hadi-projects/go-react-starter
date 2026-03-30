@@ -86,10 +86,10 @@ func (mr *MockUserServiceMockRecorder) GetAll(ctx, pagination any) *gomock.Call 
 }
 
 // GetMe mocks base method.
-func (m *MockUserService) GetMe(ctx context.Context, userID uint) (*dto.UserResponse, error) {
+func (m *MockUserService) GetMe(ctx context.Context, userID uint) (*dto.AuthUserResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMe", ctx, userID)
-	ret0, _ := ret[0].(*dto.UserResponse)
+	ret0, _ := ret[0].(*dto.AuthUserResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

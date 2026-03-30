@@ -13,20 +13,28 @@ type RefreshTokenRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-	User         UserResponse `json:"user"`
+	AccessToken  string           `json:"access_token"`
+	RefreshToken string           `json:"refresh_token"`
+	User         AuthUserResponse `json:"user"`
+}
+
+type AuthUserResponse struct {
+	ID              uint   `json:"id"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	RoleID          uint   `json:"role_id"`
+	Role            string `json:"role"`
+	PermissionsMask uint64 `json:"permissions_mask"`
 }
 
 type UserResponse struct {
-	ID          uint      `json:"id"`
-	Name        string    `json:"name"`
-	Email       string    `json:"email"`
-	RoleID      uint      `json:"role_id"`
-	Role        string    `json:"role"`
-	Permissions []string  `json:"permissions"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	RoleID    uint      `json:"role_id"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ForgotPasswordRequest struct {

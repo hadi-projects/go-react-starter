@@ -22,6 +22,7 @@ func (r *Router) setupPrivateRoutes(
 	generatorHandler handler.GeneratorHandler,
 	produkHandler customHandler.ProdukHandler,
 	healthHandler handler.HealthHandler,
+	permGuard *middleware.PermissionGuard,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
 	// Health and Status
@@ -34,7 +35,7 @@ func (r *Router) setupPrivateRoutes(
 	generator := v1.Group("/generator")
 	generator.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
-		generator.POST("", middleware.PermissionGuard("create-module"), generatorHandler.Generate)
+		generator.POST("", permGuard.Check("create-module"), generatorHandler.Generate)
 	}
 	produk := v1.Group("/produk")
 	produk.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
@@ -63,12 +64,12 @@ func (r *Router) setupPrivateRoutes(
 		// Internal permission check is handled inside GetLogs
 		logs.GET("", logHandler.GetLogs)
 		logs.GET("/export", logHandler.Export) // Combined logs export
-		logs.GET("/http", middleware.PermissionGuard("get-http-log"), httpLogHandler.GetAll)
-		logs.GET("/http/export", middleware.PermissionGuard("get-http-log"), httpLogHandler.Export)
-		logs.GET("/system", middleware.PermissionGuard("get-http-log"), systemLogHandler.GetAll) // Use same permission for now
-		logs.GET("/system/export", middleware.PermissionGuard("get-http-log"), systemLogHandler.Export)
-		logs.GET("/audit", middleware.PermissionGuard("get-http-log"), auditLogHandler.GetAll) // Use same permission for now
-		logs.GET("/audit/export", middleware.PermissionGuard("get-http-log"), auditLogHandler.Export)
+		logs.GET("/http", permGuard.Check("get-http-log"), httpLogHandler.GetAll)
+		logs.GET("/http/export", permGuard.Check("get-http-log"), httpLogHandler.Export)
+		logs.GET("/system", permGuard.Check("get-http-log"), systemLogHandler.GetAll) // Use same permission for now
+		logs.GET("/system/export", permGuard.Check("get-http-log"), systemLogHandler.Export)
+		logs.GET("/audit", permGuard.Check("get-http-log"), auditLogHandler.GetAll) // Use same permission for now
+		logs.GET("/audit/export", permGuard.Check("get-http-log"), auditLogHandler.Export)
 	}
 
 	users := v1.Group("/users")
@@ -78,34 +79,34 @@ func (r *Router) setupPrivateRoutes(
 		users.GET("/me", userHandler.Me)
 
 		// Admin only for CRUD
-		users.POST("", middleware.PermissionGuard("create-user"), userHandler.Create)
-		users.GET("", middleware.PermissionGuard("get-user"), userHandler.GetAll)
-		users.GET("/export", middleware.PermissionGuard("get-user"), userHandler.Export)
-		users.PUT("/:id", middleware.PermissionGuard("edit-user"), userHandler.Update)
-		users.DELETE("/:id", middleware.PermissionGuard("delete-user"), userHandler.Delete)
+		users.POST("", permGuard.Check("create-user"), userHandler.Create)
+		users.GET("", permGuard.Check("get-user"), userHandler.GetAll)
+		users.GET("/export", permGuard.Check("get-user"), userHandler.Export)
+		users.PUT("/:id", permGuard.Check("edit-user"), userHandler.Update)
+		users.DELETE("/:id", permGuard.Check("delete-user"), userHandler.Delete)
 	}
 
 	permissions := v1.Group("/permissions")
 	permissions.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
-	permissions.Use(middleware.PermissionGuard("get-permission")) // Assuming admin role has this
+	permissions.Use(permGuard.Check("get-permission")) // Assuming admin role has this
 	{
-		permissions.POST("", middleware.PermissionGuard("create-permission"), permissionHandler.Create)
-		permissions.GET("", middleware.PermissionGuard("get-permission"), permissionHandler.GetAll)
-		permissions.GET("/export", middleware.PermissionGuard("get-permission"), permissionHandler.Export)
-		permissions.PUT("/:id", middleware.PermissionGuard("edit-permission"), permissionHandler.Update)
-		permissions.DELETE("/:id", middleware.PermissionGuard("delete-permission"), permissionHandler.Delete)
+		permissions.POST("", permGuard.Check("create-permission"), permissionHandler.Create)
+		permissions.GET("", permGuard.Check("get-permission"), permissionHandler.GetAll)
+		permissions.GET("/export", permGuard.Check("get-permission"), permissionHandler.Export)
+		permissions.PUT("/:id", permGuard.Check("edit-permission"), permissionHandler.Update)
+		permissions.DELETE("/:id", permGuard.Check("delete-permission"), permissionHandler.Delete)
 	}
 
 	roles := v1.Group("/roles")
 	roles.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
-	roles.Use(middleware.PermissionGuard("get-role"))
+	roles.Use(permGuard.Check("get-role"))
 	{
-		roles.POST("", middleware.PermissionGuard("create-role"), roleHandler.Create)
-		roles.GET("", middleware.PermissionGuard("get-role"), roleHandler.GetAll)
-		roles.GET("/export", middleware.PermissionGuard("get-role"), roleHandler.Export)
-		roles.GET("/:id", middleware.PermissionGuard("get-role"), roleHandler.GetByID)
-		roles.PUT("/:id", middleware.PermissionGuard("edit-role"), roleHandler.Update)
-		roles.DELETE("/:id", middleware.PermissionGuard("delete-role"), roleHandler.Delete)
+		roles.POST("", permGuard.Check("create-role"), roleHandler.Create)
+		roles.GET("", permGuard.Check("get-role"), roleHandler.GetAll)
+		roles.GET("/export", permGuard.Check("get-role"), roleHandler.Export)
+		roles.GET("/:id", permGuard.Check("get-role"), roleHandler.GetByID)
+		roles.PUT("/:id", permGuard.Check("edit-role"), roleHandler.Update)
+		roles.DELETE("/:id", permGuard.Check("delete-role"), roleHandler.Delete)
 	}
 
 	// Statistics
@@ -119,7 +120,7 @@ func (r *Router) setupPrivateRoutes(
 	cache := v1.Group("/cache")
 	cache.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{
-		cache.DELETE("/clear", middleware.PermissionGuard("manage-cache"), cacheHandler.ClearAll)
-		cache.GET("/status", middleware.PermissionGuard("manage-cache"), cacheHandler.GetStatus)
+		cache.DELETE("/clear", permGuard.Check("manage-cache"), cacheHandler.ClearAll)
+		cache.GET("/status", permGuard.Check("manage-cache"), cacheHandler.GetStatus)
 	}
 }

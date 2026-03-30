@@ -14,15 +14,8 @@ import Logs from './pages/admin/Logs'
 import HttpLogs from './pages/admin/HttpLogs'
 import GeneratorPage from './pages/admin/GeneratorPage'
 import { ThemeProvider } from './context/ThemeContext'
-import TestsajaPage from './pages/admin/TestsajaPage';
 import ProdukPage from './pages/admin/ProdukPage';
-import TestduaPage from './pages/admin/TestduaPage';
-import MainnnPage from './pages/admin/MainnnPage';
-import WisudaPage from './pages/admin/WisudaPage';
-import ArsipPage from './pages/admin/ArsipPage';
-import MinaPage from './pages/admin/MinaPage';
-import BlogPage from './pages/admin/BlogPage';
-import NewsPage from './pages/admin/NewsPage';
+
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -47,15 +40,7 @@ function App() {
           <Route path="admin/logs/http" element={<HttpLogs />} />
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
-          <Route path="admin/testsaja" element={<TestsajaPage />} />
           <Route path="admin/produk" element={<ProdukPage />} />
-          <Route path="admin/testdua" element={<TestduaPage />} />
-										<Route path="admin/mainnn" element={<MainnnPage />} />
-										<Route path="admin/wisuda" element={<WisudaPage />} />
-										<Route path="admin/arsip" element={<ArsipPage />} />
-										<Route path="admin/mina" element={<MinaPage />} />
-										<Route path="admin/blog" element={<BlogPage />} />
-										<Route path="admin/news" element={<NewsPage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

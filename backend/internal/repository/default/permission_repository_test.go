@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"regexp"
 	"testing"
 	"time"
@@ -43,7 +44,7 @@ func (s *PermissionRepositoryTestSuite) TestCreate_Success() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
-	err := s.repo.Create(permission)
+	err := s.repo.Create(context.Background(), permission)
 	s.Require().NoError(err)
 }
 
@@ -57,7 +58,7 @@ func (s *PermissionRepositoryTestSuite) TestFindByID_Success() {
 		WithArgs(id, 1).
 		WillReturnRows(rows)
 
-	permission, err := s.repo.FindByID(id)
+	permission, err := s.repo.FindByID(context.Background(), id)
 	s.Require().NoError(err)
 	s.Require().NotNil(permission)
 	assert.Equal(s.T(), "test-permission", permission.Name)

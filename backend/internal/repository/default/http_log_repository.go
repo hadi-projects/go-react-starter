@@ -10,7 +10,7 @@ import (
 
 type HttpLogRepository interface {
 	Create(log *entity.HttpLog) error
-	FindAll(query *dto.HttpLogQuery) ([]entity.HttpLog, int64, error)
+	FindAll(ctx context.Context, query *dto.HttpLogQuery) ([]entity.HttpLog, int64, error)
 }
 
 type httpLogRepository struct {
@@ -26,11 +26,11 @@ func (r *httpLogRepository) Create(log *entity.HttpLog) error {
 	return r.db.WithContext(ctx).Create(log).Error
 }
 
-func (r *httpLogRepository) FindAll(query *dto.HttpLogQuery) ([]entity.HttpLog, int64, error) {
+func (r *httpLogRepository) FindAll(ctx context.Context, query *dto.HttpLogQuery) ([]entity.HttpLog, int64, error) {
 	var logs []entity.HttpLog
 	var total int64
 
-	q := r.db.Model(&entity.HttpLog{})
+	q := r.db.WithContext(ctx).Model(&entity.HttpLog{})
 
 	if query.Method != "" {
 		q = q.Where("method = ?", query.Method)

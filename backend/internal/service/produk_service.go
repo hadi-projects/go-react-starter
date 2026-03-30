@@ -19,8 +19,8 @@ import (
 
 type ProdukService interface {
 	Create(ctx context.Context, req dto.CreateProdukRequest) (*dto.ProdukResponse, error)
-	GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error)
-	GetByID(id uint) (*dto.ProdukResponse, error)
+	GetAll(ctx context.Context, pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error)
+	GetByID(ctx context.Context, id uint) (*dto.ProdukResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateProdukRequest) (*dto.ProdukResponse, error)
 	Delete(ctx context.Context, id uint) error
 	Export(ctx context.Context, format string) ([]byte, string, error)
@@ -44,11 +44,11 @@ func (s *produkService) Create(ctx context.Context, req dto.CreateProdukRequest)
 		Harga: req.Harga,
 	}
 
-	if err := s.repo.Create(entity); err != nil {
+	if err := s.repo.Create(ctx, entity); err != nil {
 		return nil, err
 	}
 
-	s.cache.DeletePattern("produk:*")
+	s.cache.DeletePattern(ctx, "produk:*")
 
 	
 	// logger.AuditLogger.Info().
@@ -61,14 +61,14 @@ func (s *produkService) Create(ctx context.Context, req dto.CreateProdukRequest)
 	return s.mapToResponse(entity), nil
 }
 
-func (s *produkService) GetAll(pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error) {
+func (s *produkService) GetAll(ctx context.Context, pagination *defaultDto.PaginationRequest) (*defaultDto.PaginationResponse, error) {
 	cacheKey := fmt.Sprintf("produk:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
 	var cached defaultDto.PaginationResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	entities, total, err := s.repo.FindAll(pagination)
+	entities, total, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -88,29 +88,29 @@ func (s *produkService) GetAll(pagination *defaultDto.PaginationRequest) (*defau
 		},
 	}
 
-	s.cache.Set(cacheKey, response, 5*time.Minute)
+	s.cache.Set(ctx, cacheKey, response, 5*time.Minute)
 	return response, nil
 }
 
-func (s *produkService) GetByID(id uint) (*dto.ProdukResponse, error) {
+func (s *produkService) GetByID(ctx context.Context, id uint) (*dto.ProdukResponse, error) {
 	cacheKey := fmt.Sprintf("produk:%d", id)
 	var cached dto.ProdukResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	entity, err := s.repo.FindByID(id)
+	entity, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	response := s.mapToResponse(entity)
-	s.cache.Set(cacheKey, response, 5*time.Minute)
+	s.cache.Set(ctx, cacheKey, response, 5*time.Minute)
 	return response, nil
 }
 
 func (s *produkService) Update(ctx context.Context, id uint, req dto.UpdateProdukRequest) (*dto.ProdukResponse, error) {
-	entity, err := s.repo.FindByID(id)
+	entity, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -119,12 +119,12 @@ func (s *produkService) Update(ctx context.Context, id uint, req dto.UpdateProdu
 	}
 	entity.Harga = req.Harga
 
-	if err := s.repo.Update(entity); err != nil {
+	if err := s.repo.Update(ctx, entity); err != nil {
 		return nil, err
 	}
 
-	s.cache.Delete(fmt.Sprintf("produk:%d", id))
-	s.cache.DeletePattern("produk:*")
+	s.cache.Delete(ctx, fmt.Sprintf("produk:%d", id))
+	s.cache.DeletePattern(ctx, "produk:*")
 
 	
 	// logger.AuditLogger.Info().
@@ -138,8 +138,8 @@ func (s *produkService) Update(ctx context.Context, id uint, req dto.UpdateProdu
 }
 
 func (s *produkService) Delete(ctx context.Context, id uint) error {
-	s.cache.Delete(fmt.Sprintf("produk:%d", id))
-	s.cache.DeletePattern("produk:*")
+	s.cache.Delete(ctx, fmt.Sprintf("produk:%d", id))
+	s.cache.DeletePattern(ctx, "produk:*")
 
 	
 	// logger.AuditLogger.Info().
@@ -149,7 +149,7 @@ func (s *produkService) Delete(ctx context.Context, id uint) error {
 	logger.LogAudit(ctx, "DELETE", "PRODUK", fmt.Sprintf("%d", id), "")
 	
 
-	return s.repo.Delete(id)
+	return s.repo.Delete(ctx, id)
 }
 
 func (s *produkService) Export(ctx context.Context, format string) ([]byte, string, error) {
@@ -158,7 +158,7 @@ func (s *produkService) Export(ctx context.Context, format string) ([]byte, stri
 		Limit: 1000000,
 	}
 
-	entities, _, err := s.repo.FindAll(pagination)
+	entities, _, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, "", err
 	}

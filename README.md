@@ -142,7 +142,12 @@ Key environment variables used in `backend/.env`:
 
 
 ## BUGS
-1. login with invalid password will crash the query
-
+1. login with invalid password will crash the query OK
+2. Request id empty on system logs
+   
 ## TODO
-1. Implement reset password
+1. Implement reset password OK
+2. implement remember me OK
+3. Implement 2fa by email anf HOTP
+4. Storage with one time link and user accesspermission
+5. web description untuk set title, favicon, seo

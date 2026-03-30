@@ -58,7 +58,7 @@ func (h *roleHandler) GetAll(c *gin.Context) {
 		Search: search,
 	}
 
-	res, err := h.service.GetAll(pagination)
+	res, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
 		logger.SystemLogger.Error().Err(err).Msg("GetAll roles failed")
 		response.Error(c, http.StatusInternalServerError, err.Error())
@@ -84,7 +84,7 @@ func (h *roleHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetByID(uint(id))
+	res, err := h.service.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
 		logger.SystemLogger.Error().Err(err).Uint("id", uint(id)).Msg("GetRoleByID failed: not found")
 		response.Error(c, http.StatusNotFound, err.Error())

@@ -57,7 +57,7 @@ func (h *permissionHandler) GetAll(c *gin.Context) {
 		Search: search,
 	}
 
-	res, err := h.service.GetAll(pagination)
+	res, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
 		logger.SystemLogger.Error().Err(err).Msg("GetAll permissions failed")
 		response.Error(c, http.StatusInternalServerError, err.Error())

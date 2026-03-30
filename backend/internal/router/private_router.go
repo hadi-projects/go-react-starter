@@ -54,6 +54,7 @@ func (r *Router) setupPrivateRoutes(
 		auth.POST("/register", userHandler.Register)
 		auth.POST("/forgot-password", authHandler.ForgotPassword)
 		auth.POST("/reset-password", authHandler.ResetPassword)
+		auth.POST("/refresh", authHandler.RefreshToken)
 	}
 
 	logs := v1.Group("/logs")

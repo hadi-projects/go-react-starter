@@ -1,6 +1,7 @@
 package mock_pkg
 
 import (
+	"context"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -30,15 +31,15 @@ func (m *MockMailer) EXPECT() *MockMailerMockRecorder {
 }
 
 // SendEmail mocks base method.
-func (m *MockMailer) SendEmail(to, subject, body string) error {
+func (m *MockMailer) SendEmail(ctx context.Context, to, subject, body string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendEmail", to, subject, body)
+	ret := m.ctrl.Call(m, "SendEmail", ctx, to, subject, body)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SendEmail indicates an expected call of SendEmail.
-func (mr *MockMailerMockRecorder) SendEmail(to, subject, body interface{}) *gomock.Call {
+func (mr *MockMailerMockRecorder) SendEmail(ctx, to, subject, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEmail", reflect.TypeOf((*MockMailer)(nil).SendEmail), to, subject, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEmail", reflect.TypeOf((*MockMailer)(nil).SendEmail), ctx, to, subject, body)
 }

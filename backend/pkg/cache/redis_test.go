@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -12,23 +13,23 @@ func TestNoOpCache(t *testing.T) {
 
 	t.Run("Get returns error", func(t *testing.T) {
 		var dest string
-		err := cache.Get("key", &dest)
+		err := cache.Get(context.Background(), "key", &dest)
 		assert.Error(t, err)
 		assert.Equal(t, "cache miss: no-op cache", err.Error())
 	})
 
 	t.Run("Set returns nil", func(t *testing.T) {
-		err := cache.Set("key", "value", time.Minute)
+		err := cache.Set(context.Background(), "key", "value", time.Minute)
 		assert.NoError(t, err)
 	})
 
 	t.Run("Delete returns nil", func(t *testing.T) {
-		err := cache.Delete("key")
+		err := cache.Delete(context.Background(), "key")
 		assert.NoError(t, err)
 	})
 
 	t.Run("DeletePattern returns nil", func(t *testing.T) {
-		err := cache.DeletePattern("pattern")
+		err := cache.DeletePattern(context.Background(), "pattern")
 		assert.NoError(t, err)
 	})
 

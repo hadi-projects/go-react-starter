@@ -11,6 +11,7 @@ const Login = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        remember_me: false,
     });
     const [errors, setErrors] = useState({});
 
@@ -22,6 +23,9 @@ const Login = () => {
         onSuccess: (data) => {
             // Save access token to localStorage
             localStorage.setItem('token', data.data.access_token);
+            if (data.data.refresh_token) {
+                localStorage.setItem('refresh_token', data.data.refresh_token);
+            }
             localStorage.setItem('user', JSON.stringify(data.data.user));
             // Redirect to dashboard or home
             navigate('/dashboard');
@@ -34,8 +38,11 @@ const Login = () => {
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ 
+            ...prev, 
+            [name]: type === 'checkbox' ? checked : value 
+        }));
         // Clear field error on change
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -105,7 +112,13 @@ const Login = () => {
 
                         <div className="flex items-center justify-between text-sm">
                             <label className="flex items-center">
-                                <input type="checkbox" className="mr-2 rounded" />
+                                <input 
+                                    type="checkbox" 
+                                    name="remember_me"
+                                    checked={formData.remember_me}
+                                    onChange={handleChange}
+                                    className="mr-2 rounded" 
+                                />
                                 <span className="text-gray-600">Remember me</span>
                             </label>
                             <Link to="/forgot-password" className="text-primary-500 hover:text-primary-600">

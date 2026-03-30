@@ -15,6 +15,7 @@ type AuthHandler interface {
 	ForgotPassword(c *gin.Context)
 	ResetPassword(c *gin.Context)
 	Logout(c *gin.Context)
+	RefreshToken(c *gin.Context)
 }
 
 type authHandler struct {
@@ -88,4 +89,20 @@ func (h *authHandler) Logout(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Logout successful", nil)
+}
+
+func (h *authHandler) RefreshToken(c *gin.Context) {
+	var req dto.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.RefreshToken(c.Request.Context(), req)
+	if err != nil {
+		response.Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Token refreshed", res)
 }

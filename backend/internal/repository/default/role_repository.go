@@ -1,18 +1,20 @@
 package repository
 
 import (
+	"context"
+
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"gorm.io/gorm"
 )
 
 type RoleRepository interface {
-	Create(role *entity.Role, permissionIDs []uint) error
-	FindAll(pagination *dto.PaginationRequest) ([]entity.Role, int64, error)
-	FindByID(id uint) (*entity.Role, error)
-	FindByName(name string) (*entity.Role, error)
-	Update(role *entity.Role, permissionIDs []uint) error
-	Delete(id uint) error
+	Create(ctx context.Context, role *entity.Role, permissionIDs []uint) error
+	FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Role, int64, error)
+	FindByID(ctx context.Context, id uint) (*entity.Role, error)
+	FindByName(ctx context.Context, name string) (*entity.Role, error)
+	Update(ctx context.Context, role *entity.Role, permissionIDs []uint) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type roleRepository struct {
@@ -23,8 +25,8 @@ func NewRoleRepository(db *gorm.DB) RoleRepository {
 	return &roleRepository{db: db}
 }
 
-func (r *roleRepository) Create(role *entity.Role, permissionIDs []uint) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
+func (r *roleRepository) Create(ctx context.Context, role *entity.Role, permissionIDs []uint) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(role).Error; err != nil {
 			return err
 		}
@@ -42,11 +44,11 @@ func (r *roleRepository) Create(role *entity.Role, permissionIDs []uint) error {
 	})
 }
 
-func (r *roleRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Role, int64, error) {
+func (r *roleRepository) FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Role, int64, error) {
 	var roles []entity.Role
 	var total int64
 
-	query := r.db.Model(&entity.Role{})
+	query := r.db.WithContext(ctx).Model(&entity.Role{})
 
 	if pagination.Search != "" {
 		searchTerm := "%" + pagination.Search + "%"
@@ -67,26 +69,26 @@ func (r *roleRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Ro
 	return roles, total, err
 }
 
-func (r *roleRepository) FindByID(id uint) (*entity.Role, error) {
+func (r *roleRepository) FindByID(ctx context.Context, id uint) (*entity.Role, error) {
 	var role entity.Role
-	err := r.db.Preload("Permissions").First(&role, id).Error
+	err := r.db.WithContext(ctx).Preload("Permissions").First(&role, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &role, nil
 }
 
-func (r *roleRepository) FindByName(name string) (*entity.Role, error) {
+func (r *roleRepository) FindByName(ctx context.Context, name string) (*entity.Role, error) {
 	var role entity.Role
-	err := r.db.Preload("Permissions").Where("name = ?", name).First(&role).Error
+	err := r.db.WithContext(ctx).Preload("Permissions").Where("name = ?", name).First(&role).Error
 	if err != nil {
 		return nil, err
 	}
 	return &role, nil
 }
 
-func (r *roleRepository) Update(role *entity.Role, permissionIDs []uint) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
+func (r *roleRepository) Update(ctx context.Context, role *entity.Role, permissionIDs []uint) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(role).Error; err != nil {
 			return err
 		}
@@ -113,8 +115,8 @@ func (r *roleRepository) Update(role *entity.Role, permissionIDs []uint) error {
 	})
 }
 
-func (r *roleRepository) Delete(id uint) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
+func (r *roleRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Clear associations first
 		var role entity.Role
 		if err := tx.First(&role, id).Error; err != nil {

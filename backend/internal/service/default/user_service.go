@@ -22,8 +22,8 @@ import (
 type UserService interface {
 	Register(ctx context.Context, req dto.RegisterRequest) (*dto.UserResponse, error)
 	CreateUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error)
-	GetMe(userID uint) (*dto.UserResponse, error)
-	GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
+	GetMe(ctx context.Context, userID uint) (*dto.UserResponse, error)
+	GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error)
 	Delete(ctx context.Context, id uint) error
 	Export(ctx context.Context, format string) ([]byte, string, error)
@@ -45,7 +45,7 @@ func NewUserService(userRepo repository.UserRepository, config *config.Config, c
 
 func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*dto.UserResponse, error) {
 	// Check if email exists
-	existingUser, _ := s.userRepo.FindByEmail(req.Email)
+	existingUser, _ := s.userRepo.FindByEmail(ctx, req.Email)
 	if existingUser != nil {
 		return nil, errors.New("email already exists")
 	}
@@ -56,7 +56,7 @@ func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	}
 
 	roleID := uint(2) // Default fallback
-	role, err := s.userRepo.FindRoleByName("user")
+	role, err := s.userRepo.FindRoleByName(ctx, "user")
 	if err == nil {
 		roleID = role.ID
 	}
@@ -68,12 +68,12 @@ func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 		RoleID:   roleID,
 	}
 
-	if err := s.userRepo.Create(user); err != nil {
+	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
 	// Invalidate users list cache
-	s.cache.DeletePattern("users:*")
+	s.cache.DeletePattern(ctx, "users:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("user_id", user.ID).
@@ -94,7 +94,7 @@ func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 
 func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error) {
 	// Check if email exists
-	existingUser, _ := s.userRepo.FindByEmail(req.Email)
+	existingUser, _ := s.userRepo.FindByEmail(ctx, req.Email)
 	if existingUser != nil {
 		return nil, errors.New("email already exists")
 	}
@@ -110,12 +110,12 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 		RoleID:   req.RoleID,
 	}
 
-	if err := s.userRepo.Create(user); err != nil {
+	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
 	// Invalidate users list cache
-	s.cache.DeletePattern("users:*")
+	s.cache.DeletePattern(ctx, "users:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("user_id", user.ID).
@@ -134,15 +134,15 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 	}, nil
 }
 
-func (s *userService) GetMe(userID uint) (*dto.UserResponse, error) {
+func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.UserResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("user:%d", userID)
 	var cached dto.UserResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	user, err := s.userRepo.FindByID(userID)
+	user, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -167,20 +167,20 @@ func (s *userService) GetMe(userID uint) (*dto.UserResponse, error) {
 
 	// Cache the result
 	ttl := time.Duration(s.config.Redis.TTL) * time.Second
-	s.cache.Set(cacheKey, response, ttl)
+	s.cache.Set(ctx, cacheKey, response, ttl)
 
 	return response, nil
 }
 
-func (s *userService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (s *userService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("users:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
 	var cached dto.PaginationResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	users, total, err := s.userRepo.FindAll(pagination)
+	users, total, err := s.userRepo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -209,13 +209,13 @@ func (s *userService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 
 	// Cache the result
 	ttl := time.Duration(s.config.Redis.TTL) * time.Second
-	s.cache.Set(cacheKey, response, ttl)
+	s.cache.Set(ctx, cacheKey, response, ttl)
 
 	return response, nil
 }
 
 func (s *userService) Update(ctx context.Context, id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
-	user, err := s.userRepo.FindByID(id)
+	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -237,13 +237,13 @@ func (s *userService) Update(ctx context.Context, id uint, req dto.UpdateUserReq
 		user.RoleID = req.RoleID
 	}
 
-	if err := s.userRepo.Update(user); err != nil {
+	if err := s.userRepo.Update(ctx, user); err != nil {
 		return nil, err
 	}
 
 	// Invalidate user cache and users list cache
-	s.cache.Delete(fmt.Sprintf("user:%d", id))
-	s.cache.DeletePattern("users:*")
+	s.cache.Delete(ctx, fmt.Sprintf("user:%d", id))
+	s.cache.DeletePattern(ctx, "users:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("user_id", user.ID).
@@ -264,8 +264,8 @@ func (s *userService) Update(ctx context.Context, id uint, req dto.UpdateUserReq
 
 func (s *userService) Delete(ctx context.Context, id uint) error {
 	// Invalidate user cache and users list cache
-	s.cache.Delete(fmt.Sprintf("user:%d", id))
-	s.cache.DeletePattern("users:*")
+	s.cache.Delete(ctx, fmt.Sprintf("user:%d", id))
+	s.cache.DeletePattern(ctx, "users:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("target_user_id", id).
@@ -273,7 +273,7 @@ func (s *userService) Delete(ctx context.Context, id uint) error {
 	// 	Msg("user deleted")
 	logger.LogAudit(ctx, "DELETE", "USER", fmt.Sprintf("%d", id), "")
 
-	return s.userRepo.Delete(id)
+	return s.userRepo.Delete(ctx, id)
 }
 
 func (s *userService) Export(ctx context.Context, format string) ([]byte, string, error) {
@@ -282,7 +282,7 @@ func (s *userService) Export(ctx context.Context, format string) ([]byte, string
 		Limit: 1000000, // Export all users
 	}
 
-	users, _, err := s.userRepo.FindAll(pagination)
+	users, _, err := s.userRepo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, "", err
 	}

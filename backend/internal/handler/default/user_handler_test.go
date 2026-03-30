@@ -85,7 +85,7 @@ func (s *UserHandlerTestSuite) TestGetAll_Success() {
 		},
 	}
 
-	s.mockService.EXPECT().GetAll(gomock.Any()).Return(pagination, nil)
+	s.mockService.EXPECT().GetAll(gomock.Any(), gomock.Any()).Return(pagination, nil)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)

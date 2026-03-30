@@ -95,7 +95,7 @@ func (h *saramaConsumerHandler) ConsumeClaim(session sarama.ConsumerGroupSession
 			Msg("kafka operation")
 
 		if logger.SystemLogRepo != nil {
-			_ = logger.SystemLogRepo.Create(&logger.SystemLog{
+			_ = logger.SystemLogRepo.Create(session.Context(), &logger.SystemLog{
 				Method:       "KAFKA:CONSUME",
 				Path:         message.Topic,
 				StatusCode:   status,

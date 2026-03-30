@@ -38,7 +38,7 @@ type SystemLog struct {
 }
 
 type SystemLogRepository interface {
-	Create(log *SystemLog) error
+	Create(ctx context.Context, log *SystemLog) error
 }
 
 type AuditLog struct {
@@ -52,7 +52,7 @@ type AuditLog struct {
 }
 
 type AuditLogRepository interface {
-	Create(log *AuditLog) error
+	Create(ctx context.Context, log *AuditLog) error
 }
 
 func LogAudit(ctx context.Context, action, module, targetID, metadata string) {
@@ -78,7 +78,7 @@ func LogAudit(ctx context.Context, action, module, targetID, metadata string) {
 	// Truncate metadata to avoid oversized logs
 	truncatedMetadata := Truncate(metadata, 65536)
 
-	_ = AuditLogRepo.Create(&AuditLog{
+	_ = AuditLogRepo.Create(ctx, &AuditLog{
 		RequestID: requestID,
 		UserID:    userID,
 		UserEmail: userEmail,

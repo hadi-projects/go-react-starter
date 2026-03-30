@@ -29,7 +29,28 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         
-        if (error.response?.status === 401 && !originalRequest.url.includes('/auth/login')) {
+        // If 401 and not from login and not already retried
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/login')) {
+            originalRequest._retry = true;
+            
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (refreshToken && !originalRequest.url.includes('/auth/refresh')) {
+                try {
+                    const { refreshTokenApi } = await import('./auth');
+                    const data = await refreshTokenApi(refreshToken);
+                    const newToken = data.data.access_token;
+                    
+                    localStorage.setItem('token', newToken);
+                    // Update header and retry
+                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    return apiClient(originalRequest);
+                } catch (refreshError) {
+                    // Refresh failed, clear everything and login
+                    console.error('Refresh token failed', refreshError);
+                }
+            }
+
+            // If we're here, either no refresh token or refresh failed
             // Attempt to log logout before clearing token
             try {
                 const logoutApi = (await import('./auth')).logoutApi;
@@ -39,6 +60,7 @@ apiClient.interceptors.response.use(
             }
             // Clear token and redirect to login
             localStorage.removeItem('token');
+            localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
             window.location.href = '/login';
         }

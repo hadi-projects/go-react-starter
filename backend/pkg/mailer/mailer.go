@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"context"
 	"fmt"
 
 	"time"
@@ -11,7 +12,7 @@ import (
 )
 
 type Mailer interface {
-	SendEmail(to string, subject string, body string) error
+	SendEmail(ctx context.Context, to string, subject string, body string) error
 }
 
 type mailer struct {
@@ -33,8 +34,12 @@ func NewMailer(cfg *config.Config) Mailer {
 	}
 }
 
-func (m *mailer) SendEmail(to string, subject string, body string) error {
+func (m *mailer) SendEmail(ctx context.Context, to string, subject string, body string) error {
 	start := time.Now()
+	requestID := ""
+	if rid, ok := ctx.Value(logger.CtxKeyRequestID).(string); ok {
+		requestID = rid
+	}
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", m.cfg.Mail.FromAddress)
 	msg.SetHeader("To", to)
@@ -58,7 +63,8 @@ func (m *mailer) SendEmail(to string, subject string, body string) error {
 		Msg("mailer operation")
 
 	if logger.SystemLogRepo != nil {
-		_ = logger.SystemLogRepo.Create(&logger.SystemLog{
+		_ = logger.SystemLogRepo.Create(ctx, &logger.SystemLog{
+			RequestID:   requestID,
 			Method:      "SMTP:SEND",
 			Path:        to,
 			StatusCode:  status,

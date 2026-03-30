@@ -18,7 +18,7 @@ import (
 
 type PermissionService interface {
 	Create(ctx context.Context, req dto.CreatePermissionRequest) (*dto.PermissionResponse, error)
-	GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
+	GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdatePermissionRequest) (*dto.PermissionResponse, error)
 	Delete(ctx context.Context, id uint) error
 	Export(ctx context.Context, format string) ([]byte, string, error)
@@ -42,12 +42,12 @@ func (s *permissionService) Create(ctx context.Context, req dto.CreatePermission
 		Description: req.Description,
 	}
 
-	if err := s.repo.Create(permission); err != nil {
+	if err := s.repo.Create(ctx, permission); err != nil {
 		return nil, err
 	}
 
 	// Invalidate permissions list cache
-	s.cache.DeletePattern("permissions:*")
+	s.cache.DeletePattern(ctx, "permissions:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("permission_id", permission.ID).
@@ -65,15 +65,15 @@ func (s *permissionService) Create(ctx context.Context, req dto.CreatePermission
 	}, nil
 }
 
-func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (s *permissionService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("permissions:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
 	var cached dto.PaginationResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	permissions, total, err := s.repo.FindAll(pagination)
+	permissions, total, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -101,25 +101,25 @@ func (s *permissionService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagi
 
 	// Cache the result
 	ttl := time.Duration(300) * time.Second
-	s.cache.Set(cacheKey, response, ttl)
+	s.cache.Set(ctx, cacheKey, response, ttl)
 
 	return response, nil
 }
 
 func (s *permissionService) Update(ctx context.Context, id uint, req dto.UpdatePermissionRequest) (*dto.PermissionResponse, error) {
-	permission, err := s.repo.FindByID(id)
+	permission, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	permission.Name = req.Name
 	permission.Description = req.Description
-	if err := s.repo.Update(permission); err != nil {
+	if err := s.repo.Update(ctx, permission); err != nil {
 		return nil, err
 	}
 
 	// Invalidate permissions list cache
-	s.cache.DeletePattern("permissions:*")
+	s.cache.DeletePattern(ctx, "permissions:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("permission_id", permission.ID).
@@ -139,7 +139,7 @@ func (s *permissionService) Update(ctx context.Context, id uint, req dto.UpdateP
 
 func (s *permissionService) Delete(ctx context.Context, id uint) error {
 	// Invalidate permissions list cache
-	s.cache.DeletePattern("permissions:*")
+	s.cache.DeletePattern(ctx, "permissions:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("target_permission_id", id).
@@ -147,7 +147,7 @@ func (s *permissionService) Delete(ctx context.Context, id uint) error {
 	// 	Msg("permission deleted")
 	logger.LogAudit(ctx, "DELETE", "PERMISSION", fmt.Sprintf("%d", id), "")
 
-	return s.repo.Delete(id)
+	return s.repo.Delete(ctx, id)
 }
 
 func (s *permissionService) Export(ctx context.Context, format string) ([]byte, string, error) {
@@ -156,7 +156,7 @@ func (s *permissionService) Export(ctx context.Context, format string) ([]byte, 
 		Limit: 1000000,
 	}
 
-	permissions, _, err := s.repo.FindAll(pagination)
+	permissions, _, err := s.repo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, "", err
 	}

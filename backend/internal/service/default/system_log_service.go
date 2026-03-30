@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"time"
@@ -15,9 +16,9 @@ import (
 )
 
 type SystemLogService interface {
-	Create(log *entity.SystemLog) error
-	GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogResponse, int64, error)
-	Export(query *dto.SystemLogQuery, format string) ([]byte, string, error)
+	Create(ctx context.Context, log *entity.SystemLog) error
+	GetAll(ctx context.Context, query *dto.SystemLogQuery) ([]dto.SystemLogResponse, int64, error)
+	Export(ctx context.Context, query *dto.SystemLogQuery, format string) ([]byte, string, error)
 }
 
 type systemLogService struct {
@@ -32,8 +33,8 @@ func NewSystemLogService(repo repository.SystemLogRepository, cache cache.CacheS
 	}
 }
 
-func (s *systemLogService) Create(log *entity.SystemLog) error {
-	return s.repo.Create(&logger.SystemLog{
+func (s *systemLogService) Create(ctx context.Context, log *entity.SystemLog) error {
+	return s.repo.Create(ctx, &logger.SystemLog{
 		RequestID:    log.RequestID,
 		Method:       log.Method,
 		Path:         log.Path,
@@ -44,7 +45,7 @@ func (s *systemLogService) Create(log *entity.SystemLog) error {
 	})
 }
 
-func (s *systemLogService) GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogResponse, int64, error) {
+func (s *systemLogService) GetAll(ctx context.Context, query *dto.SystemLogQuery) ([]dto.SystemLogResponse, int64, error) {
 	// Try to get from cache
 	cacheKey := fmt.Sprintf("system_logs:%d:%d:%s:%s:%d:%s",
 		query.GetPage(),
@@ -61,11 +62,11 @@ func (s *systemLogService) GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogRes
 	}
 
 	var cached cacheData
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return cached.Responses, cached.Total, nil
 	}
 
-	logs, total, err := s.repo.FindAll(query)
+	logs, total, err := s.repo.FindAll(ctx, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -86,7 +87,7 @@ func (s *systemLogService) GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogRes
 	}
 
 	// Save to cache with short TTL (10 seconds)
-	_ = s.cache.Set(cacheKey, cacheData{
+	_ = s.cache.Set(ctx, cacheKey, cacheData{
 		Responses: responses,
 		Total:     total,
 	}, 10*time.Second)
@@ -94,11 +95,11 @@ func (s *systemLogService) GetAll(query *dto.SystemLogQuery) ([]dto.SystemLogRes
 	return responses, total, nil
 }
 
-func (s *systemLogService) Export(query *dto.SystemLogQuery, format string) ([]byte, string, error) {
+func (s *systemLogService) Export(ctx context.Context, query *dto.SystemLogQuery, format string) ([]byte, string, error) {
 	exportQuery := *query
 	exportQuery.Limit = 1000000
 
-	logs, _, err := s.repo.FindAll(&exportQuery)
+	logs, _, err := s.repo.FindAll(ctx, &exportQuery)
 	if err != nil {
 		return nil, "", err
 	}

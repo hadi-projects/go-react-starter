@@ -23,6 +23,7 @@ type AuthService interface {
 	ForgotPassword(ctx context.Context, req dto.ForgotPasswordRequest) error
 	ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error
 	Logout(ctx context.Context, req dto.LogoutRequest) error
+	RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (*dto.LoginResponse, error)
 }
 
 type authService struct {
@@ -51,7 +52,7 @@ func NewAuthService(
 
 func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 	// 1. Find user by email (simple, no preloads)
-	user, err := s.userRepo.FindByEmailSimple(req.Email)
+	user, err := s.userRepo.FindByEmailSimple(ctx, req.Email)
 	if err != nil {
 		return nil, errors.New("invalid email or password")
 	}
@@ -63,39 +64,51 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	}
 
 	// 3. Fetch full user data including Role and Permissions for Token generation
-	fullUser, err := s.userRepo.FindByID(user.ID)
+	fullUser, err := s.userRepo.FindByID(ctx, user.ID)
 	if err != nil {
 		return nil, err
 	}
 	user = fullUser
 
-	// 4. Generate JWT Token
+	// 4. Generate JWT Tokens
 	var permissions []string
 	for _, p := range user.Role.Permissions {
 		permissions = append(permissions, p.Name)
 	}
 
-	claims := jwt.MapClaims{
-		"sub":         user.ID,
-		"email":       user.Email,
-		"role":        user.Role.Name,
-		"permissions": permissions,
-		"exp":         time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(s.config.JWT.Secret))
+	accessToken, err := s.generateAccessToken(user, permissions)
 	if err != nil {
 		return nil, err
 	}
 
+	var refreshTokenStr string
+	if req.RememberMe {
+		refreshTokenStr = uuid.New().String()
+		expirationDays := 7 // Default 7 days
+		if s.config.JWT.RefreshExpirationTime != "" {
+			fmt.Sscanf(s.config.JWT.RefreshExpirationTime, "%dh", &expirationDays)
+			// This is a simple parser, usually it would be "168h" (7 days)
+			// Let's assume it's in hours for now or just hardcode for simplicity if parsing fails
+		}
+
+		expiresAt := time.Now().Add(time.Hour * time.Duration(24*expirationDays))
+		rt := &entity.RefreshToken{
+			UserID:    user.ID,
+			Token:     refreshTokenStr,
+			ExpiresAt: expiresAt,
+		}
+		if err := s.tokenRepo.CreateRefreshToken(ctx, rt); err != nil {
+			return nil, err
+		}
+	}
+
 	// Audit login
-	logger.LogAudit(context.WithValue(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), logger.CtxKeyUserEmail, user.Email), "LOGIN", "AUTH", fmt.Sprintf("%d", user.ID), "")
+	logger.LogAudit(context.WithValue(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), logger.CtxKeyUserEmail, user.Email), "LOGIN", "AUTH", fmt.Sprintf("%d", user.ID), fmt.Sprintf("RememberMe: %v", req.RememberMe))
 
 	// 5. Return response
 	return &dto.LoginResponse{
-		AccessToken:  signedToken,
-		RefreshToken: "refresh-token-placeholder", // TODO: Implement refresh token
+		AccessToken:  accessToken,
+		RefreshToken: refreshTokenStr,
 		User: dto.UserResponse{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -109,9 +122,63 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	}, nil
 }
 
+func (s *authService) generateAccessToken(user *entity.User, permissions []string) (string, error) {
+	claims := jwt.MapClaims{
+		"sub":         user.ID,
+		"email":       user.Email,
+		"role":        user.Role.Name,
+		"permissions": permissions,
+		"exp":         time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(s.config.JWT.Secret))
+}
+
+func (s *authService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (*dto.LoginResponse, error) {
+	// 1. Find refresh token
+	rt, err := s.tokenRepo.FindByRefreshToken(ctx, req.RefreshToken)
+	if err != nil {
+		return nil, errors.New("invalid or expired refresh token")
+	}
+
+	// 2. Check expiration
+	if time.Now().After(rt.ExpiresAt) {
+		s.tokenRepo.DeleteRefreshToken(ctx, req.RefreshToken)
+		return nil, errors.New("refresh token expired")
+	}
+
+	// 3. Generate new Access Token
+	var permissions []string
+	for _, p := range rt.User.Role.Permissions {
+		permissions = append(permissions, p.Name)
+	}
+
+	accessToken, err := s.generateAccessToken(&rt.User, permissions)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. Return response
+	return &dto.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: rt.Token, // Reuse same refresh token
+		User: dto.UserResponse{
+			ID:          rt.User.ID,
+			Name:        rt.User.Name,
+			Email:       rt.User.Email,
+			RoleID:      rt.User.RoleID,
+			Role:        rt.User.Role.Name,
+			Permissions: permissions,
+			CreatedAt:   rt.User.CreatedAt,
+			UpdatedAt:   rt.User.UpdatedAt,
+		},
+	}, nil
+}
+
 func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPasswordRequest) error {
 	// 1. Find user by email
-	user, err := s.userRepo.FindByEmail(req.Email)
+	user, err := s.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
 		// Return nil to avoid enumerating users
 		return nil
@@ -131,7 +198,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 		ExpiresAt: expiresAt,
 	}
 
-	if err := s.tokenRepo.Create(resetToken); err != nil {
+	if err := s.tokenRepo.Create(ctx, resetToken); err != nil {
 		return err
 	}
 
@@ -149,7 +216,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 
 	var publishErr error
 	if s.producer != nil {
-		publishErr = s.producer.Publish(topic, msg)
+		publishErr = s.producer.Publish(ctx, topic, msg)
 	} else {
 		publishErr = errors.New("kafka producer is not initialized")
 	}
@@ -165,7 +232,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 			}
 			resetLink := frontendURL + "/reset-password?token=" + token
 			body := mailer.GetResetPasswordEmailNative(resetLink)
-			if err := s.mailer.SendEmail(user.Email, "Reset Password Request (Fallback)", body); err != nil {
+			if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Password Request (Fallback)", body); err != nil {
 				logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send fallback email")
 			} else {
 				logger.SystemLogger.Info().Str("email", user.Email).Msg("Fallback email sent successfully")
@@ -181,7 +248,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 
 func (s *authService) ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error {
 	// 1. Find token
-	resetToken, err := s.tokenRepo.FindByToken(req.Token)
+	resetToken, err := s.tokenRepo.FindByToken(ctx, req.Token)
 	if err != nil {
 		return errors.New("invalid or expired token")
 	}
@@ -200,12 +267,12 @@ func (s *authService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 	// 4. Update user password
 	user := resetToken.User
 	user.Password = string(hashedPassword)
-	if err := s.userRepo.Update(&user); err != nil {
+	if err := s.userRepo.Update(ctx, &user); err != nil {
 		return err
 	}
 
 	// 5. Delete token (and potentially all other tokens for this user)
-	if err := s.tokenRepo.DeleteByUserID(user.ID); err != nil {
+	if err := s.tokenRepo.DeleteByUserID(ctx, user.ID); err != nil {
 		logger.SystemLogger.Error().Err(err).Msg("Failed to delete reset tokens")
 	}
 

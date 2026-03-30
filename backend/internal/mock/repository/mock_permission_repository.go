@@ -10,6 +10,7 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
 
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
@@ -42,37 +43,37 @@ func (m *MockPermissionRepository) EXPECT() *MockPermissionRepositoryMockRecorde
 }
 
 // Create mocks base method.
-func (m *MockPermissionRepository) Create(permission *entity.Permission) error {
+func (m *MockPermissionRepository) Create(ctx context.Context, permission *entity.Permission) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", permission)
+	ret := m.ctrl.Call(m, "Create", ctx, permission)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockPermissionRepositoryMockRecorder) Create(permission any) *gomock.Call {
+func (mr *MockPermissionRepositoryMockRecorder) Create(ctx, permission any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockPermissionRepository)(nil).Create), permission)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockPermissionRepository)(nil).Create), ctx, permission)
 }
 
 // Delete mocks base method.
-func (m *MockPermissionRepository) Delete(id uint) error {
+func (m *MockPermissionRepository) Delete(ctx context.Context, id uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockPermissionRepositoryMockRecorder) Delete(id any) *gomock.Call {
+func (mr *MockPermissionRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPermissionRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPermissionRepository)(nil).Delete), ctx, id)
 }
 
 // FindAll mocks base method.
-func (m *MockPermissionRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Permission, int64, error) {
+func (m *MockPermissionRepository) FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Permission, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", pagination)
+	ret := m.ctrl.Call(m, "FindAll", ctx, pagination)
 	ret0, _ := ret[0].([]entity.Permission)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -80,36 +81,36 @@ func (m *MockPermissionRepository) FindAll(pagination *dto.PaginationRequest) ([
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockPermissionRepositoryMockRecorder) FindAll(pagination any) *gomock.Call {
+func (mr *MockPermissionRepositoryMockRecorder) FindAll(ctx, pagination any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockPermissionRepository)(nil).FindAll), pagination)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockPermissionRepository)(nil).FindAll), ctx, pagination)
 }
 
 // FindByID mocks base method.
-func (m *MockPermissionRepository) FindByID(id uint) (*entity.Permission, error) {
+func (m *MockPermissionRepository) FindByID(ctx context.Context, id uint) (*entity.Permission, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*entity.Permission)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockPermissionRepositoryMockRecorder) FindByID(id any) *gomock.Call {
+func (mr *MockPermissionRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockPermissionRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockPermissionRepository)(nil).FindByID), ctx, id)
 }
 
 // Update mocks base method.
-func (m *MockPermissionRepository) Update(permission *entity.Permission) error {
+func (m *MockPermissionRepository) Update(ctx context.Context, permission *entity.Permission) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", permission)
+	ret := m.ctrl.Call(m, "Update", ctx, permission)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockPermissionRepositoryMockRecorder) Update(permission any) *gomock.Call {
+func (mr *MockPermissionRepositoryMockRecorder) Update(ctx, permission any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPermissionRepository)(nil).Update), permission)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPermissionRepository)(nil).Update), ctx, permission)
 }

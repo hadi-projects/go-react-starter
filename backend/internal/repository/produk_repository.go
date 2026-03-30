@@ -1,17 +1,19 @@
 package repository
 
 import (
+	"context"
+
 	defaultDto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	"github.com/hadi-projects/go-react-starter/internal/entity"
 	"gorm.io/gorm"
 )
 
 type ProdukRepository interface {
-	Create(entity *entity.Produk) error
-	FindAll(pagination *defaultDto.PaginationRequest) ([]entity.Produk, int64, error)
-	FindByID(id uint) (*entity.Produk, error)
-	Update(entity *entity.Produk) error
-	Delete(id uint) error
+	Create(ctx context.Context, entity *entity.Produk) error
+	FindAll(ctx context.Context, pagination *defaultDto.PaginationRequest) ([]entity.Produk, int64, error)
+	FindByID(ctx context.Context, id uint) (*entity.Produk, error)
+	Update(ctx context.Context, entity *entity.Produk) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type produkRepository struct {
@@ -22,15 +24,15 @@ func NewProdukRepository(db *gorm.DB) ProdukRepository {
 	return &produkRepository{db: db}
 }
 
-func (r *produkRepository) Create(entity *entity.Produk) error {
-	return r.db.Create(entity).Error
+func (r *produkRepository) Create(ctx context.Context, entity *entity.Produk) error {
+	return r.db.WithContext(ctx).Create(entity).Error
 }
 
-func (r *produkRepository) FindAll(pagination *defaultDto.PaginationRequest) ([]entity.Produk, int64, error) {
+func (r *produkRepository) FindAll(ctx context.Context, pagination *defaultDto.PaginationRequest) ([]entity.Produk, int64, error) {
 	var entities []entity.Produk
 	var total int64
 
-	query := r.db.Model(&entity.Produk{})
+	query := r.db.WithContext(ctx).Model(&entity.Produk{})
 
 	
 	if pagination.Search != "" {
@@ -51,19 +53,19 @@ func (r *produkRepository) FindAll(pagination *defaultDto.PaginationRequest) ([]
 	return entities, total, err
 }
 
-func (r *produkRepository) FindByID(id uint) (*entity.Produk, error) {
+func (r *produkRepository) FindByID(ctx context.Context, id uint) (*entity.Produk, error) {
 	var entity entity.Produk
-	err := r.db.First(&entity, id).Error
+	err := r.db.WithContext(ctx).First(&entity, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &entity, nil
 }
 
-func (r *produkRepository) Update(entity *entity.Produk) error {
-	return r.db.Save(entity).Error
+func (r *produkRepository) Update(ctx context.Context, entity *entity.Produk) error {
+	return r.db.WithContext(ctx).Save(entity).Error
 }
 
-func (r *produkRepository) Delete(id uint) error {
-	return r.db.Delete(&entity.Produk{}, id).Error
+func (r *produkRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&entity.Produk{}, id).Error
 }

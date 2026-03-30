@@ -45,6 +45,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware claims=%v", claims)
 			var userID uint
 			var userEmail string
 
@@ -58,6 +59,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 				c.Set("user_email", userEmail)
 			}
 			c.Set("role", claims["role"])
+			logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware set role=%v", claims["role"])
 
 			// Also set in request context for logger.WithCtx compatibility
 			ctx := c.Request.Context()
@@ -77,6 +79,11 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 					}
 				}
 				c.Set("permissions", perms)
+				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware set permissions count=%d", len(perms))
+			} else {
+				logger.SystemLogger.Info().Msgf("DEBUG: AuthMiddleware permissions claim missing or invalid type: %T", claims["permissions"])
+				// Set empty slice to avoid "not found" error in guard
+				c.Set("permissions", []string{})
 			}
 		} else {
 			response.Error(c, http.StatusUnauthorized, "Invalid token claims")

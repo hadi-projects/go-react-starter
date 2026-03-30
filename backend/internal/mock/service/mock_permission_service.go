@@ -71,18 +71,18 @@ func (mr *MockPermissionServiceMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // GetAll mocks base method.
-func (m *MockPermissionService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (m *MockPermissionService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", pagination)
+	ret := m.ctrl.Call(m, "GetAll", ctx, pagination)
 	ret0, _ := ret[0].(*dto.PaginationResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockPermissionServiceMockRecorder) GetAll(pagination any) *gomock.Call {
+func (mr *MockPermissionServiceMockRecorder) GetAll(ctx, pagination any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockPermissionService)(nil).GetAll), pagination)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockPermissionService)(nil).GetAll), ctx, pagination)
 }
 
 // Update mocks base method.

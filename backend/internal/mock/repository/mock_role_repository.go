@@ -10,6 +10,7 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
 
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
@@ -42,37 +43,37 @@ func (m *MockRoleRepository) EXPECT() *MockRoleRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockRoleRepository) Create(role *entity.Role, permissionIDs []uint) error {
+func (m *MockRoleRepository) Create(ctx context.Context, role *entity.Role, permissionIDs []uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", role, permissionIDs)
+	ret := m.ctrl.Call(m, "Create", ctx, role, permissionIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockRoleRepositoryMockRecorder) Create(role, permissionIDs any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) Create(ctx, role, permissionIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRoleRepository)(nil).Create), role, permissionIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRoleRepository)(nil).Create), ctx, role, permissionIDs)
 }
 
 // Delete mocks base method.
-func (m *MockRoleRepository) Delete(id uint) error {
+func (m *MockRoleRepository) Delete(ctx context.Context, id uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockRoleRepositoryMockRecorder) Delete(id any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRoleRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRoleRepository)(nil).Delete), ctx, id)
 }
 
 // FindAll mocks base method.
-func (m *MockRoleRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Role, int64, error) {
+func (m *MockRoleRepository) FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Role, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", pagination)
+	ret := m.ctrl.Call(m, "FindAll", ctx, pagination)
 	ret0, _ := ret[0].([]entity.Role)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -80,51 +81,51 @@ func (m *MockRoleRepository) FindAll(pagination *dto.PaginationRequest) ([]entit
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockRoleRepositoryMockRecorder) FindAll(pagination any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) FindAll(ctx, pagination any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRoleRepository)(nil).FindAll), pagination)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRoleRepository)(nil).FindAll), ctx, pagination)
 }
 
 // FindByID mocks base method.
-func (m *MockRoleRepository) FindByID(id uint) (*entity.Role, error) {
+func (m *MockRoleRepository) FindByID(ctx context.Context, id uint) (*entity.Role, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*entity.Role)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockRoleRepositoryMockRecorder) FindByID(id any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockRoleRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockRoleRepository)(nil).FindByID), ctx, id)
 }
 
 // FindByName mocks base method.
-func (m *MockRoleRepository) FindByName(name string) (*entity.Role, error) {
+func (m *MockRoleRepository) FindByName(ctx context.Context, name string) (*entity.Role, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", name)
+	ret := m.ctrl.Call(m, "FindByName", ctx, name)
 	ret0, _ := ret[0].(*entity.Role)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByName indicates an expected call of FindByName.
-func (mr *MockRoleRepositoryMockRecorder) FindByName(name any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) FindByName(ctx, name any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockRoleRepository)(nil).FindByName), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockRoleRepository)(nil).FindByName), ctx, name)
 }
 
 // Update mocks base method.
-func (m *MockRoleRepository) Update(role *entity.Role, permissionIDs []uint) error {
+func (m *MockRoleRepository) Update(ctx context.Context, role *entity.Role, permissionIDs []uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", role, permissionIDs)
+	ret := m.ctrl.Call(m, "Update", ctx, role, permissionIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockRoleRepositoryMockRecorder) Update(role, permissionIDs any) *gomock.Call {
+func (mr *MockRoleRepositoryMockRecorder) Update(ctx, role, permissionIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockRoleRepository)(nil).Update), role, permissionIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockRoleRepository)(nil).Update), ctx, role, permissionIDs)
 }

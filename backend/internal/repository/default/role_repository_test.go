@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"regexp"
 	"testing"
 	"time"
@@ -54,7 +55,7 @@ func (s *RoleRepositoryTestSuite) TestCreate_Success() {
 
 	s.mock.ExpectCommit()
 
-	err := s.repo.Create(role, permissionIDs)
+	err := s.repo.Create(context.Background(), role, permissionIDs)
 	s.Require().NoError(err)
 }
 
@@ -77,7 +78,7 @@ func (s *RoleRepositoryTestSuite) TestFindByID_Success() {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "create-user"))
 
-	role, err := s.repo.FindByID(id)
+	role, err := s.repo.FindByID(context.Background(), id)
 	s.Require().NoError(err)
 	s.Require().NotNil(role)
 	assert.Equal(s.T(), "admin", role.Name)

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"regexp"
 	"testing"
 	"time"
@@ -47,7 +48,7 @@ func (s *UserRepositoryTestSuite) TestCreate_Success() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
-	err := s.repo.Create(user)
+	err := s.repo.Create(context.Background(), user)
 	s.Require().NoError(err)
 }
 
@@ -77,7 +78,7 @@ func (s *UserRepositoryTestSuite) TestFindByEmail_Success() {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "create-user"))
 
-	user, err := s.repo.FindByEmail(email)
+	user, err := s.repo.FindByEmail(context.Background(), email)
 	s.Require().NoError(err)
 	s.Require().NotNil(user)
 	assert.Equal(s.T(), email, user.Email)
@@ -95,7 +96,7 @@ func (s *UserRepositoryTestSuite) TestUpdate_Success() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
-	err := s.repo.Update(user)
+	err := s.repo.Update(context.Background(), user)
 	s.Require().NoError(err)
 }
 
@@ -108,7 +109,7 @@ func (s *UserRepositoryTestSuite) TestDelete_Success() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
-	err := s.repo.Delete(userID)
+	err := s.repo.Delete(context.Background(), userID)
 	s.Require().NoError(err)
 }
 

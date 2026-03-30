@@ -10,8 +10,8 @@ import (
 )
 
 type AuditLogRepository interface {
-	Create(log *logger.AuditLog) error
-	FindAll(query *dto.AuditLogQuery) ([]entity.AuditLog, int64, error)
+	Create(ctx context.Context, log *logger.AuditLog) error
+	FindAll(ctx context.Context, query *dto.AuditLogQuery) ([]entity.AuditLog, int64, error)
 }
 
 type auditLogRepository struct {
@@ -22,7 +22,7 @@ func NewAuditLogRepository(db *gorm.DB) AuditLogRepository {
 	return &auditLogRepository{db: db}
 }
 
-func (r *auditLogRepository) Create(log *logger.AuditLog) error {
+func (r *auditLogRepository) Create(ctx context.Context, log *logger.AuditLog) error {
 	entityLog := &entity.AuditLog{
 		RequestID: log.RequestID,
 		UserID:    log.UserID,
@@ -34,15 +34,15 @@ func (r *auditLogRepository) Create(log *logger.AuditLog) error {
 	}
 
 	// Signal logger to skip this operation to avoid recursion if AuditLog uses GORM
-	ctx := context.WithValue(context.Background(), logger.CtxKeySkipLogging, true)
+	ctx = context.WithValue(ctx, logger.CtxKeySkipLogging, true)
 	return r.db.WithContext(ctx).Create(entityLog).Error
 }
 
-func (r *auditLogRepository) FindAll(query *dto.AuditLogQuery) ([]entity.AuditLog, int64, error) {
+func (r *auditLogRepository) FindAll(ctx context.Context, query *dto.AuditLogQuery) ([]entity.AuditLog, int64, error) {
 	var logs []entity.AuditLog
 	var total int64
 
-	db := r.db.Model(&entity.AuditLog{})
+	db := r.db.WithContext(ctx).Model(&entity.AuditLog{})
 
 	if query.Module != "" {
 		db = db.Where("module = ?", query.Module)

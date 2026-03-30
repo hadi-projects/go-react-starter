@@ -27,3 +27,8 @@ export const logoutApi = async (reason) => {
         // Silent fail on logging
     }
 };
+
+export const refreshTokenApi = async (refreshToken) => {
+    const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
+    return response.data;
+};

@@ -1,17 +1,19 @@
 package repository
 
 import (
+	"context"
+
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"gorm.io/gorm"
 )
 
 type PermissionRepository interface {
-	Create(permission *entity.Permission) error
-	FindAll(pagination *dto.PaginationRequest) ([]entity.Permission, int64, error)
-	FindByID(id uint) (*entity.Permission, error)
-	Update(permission *entity.Permission) error
-	Delete(id uint) error
+	Create(ctx context.Context, permission *entity.Permission) error
+	FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Permission, int64, error)
+	FindByID(ctx context.Context, id uint) (*entity.Permission, error)
+	Update(ctx context.Context, permission *entity.Permission) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type permissionRepository struct {
@@ -22,15 +24,15 @@ func NewPermissionRepository(db *gorm.DB) PermissionRepository {
 	return &permissionRepository{db: db}
 }
 
-func (r *permissionRepository) Create(permission *entity.Permission) error {
-	return r.db.Create(permission).Error
+func (r *permissionRepository) Create(ctx context.Context, permission *entity.Permission) error {
+	return r.db.WithContext(ctx).Create(permission).Error
 }
 
-func (r *permissionRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Permission, int64, error) {
+func (r *permissionRepository) FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.Permission, int64, error) {
 	var permissions []entity.Permission
 	var total int64
 
-	query := r.db.Model(&entity.Permission{})
+	query := r.db.WithContext(ctx).Model(&entity.Permission{})
 
 	if pagination.Search != "" {
 		searchTerm := "%" + pagination.Search + "%"
@@ -50,19 +52,19 @@ func (r *permissionRepository) FindAll(pagination *dto.PaginationRequest) ([]ent
 	return permissions, total, err
 }
 
-func (r *permissionRepository) FindByID(id uint) (*entity.Permission, error) {
+func (r *permissionRepository) FindByID(ctx context.Context, id uint) (*entity.Permission, error) {
 	var permission entity.Permission
-	err := r.db.First(&permission, id).Error
+	err := r.db.WithContext(ctx).First(&permission, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &permission, nil
 }
 
-func (r *permissionRepository) Update(permission *entity.Permission) error {
-	return r.db.Save(permission).Error
+func (r *permissionRepository) Update(ctx context.Context, permission *entity.Permission) error {
+	return r.db.WithContext(ctx).Save(permission).Error
 }
 
-func (r *permissionRepository) Delete(id uint) error {
-	return r.db.Delete(&entity.Permission{}, id).Error
+func (r *permissionRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&entity.Permission{}, id).Error
 }

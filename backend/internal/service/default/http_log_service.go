@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"time"
@@ -14,9 +15,9 @@ import (
 )
 
 type HttpLogService interface {
-	Create(log *entity.HttpLog) error
-	GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse, int64, error)
-	Export(query *dto.HttpLogQuery, format string) ([]byte, string, error)
+	Create(ctx context.Context, log *entity.HttpLog) error
+	GetAll(ctx context.Context, query *dto.HttpLogQuery) ([]dto.HttpLogResponse, int64, error)
+	Export(ctx context.Context, query *dto.HttpLogQuery, format string) ([]byte, string, error)
 }
 
 type httpLogService struct {
@@ -31,11 +32,11 @@ func NewHttpLogService(repo repository.HttpLogRepository, cache cache.CacheServi
 	}
 }
 
-func (s *httpLogService) Create(log *entity.HttpLog) error {
+func (s *httpLogService) Create(ctx context.Context, log *entity.HttpLog) error {
 	return s.repo.Create(log)
 }
 
-func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse, int64, error) {
+func (s *httpLogService) GetAll(ctx context.Context, query *dto.HttpLogQuery) ([]dto.HttpLogResponse, int64, error) {
 	// Try to get from cache
 	cacheKey := fmt.Sprintf("http_logs:%d:%d:%s:%s:%d",
 		query.GetPage(),
@@ -51,11 +52,11 @@ func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse,
 	}
 
 	var cached cacheData
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return cached.Responses, cached.Total, nil
 	}
 
-	logs, total, err := s.repo.FindAll(query)
+	logs, total, err := s.repo.FindAll(ctx, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -83,7 +84,7 @@ func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse,
 	}
 
 	// Save to cache with short TTL (10 seconds)
-	_ = s.cache.Set(cacheKey, cacheData{
+	_ = s.cache.Set(ctx, cacheKey, cacheData{
 		Responses: responses,
 		Total:     total,
 	}, 10*time.Second)
@@ -91,13 +92,13 @@ func (s *httpLogService) GetAll(query *dto.HttpLogQuery) ([]dto.HttpLogResponse,
 	return responses, total, nil
 }
 
-func (s *httpLogService) Export(query *dto.HttpLogQuery, format string) ([]byte, string, error) {
+func (s *httpLogService) Export(ctx context.Context, query *dto.HttpLogQuery, format string) ([]byte, string, error) {
 	// For export, we want to fetch all matching logs without small pagination limits
 	// But let's reuse FindAll with a large limit
 	exportQuery := *query
 	exportQuery.Limit = 1000000
 
-	logs, _, err := s.repo.FindAll(&exportQuery)
+	logs, _, err := s.repo.FindAll(ctx, &exportQuery)
 	if err != nil {
 		return nil, "", err
 	}

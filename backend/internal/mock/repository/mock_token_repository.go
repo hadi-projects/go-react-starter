@@ -1,6 +1,7 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
 
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
@@ -31,58 +32,58 @@ func (m *MockTokenRepository) EXPECT() *MockTokenRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockTokenRepository) Create(token *entity.PasswordResetToken) error {
+func (m *MockTokenRepository) Create(ctx context.Context, token *entity.PasswordResetToken) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", token)
+	ret := m.ctrl.Call(m, "Create", ctx, token)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockTokenRepositoryMockRecorder) Create(token interface{}) *gomock.Call {
+func (mr *MockTokenRepositoryMockRecorder) Create(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTokenRepository)(nil).Create), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTokenRepository)(nil).Create), ctx, token)
 }
 
 // Delete mocks base method.
-func (m *MockTokenRepository) Delete(token *entity.PasswordResetToken) error {
+func (m *MockTokenRepository) Delete(ctx context.Context, token *entity.PasswordResetToken) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", token)
+	ret := m.ctrl.Call(m, "Delete", ctx, token)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockTokenRepositoryMockRecorder) Delete(token interface{}) *gomock.Call {
+func (mr *MockTokenRepositoryMockRecorder) Delete(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTokenRepository)(nil).Delete), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTokenRepository)(nil).Delete), ctx, token)
 }
 
 // DeleteByUserID mocks base method.
-func (m *MockTokenRepository) DeleteByUserID(userID uint) error {
+func (m *MockTokenRepository) DeleteByUserID(ctx context.Context, userID uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByUserID", userID)
+	ret := m.ctrl.Call(m, "DeleteByUserID", ctx, userID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteByUserID indicates an expected call of DeleteByUserID.
-func (mr *MockTokenRepositoryMockRecorder) DeleteByUserID(userID interface{}) *gomock.Call {
+func (mr *MockTokenRepositoryMockRecorder) DeleteByUserID(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByUserID", reflect.TypeOf((*MockTokenRepository)(nil).DeleteByUserID), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByUserID", reflect.TypeOf((*MockTokenRepository)(nil).DeleteByUserID), ctx, userID)
 }
 
 // FindByToken mocks base method.
-func (m *MockTokenRepository) FindByToken(token string) (*entity.PasswordResetToken, error) {
+func (m *MockTokenRepository) FindByToken(ctx context.Context, token string) (*entity.PasswordResetToken, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByToken", token)
+	ret := m.ctrl.Call(m, "FindByToken", ctx, token)
 	ret0, _ := ret[0].(*entity.PasswordResetToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByToken indicates an expected call of FindByToken.
-func (mr *MockTokenRepositoryMockRecorder) FindByToken(token interface{}) *gomock.Call {
+func (mr *MockTokenRepositoryMockRecorder) FindByToken(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByToken", reflect.TypeOf((*MockTokenRepository)(nil).FindByToken), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByToken", reflect.TypeOf((*MockTokenRepository)(nil).FindByToken), ctx, token)
 }

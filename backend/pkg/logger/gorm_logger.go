@@ -58,7 +58,7 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 
 	// Try to get request_id from context if available
 	requestID := ""
-	if rid, ok := ctx.Value("request_id").(string); ok {
+	if rid, ok := ctx.Value(CtxKeyRequestID).(string); ok {
 		requestID = rid
 	}
 
@@ -73,7 +73,7 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 		Msg("database operation")
 
 	if SystemLogRepo != nil {
-		_ = SystemLogRepo.Create(&SystemLog{
+		_ = SystemLogRepo.Create(ctx, &SystemLog{
 			RequestID:    requestID,
 			Method:       "DATABASE",
 			Path:         "mysql",

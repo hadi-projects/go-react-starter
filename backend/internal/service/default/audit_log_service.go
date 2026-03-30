@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"time"
@@ -15,9 +16,9 @@ import (
 )
 
 type AuditLogService interface {
-	Create(log *entity.AuditLog) error
-	GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogResponse, int64, error)
-	Export(query *dto.AuditLogQuery, format string) ([]byte, string, error)
+	Create(ctx context.Context, log *entity.AuditLog) error
+	GetAll(ctx context.Context, query *dto.AuditLogQuery) ([]dto.AuditLogResponse, int64, error)
+	Export(ctx context.Context, query *dto.AuditLogQuery, format string) ([]byte, string, error)
 }
 
 type auditLogService struct {
@@ -32,8 +33,8 @@ func NewAuditLogService(repo repository.AuditLogRepository, cache cache.CacheSer
 	}
 }
 
-func (s *auditLogService) Create(log *entity.AuditLog) error {
-	return s.repo.Create(&logger.AuditLog{
+func (s *auditLogService) Create(ctx context.Context, log *entity.AuditLog) error {
+	return s.repo.Create(ctx, &logger.AuditLog{
 		RequestID: log.RequestID,
 		UserID:    log.UserID,
 		UserEmail: log.UserEmail,
@@ -44,7 +45,7 @@ func (s *auditLogService) Create(log *entity.AuditLog) error {
 	})
 }
 
-func (s *auditLogService) GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogResponse, int64, error) {
+func (s *auditLogService) GetAll(ctx context.Context, query *dto.AuditLogQuery) ([]dto.AuditLogResponse, int64, error) {
 	cacheKey := fmt.Sprintf("audit_logs:%d:%d:%s:%s:%s:%s",
 		query.GetPage(),
 		query.GetLimit(),
@@ -60,11 +61,11 @@ func (s *auditLogService) GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogRespon
 	}
 
 	var cached cacheData
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return cached.Responses, cached.Total, nil
 	}
 
-	logs, total, err := s.repo.FindAll(query)
+	logs, total, err := s.repo.FindAll(ctx, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -84,7 +85,7 @@ func (s *auditLogService) GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogRespon
 		})
 	}
 
-	_ = s.cache.Set(cacheKey, cacheData{
+	_ = s.cache.Set(ctx, cacheKey, cacheData{
 		Responses: responses,
 		Total:     total,
 	}, 10*time.Second)
@@ -92,11 +93,11 @@ func (s *auditLogService) GetAll(query *dto.AuditLogQuery) ([]dto.AuditLogRespon
 	return responses, total, nil
 }
 
-func (s *auditLogService) Export(query *dto.AuditLogQuery, format string) ([]byte, string, error) {
+func (s *auditLogService) Export(ctx context.Context, query *dto.AuditLogQuery, format string) ([]byte, string, error) {
 	exportQuery := *query
 	exportQuery.Limit = 1000000
 
-	logs, _, err := s.repo.FindAll(&exportQuery)
+	logs, _, err := s.repo.FindAll(ctx, &exportQuery)
 	if err != nil {
 		return nil, "", err
 	}

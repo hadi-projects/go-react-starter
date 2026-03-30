@@ -41,11 +41,11 @@ func (s *PermissionServiceTestSuite) TestCreate_Success() {
 		Name: "test-permission",
 	}
 
-	s.mockRepo.EXPECT().Create(gomock.Any()).DoAndReturn(func(p *entity.Permission) error {
+	s.mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, p *entity.Permission) error {
 		p.ID = 1
 		return nil
 	})
-	s.mockCache.EXPECT().DeletePattern("permissions:*").Return(nil)
+	s.mockCache.EXPECT().DeletePattern(gomock.Any(), "permissions:*").Return(nil)
 
 	res, err := s.service.Create(context.TODO(), req)
 	assert.NoError(s.T(), err)

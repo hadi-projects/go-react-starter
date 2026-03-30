@@ -1,6 +1,7 @@
 package seeder
 
 import (
+	"context"
 	"strconv"
 
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
@@ -41,7 +42,7 @@ func SeedUser(db *gorm.DB, bcryptCost int) {
 		}
 
 		user = entity.User{Email: email, Password: string(hashedPassword), RoleID: uint(roleId)}
-		if err := repository.NewUserRepository(db).Create(&user); err != nil {
+		if err := repository.NewUserRepository(db).Create(context.Background(), &user); err != nil {
 			logger.SystemLogger.Error().Err(err).Msgf("Failed to create user %s", email)
 		} else {
 			logger.SystemLogger.Info().Msgf("User %s created successfully.", email)

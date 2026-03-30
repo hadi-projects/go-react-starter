@@ -1,20 +1,22 @@
 package repository
 
 import (
+	"context"
+
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	Create(user *entity.User) error
-	FindAll(pagination *dto.PaginationRequest) ([]entity.User, int64, error)
-	FindByID(id uint) (*entity.User, error)
-	FindByEmail(email string) (*entity.User, error)
-	FindByEmailSimple(email string) (*entity.User, error)
-	FindRoleByName(name string) (*entity.Role, error)
-	Update(user *entity.User) error
-	Delete(id uint) error
+	Create(ctx context.Context, user *entity.User) error
+	FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.User, int64, error)
+	FindByID(ctx context.Context, id uint) (*entity.User, error)
+	FindByEmail(ctx context.Context, email string) (*entity.User, error)
+	FindByEmailSimple(ctx context.Context, email string) (*entity.User, error)
+	FindRoleByName(ctx context.Context, name string) (*entity.Role, error)
+	Update(ctx context.Context, user *entity.User) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type userRepository struct {
@@ -25,15 +27,15 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) Create(user *entity.User) error {
-	return r.db.Create(user).Error
+func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
+	return r.db.WithContext(ctx).Create(user).Error
 }
 
-func (r *userRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.User, int64, error) {
+func (r *userRepository) FindAll(ctx context.Context, pagination *dto.PaginationRequest) ([]entity.User, int64, error) {
 	var users []entity.User
 	var total int64
 
-	query := r.db.Model(&entity.User{})
+	query := r.db.WithContext(ctx).Model(&entity.User{})
 
 	if pagination.Search != "" {
 		searchTerm := "%" + pagination.Search + "%"
@@ -54,46 +56,46 @@ func (r *userRepository) FindAll(pagination *dto.PaginationRequest) ([]entity.Us
 	return users, total, err
 }
 
-func (r *userRepository) FindByID(id uint) (*entity.User, error) {
+func (r *userRepository) FindByID(ctx context.Context, id uint) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Preload("Role.Permissions").First(&user, id).Error
+	err := r.db.WithContext(ctx).Preload("Role.Permissions").First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *userRepository) FindByEmail(email string) (*entity.User, error) {
+func (r *userRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Preload("Role.Permissions").Where("email = ?", email).First(&user).Error
+	err := r.db.WithContext(ctx).Preload("Role.Permissions").Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *userRepository) FindByEmailSimple(email string) (*entity.User, error) {
+func (r *userRepository) FindByEmailSimple(ctx context.Context, email string) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Where("email = ?", email).First(&user).Error
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *userRepository) FindRoleByName(name string) (*entity.Role, error) {
+func (r *userRepository) FindRoleByName(ctx context.Context, name string) (*entity.Role, error) {
 	var role entity.Role
-	err := r.db.Where("name = ?", name).First(&role).Error
+	err := r.db.WithContext(ctx).Where("name = ?", name).First(&role).Error
 	if err != nil {
 		return nil, err
 	}
 	return &role, nil
 }
 
-func (r *userRepository) Update(user *entity.User) error {
-	return r.db.Save(user).Error
+func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
+	return r.db.WithContext(ctx).Save(user).Error
 }
 
-func (r *userRepository) Delete(id uint) error {
-	return r.db.Delete(&entity.User{}, id).Error
+func (r *userRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&entity.User{}, id).Error
 }

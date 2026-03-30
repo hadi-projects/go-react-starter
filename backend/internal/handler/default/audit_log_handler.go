@@ -29,7 +29,7 @@ func (h *auditLogHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	logs, total, err := h.service.GetAll(&query)
+	logs, total, err := h.service.GetAll(c.Request.Context(), &query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -51,7 +51,7 @@ func (h *auditLogHandler) Export(c *gin.Context) {
 	}
 
 	format := c.DefaultQuery("format", "excel")
-	data, filename, err := h.service.Export(&query, format)
+	data, filename, err := h.service.Export(c.Request.Context(), &query, format)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

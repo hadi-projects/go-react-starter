@@ -81,7 +81,7 @@ func (h *userHandler) Me(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetMe(userID)
+	res, err := h.service.GetMe(c.Request.Context(), userID)
 	if err != nil {
 		logger.WithCtx(c, logger.SystemLogger).Error().Err(err).Uint("user_id", userID).Msg("Me failed: user not found")
 		response.Error(c, http.StatusNotFound, "User not found")
@@ -102,7 +102,7 @@ func (h *userHandler) GetAll(c *gin.Context) {
 		Search: search,
 	}
 
-	res, err := h.service.GetAll(pagination)
+	res, err := h.service.GetAll(c.Request.Context(), pagination)
 	if err != nil {
 		logger.WithCtx(c, logger.SystemLogger).Error().Err(err).Msg("GetAll users failed")
 		response.Error(c, http.StatusInternalServerError, err.Error())

@@ -30,7 +30,7 @@ func (h *systemLogHandler) GetAll(ctx *gin.Context) {
 		return
 	}
 
-	logs, total, err := h.service.GetAll(&query)
+	logs, total, err := h.service.GetAll(ctx.Request.Context(), &query)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, "Failed to get system logs")
 		return
@@ -55,7 +55,7 @@ func (h *systemLogHandler) Export(ctx *gin.Context) {
 	}
 
 	format := ctx.DefaultQuery("format", "excel")
-	data, filename, err := h.service.Export(&query, format)
+	data, filename, err := h.service.Export(ctx.Request.Context(), &query, format)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return

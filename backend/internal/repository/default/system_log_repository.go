@@ -10,8 +10,8 @@ import (
 )
 
 type SystemLogRepository interface {
-	Create(log *logger.SystemLog) error
-	FindAll(query *dto.SystemLogQuery) ([]entity.SystemLog, int64, error)
+	Create(ctx context.Context, log *logger.SystemLog) error
+	FindAll(ctx context.Context, query *dto.SystemLogQuery) ([]entity.SystemLog, int64, error)
 }
 
 type systemLogRepository struct {
@@ -22,7 +22,7 @@ func NewSystemLogRepository(db *gorm.DB) SystemLogRepository {
 	return &systemLogRepository{db: db}
 }
 
-func (r *systemLogRepository) Create(log *logger.SystemLog) error {
+func (r *systemLogRepository) Create(ctx context.Context, log *logger.SystemLog) error {
 	entityLog := &entity.SystemLog{
 		RequestID:    log.RequestID,
 		Method:       log.Method,
@@ -34,15 +34,15 @@ func (r *systemLogRepository) Create(log *logger.SystemLog) error {
 	}
 	
 	// Use a context that signals the logger to skip this operation
-	ctx := context.WithValue(context.Background(), logger.CtxKeySkipLogging, true)
+	ctx = context.WithValue(ctx, logger.CtxKeySkipLogging, true)
 	return r.db.WithContext(ctx).Create(entityLog).Error
 }
 
-func (r *systemLogRepository) FindAll(query *dto.SystemLogQuery) ([]entity.SystemLog, int64, error) {
+func (r *systemLogRepository) FindAll(ctx context.Context, query *dto.SystemLogQuery) ([]entity.SystemLog, int64, error) {
 	var logs []entity.SystemLog
 	var total int64
 
-	db := r.db.Model(&entity.SystemLog{})
+	db := r.db.WithContext(ctx).Model(&entity.SystemLog{})
 
 	if query.Method != "" {
 		db = db.Where("method = ?", query.Method)

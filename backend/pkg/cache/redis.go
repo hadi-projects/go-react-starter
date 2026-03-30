@@ -12,10 +12,10 @@ import (
 
 // CacheService defines the interface for cache operations
 type CacheService interface {
-	Get(key string, dest interface{}) error
-	Set(key string, value interface{}, ttl time.Duration) error
-	Delete(key string) error
-	DeletePattern(pattern string) error
+	Get(ctx context.Context, key string, dest interface{}) error
+	Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error
+	Delete(ctx context.Context, key string) error
+	DeletePattern(ctx context.Context, pattern string) error
 	FlushAll() error
 	Close() error
 	Status() string
@@ -51,9 +51,13 @@ func NewRedisCache(host, port, password string, db int) (CacheService, error) {
 }
 
 // Get retrieves a value from cache and unmarshals it into dest
-func (r *redisCache) Get(key string, dest interface{}) error {
+func (r *redisCache) Get(ctx context.Context, key string, dest interface{}) error {
 	start := time.Now()
-	val, err := r.client.Get(r.ctx, key).Result()
+	requestID := ""
+	if rid, ok := ctx.Value(logger.CtxKeyRequestID).(string); ok {
+		requestID = rid
+	}
+	val, err := r.client.Get(ctx, key).Result()
 	elapsed := time.Since(start)
 
 	// Truncate response for logging
@@ -73,7 +77,8 @@ func (r *redisCache) Get(key string, dest interface{}) error {
 		Msg("redis operation")
 
 	if logger.SystemLogRepo != nil {
-		_ = logger.SystemLogRepo.Create(&logger.SystemLog{
+		_ = logger.SystemLogRepo.Create(ctx, &logger.SystemLog{
+			RequestID:    requestID,
 			Method:       "REDIS:GET",
 			Path:         key,
 			StatusCode:   status,
@@ -97,8 +102,12 @@ func (r *redisCache) Get(key string, dest interface{}) error {
 }
 
 // Set stores a value in cache with the specified TTL
-func (r *redisCache) Set(key string, value interface{}, ttl time.Duration) error {
+func (r *redisCache) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
 	start := time.Now()
+	requestID := ""
+	if rid, ok := ctx.Value(logger.CtxKeyRequestID).(string); ok {
+		requestID = rid
+	}
 	jsonValue, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("failed to marshal value: %w", err)
@@ -124,7 +133,8 @@ func (r *redisCache) Set(key string, value interface{}, ttl time.Duration) error
 		Msg("redis operation")
 
 	if logger.SystemLogRepo != nil {
-		_ = logger.SystemLogRepo.Create(&logger.SystemLog{
+		_ = logger.SystemLogRepo.Create(ctx, &logger.SystemLog{
+			RequestID:   requestID,
 			Method:      "REDIS:SET",
 			Path:        key,
 			StatusCode:  status,
@@ -141,18 +151,18 @@ func (r *redisCache) Set(key string, value interface{}, ttl time.Duration) error
 }
 
 // Delete removes a specific key from cache
-func (r *redisCache) Delete(key string) error {
-	if err := r.client.Del(r.ctx, key).Err(); err != nil {
+func (r *redisCache) Delete(ctx context.Context, key string) error {
+	if err := r.client.Del(ctx, key).Err(); err != nil {
 		return fmt.Errorf("failed to delete cache: %w", err)
 	}
 	return nil
 }
 
 // DeletePattern removes all keys matching the pattern
-func (r *redisCache) DeletePattern(pattern string) error {
-	iter := r.client.Scan(r.ctx, 0, pattern, 0).Iterator()
-	for iter.Next(r.ctx) {
-		if err := r.client.Del(r.ctx, iter.Val()).Err(); err != nil {
+func (r *redisCache) DeletePattern(ctx context.Context, pattern string) error {
+	iter := r.client.Scan(ctx, 0, pattern, 0).Iterator()
+	for iter.Next(ctx) {
+		if err := r.client.Del(ctx, iter.Val()).Err(); err != nil {
 			return fmt.Errorf("failed to delete key %s: %w", iter.Val(), err)
 		}
 	}
@@ -186,19 +196,19 @@ func (r *redisCache) Close() error {
 // NoOpCache implements CacheService but does nothing
 type NoOpCache struct{}
 
-func (n *NoOpCache) Get(key string, dest interface{}) error {
+func (n *NoOpCache) Get(ctx context.Context, key string, dest interface{}) error {
 	return fmt.Errorf("cache miss: no-op cache")
 }
 
-func (n *NoOpCache) Set(key string, value interface{}, ttl time.Duration) error {
+func (n *NoOpCache) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
 	return nil
 }
 
-func (n *NoOpCache) Delete(key string) error {
+func (n *NoOpCache) Delete(ctx context.Context, key string) error {
 	return nil
 }
 
-func (n *NoOpCache) DeletePattern(pattern string) error {
+func (n *NoOpCache) DeletePattern(ctx context.Context, pattern string) error {
 	return nil
 }
 

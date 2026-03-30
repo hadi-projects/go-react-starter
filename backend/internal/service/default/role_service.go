@@ -18,8 +18,8 @@ import (
 
 type RoleService interface {
 	Create(ctx context.Context, req dto.CreateRoleRequest) (*dto.RoleResponse, error)
-	GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
-	GetByID(id uint) (*dto.RoleResponse, error)
+	GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error)
+	GetByID(ctx context.Context, id uint) (*dto.RoleResponse, error)
 	Update(ctx context.Context, id uint, req dto.UpdateRoleRequest) (*dto.RoleResponse, error)
 	Delete(ctx context.Context, id uint) error
 	Export(ctx context.Context, format string) ([]byte, string, error)
@@ -43,12 +43,12 @@ func (s *roleService) Create(ctx context.Context, req dto.CreateRoleRequest) (*d
 		Description: req.Description,
 	}
 
-	if err := s.roleRepo.Create(role, req.PermissionIDs); err != nil {
+	if err := s.roleRepo.Create(ctx, role, req.PermissionIDs); err != nil {
 		return nil, err
 	}
 
 	// Invalidate roles list cache
-	s.cache.DeletePattern("roles:*")
+	s.cache.DeletePattern(ctx, "roles:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("role_id", role.ID).
@@ -59,7 +59,7 @@ func (s *roleService) Create(ctx context.Context, req dto.CreateRoleRequest) (*d
 
 	// Fetch again to get permissions populated (or we can construct response manually if we trust repo)
 	// Better to fetch to be sure.
-	createdRole, err := s.roleRepo.FindByID(role.ID)
+	createdRole, err := s.roleRepo.FindByID(ctx, role.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,15 +67,15 @@ func (s *roleService) Create(ctx context.Context, req dto.CreateRoleRequest) (*d
 	return s.mapToResponse(createdRole), nil
 }
 
-func (s *roleService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (s *roleService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("roles:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
 	var cached dto.PaginationResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	roles, total, err := s.roleRepo.FindAll(pagination)
+	roles, total, err := s.roleRepo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -97,20 +97,20 @@ func (s *roleService) GetAll(pagination *dto.PaginationRequest) (*dto.Pagination
 
 	// Cache the result
 	ttl := time.Duration(300) * time.Second // Default 5 minutes
-	s.cache.Set(cacheKey, response, ttl)
+	s.cache.Set(ctx, cacheKey, response, ttl)
 
 	return response, nil
 }
 
-func (s *roleService) GetByID(id uint) (*dto.RoleResponse, error) {
+func (s *roleService) GetByID(ctx context.Context, id uint) (*dto.RoleResponse, error) {
 	// Try cache first
 	cacheKey := fmt.Sprintf("role:%d", id)
 	var cached dto.RoleResponse
-	if err := s.cache.Get(cacheKey, &cached); err == nil {
+	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
 	}
 
-	role, err := s.roleRepo.FindByID(id)
+	role, err := s.roleRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -119,13 +119,13 @@ func (s *roleService) GetByID(id uint) (*dto.RoleResponse, error) {
 
 	// Cache the result
 	ttl := time.Duration(300) * time.Second
-	s.cache.Set(cacheKey, response, ttl)
+	s.cache.Set(ctx, cacheKey, response, ttl)
 
 	return response, nil
 }
 
 func (s *roleService) Update(ctx context.Context, id uint, req dto.UpdateRoleRequest) (*dto.RoleResponse, error) {
-	role, err := s.roleRepo.FindByID(id)
+	role, err := s.roleRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -138,14 +138,14 @@ func (s *roleService) Update(ctx context.Context, id uint, req dto.UpdateRoleReq
 		role.Description = req.Description
 	}
 
-	if err := s.roleRepo.Update(role, req.PermissionIDs); err != nil {
+	if err := s.roleRepo.Update(ctx, role, req.PermissionIDs); err != nil {
 		return nil, err
 	}
 
 	// Invalidate role cache, roles list cache, AND all user caches since permissions changed
-	s.cache.Delete(fmt.Sprintf("role:%d", id))
-	s.cache.DeletePattern("roles:*")
-	s.cache.DeletePattern("user:*")
+	s.cache.Delete(ctx, fmt.Sprintf("role:%d", id))
+	s.cache.DeletePattern(ctx, "roles:*")
+	s.cache.DeletePattern(ctx, "user:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("role_id", role.ID).
@@ -154,7 +154,7 @@ func (s *roleService) Update(ctx context.Context, id uint, req dto.UpdateRoleReq
 	// 	Msg("role updated")
 	logger.LogAudit(ctx, "UPDATE", "ROLE", fmt.Sprintf("%d", id), fmt.Sprintf("name: %s", role.Name))
 
-	updatedRole, err := s.roleRepo.FindByID(id)
+	updatedRole, err := s.roleRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -164,9 +164,9 @@ func (s *roleService) Update(ctx context.Context, id uint, req dto.UpdateRoleReq
 
 func (s *roleService) Delete(ctx context.Context, id uint) error {
 	// Invalidate role cache, roles list cache, AND all user caches
-	s.cache.Delete(fmt.Sprintf("role:%d", id))
-	s.cache.DeletePattern("roles:*")
-	s.cache.DeletePattern("user:*")
+	s.cache.Delete(ctx, fmt.Sprintf("role:%d", id))
+	s.cache.DeletePattern(ctx, "roles:*")
+	s.cache.DeletePattern(ctx, "user:*")
 
 	// logger.AuditLogger.Info().
 	// 	Uint("target_role_id", id).
@@ -174,7 +174,7 @@ func (s *roleService) Delete(ctx context.Context, id uint) error {
 	// 	Msg("role deleted")
 	logger.LogAudit(ctx, "DELETE", "ROLE", fmt.Sprintf("%d", id), "")
 
-	return s.roleRepo.Delete(id)
+	return s.roleRepo.Delete(ctx, id)
 }
 
 func (s *roleService) Export(ctx context.Context, format string) ([]byte, string, error) {
@@ -183,7 +183,7 @@ func (s *roleService) Export(ctx context.Context, format string) ([]byte, string
 		Limit: 1000000,
 	}
 
-	roles, _, err := s.roleRepo.FindAll(pagination)
+	roles, _, err := s.roleRepo.FindAll(ctx, pagination)
 	if err != nil {
 		return nil, "", err
 	}

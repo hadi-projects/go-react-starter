@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
@@ -31,7 +32,7 @@ func ProcessResetPassword(payload []byte, mailService mailer.Mailer) error {
 	resetLink := "http://localhost:3000/reset-password?token=" + data.Token
 	body := mailer.GetResetPasswordEmailNative(resetLink)
 
-	if err := mailService.SendEmail(data.Email, "Reset Password Request", body); err != nil {
+	if err := mailService.SendEmail(context.Background(), data.Email, "Reset Password Request", body); err != nil {
 		return err
 	}
 

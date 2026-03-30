@@ -30,7 +30,7 @@ func (h *httpLogHandler) GetAll(ctx *gin.Context) {
 		return
 	}
 
-	logs, total, err := h.httpLogService.GetAll(&query)
+	logs, total, err := h.httpLogService.GetAll(ctx.Request.Context(), &query)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -54,7 +54,7 @@ func (h *httpLogHandler) Export(ctx *gin.Context) {
 	}
 
 	format := ctx.DefaultQuery("format", "excel")
-	data, filename, err := h.httpLogService.Export(&query, format)
+	data, filename, err := h.httpLogService.Export(ctx.Request.Context(), &query, format)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return

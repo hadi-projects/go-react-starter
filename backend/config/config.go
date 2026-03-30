@@ -82,6 +82,7 @@ func LoadConfig() (config Config) {
 		"JWT_SECRET",
 		"JWT_ISSUER",
 		"JWT_ACCESS_EXPIRATION_TIME",
+		"JWT_REFRESH_EXPIRATION_TIME",
 		"RATE_LIMIT_RPS",
 		"RATE_LIMIT_BURST",
 		"REQUEST_TIMEOUT",
@@ -144,9 +145,10 @@ func LoadConfig() (config Config) {
 	}
 
 	config.JWT = JWTConfig{
-		Secret:               viper.GetString("JWT_SECRET"),
-		Issuer:               viper.GetString("JWT_ISSUER"),
-		AccessExpirationTime: viper.GetString("JWT_ACCESS_EXPIRATION_TIME"),
+		Secret:                viper.GetString("JWT_SECRET"),
+		Issuer:                viper.GetString("JWT_ISSUER"),
+		AccessExpirationTime:  viper.GetString("JWT_ACCESS_EXPIRATION_TIME"),
+		RefreshExpirationTime: viper.GetString("JWT_REFRESH_EXPIRATION_TIME"),
 	}
 
 	config.RateLimit = RateLimitConfig{

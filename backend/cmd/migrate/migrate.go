@@ -28,6 +28,7 @@ func main() {
 		&entity.HttpLog{},
 		&entity.SystemLog{},
 		&entity.AuditLog{},
+		&entity.RefreshToken{},
 		&customEntity.Produk{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)

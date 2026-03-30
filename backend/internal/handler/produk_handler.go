@@ -52,7 +52,7 @@ func (h *produkHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GetAll(&pagination)
+	res, err := h.service.GetAll(c.Request.Context(), &pagination)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -63,7 +63,7 @@ func (h *produkHandler) GetAll(c *gin.Context) {
 
 func (h *produkHandler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	res, err := h.service.GetByID(uint(id))
+	res, err := h.service.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Produk not found")
 		return

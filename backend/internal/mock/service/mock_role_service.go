@@ -71,33 +71,33 @@ func (mr *MockRoleServiceMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // GetAll mocks base method.
-func (m *MockRoleService) GetAll(pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
+func (m *MockRoleService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", pagination)
+	ret := m.ctrl.Call(m, "GetAll", ctx, pagination)
 	ret0, _ := ret[0].(*dto.PaginationResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockRoleServiceMockRecorder) GetAll(pagination any) *gomock.Call {
+func (mr *MockRoleServiceMockRecorder) GetAll(ctx, pagination any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockRoleService)(nil).GetAll), pagination)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockRoleService)(nil).GetAll), ctx, pagination)
 }
 
 // GetByID mocks base method.
-func (m *MockRoleService) GetByID(id uint) (*dto.RoleResponse, error) {
+func (m *MockRoleService) GetByID(ctx context.Context, id uint) (*dto.RoleResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", id)
+	ret := m.ctrl.Call(m, "GetByID", ctx, id)
 	ret0, _ := ret[0].(*dto.RoleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockRoleServiceMockRecorder) GetByID(id any) *gomock.Call {
+func (mr *MockRoleServiceMockRecorder) GetByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRoleService)(nil).GetByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRoleService)(nil).GetByID), ctx, id)
 }
 
 // Update mocks base method.

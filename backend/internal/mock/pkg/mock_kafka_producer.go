@@ -1,6 +1,7 @@
 package mock_pkg
 
 import (
+	"context"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -44,17 +45,17 @@ func (mr *MockProducerMockRecorder) Close() *gomock.Call {
 }
 
 // Publish mocks base method.
-func (m *MockProducer) Publish(topic string, message interface{}) error {
+func (m *MockProducer) Publish(ctx context.Context, topic string, message interface{}) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", topic, message)
+	ret := m.ctrl.Call(m, "Publish", ctx, topic, message)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Publish indicates an expected call of Publish.
-func (mr *MockProducerMockRecorder) Publish(topic, message interface{}) *gomock.Call {
+func (mr *MockProducerMockRecorder) Publish(ctx, topic, message interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockProducer)(nil).Publish), topic, message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockProducer)(nil).Publish), ctx, topic, message)
 }
 // Status mocks base method.
 func (m *MockProducer) Status() string {

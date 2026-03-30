@@ -42,14 +42,14 @@ func (s *RoleServiceTestSuite) TestCreate_Success() {
 		PermissionIDs: []uint{1},
 	}
 
-	s.mockRepo.EXPECT().Create(gomock.Any(), req.PermissionIDs).DoAndReturn(func(role *entity.Role, ids []uint) error {
+	s.mockRepo.EXPECT().Create(gomock.Any(), gomock.Any(), req.PermissionIDs).DoAndReturn(func(ctx context.Context, role *entity.Role, ids []uint) error {
 		role.ID = 1
 		role.Name = req.Name
 		return nil
 	})
 
-	s.mockCache.EXPECT().DeletePattern("roles:*").Return(nil)
-	s.mockRepo.EXPECT().FindByID(uint(1)).Return(&entity.Role{ID: 1, Name: "admin"}, nil)
+	s.mockCache.EXPECT().DeletePattern(gomock.Any(), "roles:*").Return(nil)
+	s.mockRepo.EXPECT().FindByID(gomock.Any(), uint(1)).Return(&entity.Role{ID: 1, Name: "admin"}, nil)
 
 	res, err := s.service.Create(context.TODO(), req)
 	s.Require().NoError(err)

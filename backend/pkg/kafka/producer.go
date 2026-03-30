@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -11,7 +12,7 @@ import (
 )
 
 type Producer interface {
-	Publish(topic string, message interface{}) error
+	Publish(ctx context.Context, topic string, message interface{}) error
 	Close() error
 	Status() string
 }
@@ -34,8 +35,12 @@ func NewProducer(cfg *config.Config) (Producer, error) {
 	return &producer{syncProducer: syncProducer}, nil
 }
 
-func (p *producer) Publish(topic string, message interface{}) error {
+func (p *producer) Publish(ctx context.Context, topic string, message interface{}) error {
 	start := time.Now()
+	requestID := ""
+	if rid, ok := ctx.Value(logger.CtxKeyRequestID).(string); ok {
+		requestID = rid
+	}
 	value, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -64,7 +69,8 @@ func (p *producer) Publish(topic string, message interface{}) error {
 		Msg("kafka operation")
 
 	if logger.SystemLogRepo != nil {
-		_ = logger.SystemLogRepo.Create(&logger.SystemLog{
+		_ = logger.SystemLogRepo.Create(ctx, &logger.SystemLog{
+			RequestID:    requestID,
 			Method:       "KAFKA:PUBLISH",
 			Path:         topic,
 			StatusCode:   200,

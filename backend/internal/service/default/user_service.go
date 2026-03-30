@@ -86,10 +86,11 @@ func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	return &dto.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
-		Email:     user.Email,
-		RoleID:    user.RoleID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		Email:        user.Email,
+		RoleID:       user.RoleID,
+		TwoFAEnabled: user.TwoFAEnabled,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}, nil
 }
 
@@ -132,13 +133,15 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 	logger.LogAudit(ctx, "CREATE", "USER", fmt.Sprintf("%d", user.ID), fmt.Sprintf("email: %s, role_id: %d", user.Email, user.RoleID))
 
 	return &dto.UserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		RoleID:    user.RoleID,
-		Status:    user.Status,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		ID:           user.ID,
+		Name:         user.Name,
+		Email:        user.Email,
+		RoleID:       user.RoleID,
+		Role:         user.Role.Name,
+		Status:       user.Status,
+		TwoFAEnabled: user.TwoFAEnabled,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}, nil
 }
 
@@ -172,6 +175,7 @@ func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.AuthUserResp
 		Role:            user.Role.Name,
 		PermissionsMask: permissionsMask,
 		Status:          user.Status,
+		TwoFAEnabled:    user.TwoFAEnabled,
 	}
 
 	// Cache the result
@@ -195,15 +199,17 @@ func (s *userService) GetAll(ctx context.Context, pagination *dto.PaginationRequ
 	}
 
 	var userResponses []dto.UserResponse
-	for _, user := range users {
+	for _, u := range users {
 		userResponses = append(userResponses, dto.UserResponse{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			RoleID:    user.RoleID,
-			Status:    user.Status,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
+			ID:           u.ID,
+			Name:         u.Name,
+			Email:        u.Email,
+			RoleID:       u.RoleID,
+			Role:         u.Role.Name,
+			Status:       u.Status,
+			TwoFAEnabled: u.TwoFAEnabled,
+			CreatedAt:    u.CreatedAt,
+			UpdatedAt:    u.UpdatedAt,
 		})
 	}
 

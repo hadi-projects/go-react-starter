@@ -55,9 +55,10 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	RoleID    uint      `json:"role_id"`
 	Role      string    `json:"role"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Status       string    `json:"status"`
+	TwoFAEnabled bool      `json:"two_fa_enabled"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type ForgotPasswordRequest struct {

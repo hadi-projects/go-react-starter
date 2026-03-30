@@ -136,6 +136,23 @@ const Users = () => {
             ),
         },
         {
+            header: '2FA',
+            render: (row) => (
+                <div className="flex items-center gap-1.5">
+                    {row.two_fa_enabled ? (
+                        <span className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zM10 5a1 1 0 011 1v3.586l2.293 2.293a1 1 0 11-1.414 1.414l-3-3A1 1 0 019 9V6a1 1 0 011-1z" clipRule="evenodd" /></svg>
+                            Active
+                        </span>
+                    ) : (
+                        <span className="text-xs font-medium text-surface-on-variant bg-surface-variant/20 px-2 py-0.5 rounded-full">
+                            Off
+                        </span>
+                    )}
+                </div>
+            )
+        },
+        {
             header: 'Created At',
             render: (row) => new Date(row.created_at).toLocaleDateString(),
         },

@@ -50,8 +50,8 @@ func NewAuthService(
 }
 
 func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
-	// 1. Find user by email
-	user, err := s.userRepo.FindByEmail(req.Email)
+	// 1. Find user by email (simple, no preloads)
+	user, err := s.userRepo.FindByEmailSimple(req.Email)
 	if err != nil {
 		return nil, errors.New("invalid email or password")
 	}
@@ -62,7 +62,14 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 		return nil, errors.New("invalid email or password")
 	}
 
-	// 3. Generate JWT Token
+	// 3. Fetch full user data including Role and Permissions for Token generation
+	fullUser, err := s.userRepo.FindByID(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	user = fullUser
+
+	// 4. Generate JWT Token
 	var permissions []string
 	for _, p := range user.Role.Permissions {
 		permissions = append(permissions, p.Name)
@@ -85,7 +92,7 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	// Audit login
 	logger.LogAudit(context.WithValue(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), logger.CtxKeyUserEmail, user.Email), "LOGIN", "AUTH", fmt.Sprintf("%d", user.ID), "")
 
-	// 4. Return response
+	// 5. Return response
 	return &dto.LoginResponse{
 		AccessToken:  signedToken,
 		RefreshToken: "refresh-token-placeholder", // TODO: Implement refresh token

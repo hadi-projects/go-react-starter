@@ -11,6 +11,7 @@ type UserRepository interface {
 	FindAll(pagination *dto.PaginationRequest) ([]entity.User, int64, error)
 	FindByID(id uint) (*entity.User, error)
 	FindByEmail(email string) (*entity.User, error)
+	FindByEmailSimple(email string) (*entity.User, error)
 	FindRoleByName(name string) (*entity.Role, error)
 	Update(user *entity.User) error
 	Delete(id uint) error
@@ -65,6 +66,15 @@ func (r *userRepository) FindByID(id uint) (*entity.User, error) {
 func (r *userRepository) FindByEmail(email string) (*entity.User, error) {
 	var user entity.User
 	err := r.db.Preload("Role.Permissions").Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) FindByEmailSimple(email string) (*entity.User, error) {
+	var user entity.User
+	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

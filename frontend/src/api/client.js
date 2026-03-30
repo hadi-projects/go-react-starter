@@ -27,7 +27,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
+        const originalRequest = error.config;
+        
+        if (error.response?.status === 401 && !originalRequest.url.includes('/auth/login')) {
             // Attempt to log logout before clearing token
             try {
                 const logoutApi = (await import('./auth')).logoutApi;

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 )
 
@@ -46,12 +47,12 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	truncatedSQL := Truncate(sql, 65536)
 
 	status := 200
-	if err != nil {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		status = 500
 	}
 
 	event := l.Zerolog.Info()
-	if err != nil {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		event = l.Zerolog.Error().Err(err)
 	}
 

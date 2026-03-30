@@ -1,8 +1,10 @@
 package repository
 
 import (
+	"context"
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
-	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
+	"github.com/hadi-projects/go-react-starter/internal/entity/default"
+	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +22,8 @@ func NewHttpLogRepository(db *gorm.DB) HttpLogRepository {
 }
 
 func (r *httpLogRepository) Create(log *entity.HttpLog) error {
-	return r.db.Create(log).Error
+	ctx := context.WithValue(context.Background(), logger.CtxKeySkipLogging, true)
+	return r.db.WithContext(ctx).Create(log).Error
 }
 
 func (r *httpLogRepository) FindAll(query *dto.HttpLogQuery) ([]entity.HttpLog, int64, error) {

@@ -139,3 +139,10 @@ Key environment variables used in `backend/.env`:
 - `make docker-logs`: View container logs
 - `make docker-migrate`: Run database migrations (Docker)
 - `make docker-seed`: Run database seeder (Docker)
+
+
+## BUGS
+1. login with invalid password will crash the query
+
+## TODO
+1. Implement reset password

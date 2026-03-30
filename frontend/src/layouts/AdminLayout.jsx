@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Button from '../components/Button';
 import { getHealthStatus, getMe } from '../api/admin';
@@ -231,9 +231,13 @@ const AdminLayout = () => {
                             <span className="text-sm font-medium text-surface-on">{user.email}</span>
                             <span className="text-[11px] text-surface-on-variant font-medium">System Administrator</span>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary-on-container border border-primary/20 cursor-pointer hover:bg-primary-container/80 transition-all">
+                        <Link
+                            to="/profile"
+                            className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary-on-container border border-primary/20 cursor-pointer hover:bg-primary-container/80 transition-all"
+                            title="My Profile"
+                        >
                             {user.email.charAt(0).toUpperCase()}
-                        </div>
+                        </Link>
                     </div>
                 </header>
 

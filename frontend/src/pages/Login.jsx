@@ -21,13 +21,18 @@ const Login = () => {
             return response.data;
         },
         onSuccess: (data) => {
-            // Save access token to localStorage
+            // Check if 2FA is required
+            if (data.data.requires_2fa) {
+                // Navigate to 2FA challenge with temp token
+                navigate('/2fa-challenge', { state: { tempToken: data.data.temp_token } });
+                return;
+            }
+            // Normal login: Save tokens and redirect
             localStorage.setItem('token', data.data.access_token);
             if (data.data.refresh_token) {
                 localStorage.setItem('refresh_token', data.data.refresh_token);
             }
             localStorage.setItem('user', JSON.stringify(data.data.user));
-            // Redirect to dashboard or home
             navigate('/dashboard');
         },
         onError: (error) => {

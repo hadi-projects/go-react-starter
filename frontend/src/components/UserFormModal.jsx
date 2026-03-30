@@ -10,6 +10,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
         email: '',
         password: '',
         role_id: 2,
+        status: 'active',
     });
     const [errors, setErrors] = useState({});
 
@@ -19,12 +20,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
                 email: user.email || '',
                 password: '',
                 role_id: user.role_id || 2,
+                status: user.status || 'active',
             });
         } else {
             setFormData({
                 email: '',
                 password: '',
                 role_id: 2,
+                status: 'active',
             });
         }
         setErrors({});
@@ -117,6 +120,22 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
                         >
                             <option value={1}>Admin (1)</option>
                             <option value={2}>User (2)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="text-field-label">
+                            Status
+                        </label>
+                        <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                            className="text-field"
+                        >
+                            <option value="active">Active</option>
+                            <option value="freezed">Freezed</option>
+                            <option value="pending">Pending</option>
                         </select>
                     </div>
                 </div>

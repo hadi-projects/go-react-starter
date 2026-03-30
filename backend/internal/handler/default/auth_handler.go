@@ -16,6 +16,10 @@ type AuthHandler interface {
 	ResetPassword(c *gin.Context)
 	Logout(c *gin.Context)
 	RefreshToken(c *gin.Context)
+	Verify2FA(c *gin.Context)
+	Enroll2FA(c *gin.Context)
+	Confirm2FA(c *gin.Context)
+	Disable2FA(c *gin.Context)
 }
 
 type authHandler struct {
@@ -37,7 +41,7 @@ func (h *authHandler) Login(c *gin.Context) {
 	res, err := h.service.Login(c.Request.Context(), loginReq)
 	if err != nil {
 		logger.WithCtx(c, logger.SystemLogger).Error().Err(err).Msg("Login failed: service error")
-		response.Error(c, http.StatusUnauthorized, "Invalid email or password")
+		response.Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -105,4 +109,56 @@ func (h *authHandler) RefreshToken(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Token refreshed", res)
+}
+
+func (h *authHandler) Verify2FA(c *gin.Context) {
+	var req dto.TwoFAVerifyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	res, err := h.service.Verify2FA(c.Request.Context(), req)
+	if err != nil {
+		response.Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "2FA verified successfully", res)
+}
+
+func (h *authHandler) Enroll2FA(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	res, err := h.service.Enroll2FA(c.Request.Context(), userID.(uint))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "2FA enrollment started", res)
+}
+
+func (h *authHandler) Confirm2FA(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	var req dto.TwoFAConfirmRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.service.Confirm2FA(c.Request.Context(), userID.(uint), req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "2FA enabled successfully", nil)
+}
+
+func (h *authHandler) Disable2FA(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	var req dto.TwoFADisableRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.service.Disable2FA(c.Request.Context(), userID.(uint), req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "2FA disabled successfully", nil)
 }

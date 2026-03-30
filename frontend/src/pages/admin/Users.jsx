@@ -124,6 +124,18 @@ const Users = () => {
             render: (row) => rolesMap[row.role_id] || `Role ${row.role_id}`
         },
         {
+            header: 'Status',
+            render: (row) => (
+                <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${
+                    row.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    row.status === 'freezed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                }`}>
+                    {row.status ? row.status.charAt(0).toUpperCase() + row.status.slice(1) : 'Active'}
+                </span>
+            ),
+        },
+        {
             header: 'Created At',
             render: (row) => new Date(row.created_at).toLocaleDateString(),
         },

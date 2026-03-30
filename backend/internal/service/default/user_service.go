@@ -66,6 +66,7 @@ func (s *userService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		RoleID:   roleID,
+		Status:   "active",
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
@@ -104,10 +105,16 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 		return nil, err
 	}
 
+	status := "active"
+	if req.Status != "" {
+		status = req.Status
+	}
+
 	user := &entity.User{
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		RoleID:   req.RoleID,
+		Status:   status,
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
@@ -129,6 +136,7 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 		Name:      user.Name,
 		Email:     user.Email,
 		RoleID:    user.RoleID,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}, nil
@@ -163,6 +171,7 @@ func (s *userService) GetMe(ctx context.Context, userID uint) (*dto.AuthUserResp
 		RoleID:          user.RoleID,
 		Role:            user.Role.Name,
 		PermissionsMask: permissionsMask,
+		Status:          user.Status,
 	}
 
 	// Cache the result
@@ -192,6 +201,7 @@ func (s *userService) GetAll(ctx context.Context, pagination *dto.PaginationRequ
 			Name:      user.Name,
 			Email:     user.Email,
 			RoleID:    user.RoleID,
+			Status:    user.Status,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 		})
@@ -235,6 +245,9 @@ func (s *userService) Update(ctx context.Context, id uint, req dto.UpdateUserReq
 	}
 	if req.RoleID != 0 {
 		user.RoleID = req.RoleID
+	}
+	if req.Status != "" {
+		user.Status = req.Status
 	}
 
 	if err := s.userRepo.Update(ctx, user); err != nil {
@@ -298,7 +311,7 @@ func (s *userService) generateCSV(users []entity.User) ([]byte, string, error) {
 	writer := csv.NewWriter(buf)
 
 	// Header
-	header := []string{"ID", "Name", "Email", "Role", "Created At"}
+	header := []string{"ID", "Name", "Email", "Role", "Status", "Created At"}
 	if err := writer.Write(header); err != nil {
 		return nil, "", err
 	}
@@ -310,6 +323,7 @@ func (s *userService) generateCSV(users []entity.User) ([]byte, string, error) {
 			user.Name,
 			user.Email,
 			user.Role.Name,
+			user.Status,
 			user.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 		if err := writer.Write(row); err != nil {
@@ -338,7 +352,7 @@ func (s *userService) generateExcel(users []entity.User) ([]byte, string, error)
 	f.DeleteSheet("Sheet1")
 
 	// Header
-	headers := []string{"ID", "Name", "Email", "Role", "Created At"}
+	headers := []string{"ID", "Name", "Email", "Role", "Status", "Created At"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -351,6 +365,7 @@ func (s *userService) generateExcel(users []entity.User) ([]byte, string, error)
 			user.Name,
 			user.Email,
 			user.Role.Name,
+			user.Status,
 			user.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 		for j, val := range row {

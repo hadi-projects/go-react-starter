@@ -15,6 +15,8 @@ import HttpLogs from './pages/admin/HttpLogs'
 import GeneratorPage from './pages/admin/GeneratorPage'
 import { ThemeProvider } from './context/ThemeContext'
 import ProdukPage from './pages/admin/ProdukPage';
+import TwoFAChallengePage from './pages/TwoFAChallengePage';
+import ProfilePage from './pages/admin/ProfilePage';
 
 // [GENERATOR_INSERT_IMPORT]
 
@@ -28,6 +30,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/2fa-challenge" element={<TwoFAChallengePage />} />
 
         {/* Admin Routes with Sidebar */}
         <Route path="/" element={<AdminLayout />}>
@@ -41,6 +44,7 @@ function App() {
           <Route path="admin/logs/:type" element={<Logs />} />
           <Route path="admin/generator" element={<GeneratorPage />} />
           <Route path="admin/produk" element={<ProdukPage />} />
+          <Route path="profile" element={<ProfilePage />} />
 					// [GENERATOR_INSERT_ROUTE]
         </Route>
       </Routes>

@@ -12,9 +12,11 @@ import (
 	dto "github.com/hadi-projects/go-react-starter/internal/dto/default"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
+	"github.com/hadi-projects/go-react-starter/pkg/cache"
 	"github.com/hadi-projects/go-react-starter/pkg/kafka"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"github.com/hadi-projects/go-react-starter/pkg/mailer"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,6 +26,10 @@ type AuthService interface {
 	ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error
 	Logout(ctx context.Context, req dto.LogoutRequest) error
 	RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (*dto.LoginResponse, error)
+	Enroll2FA(ctx context.Context, userID uint) (*dto.TwoFAEnrollResponse, error)
+	Confirm2FA(ctx context.Context, userID uint, req dto.TwoFAConfirmRequest) error
+	Disable2FA(ctx context.Context, userID uint, req dto.TwoFADisableRequest) error
+	Verify2FA(ctx context.Context, req dto.TwoFAVerifyRequest) (*dto.LoginResponse, error)
 }
 
 type authService struct {
@@ -32,6 +38,7 @@ type authService struct {
 	producer  kafka.Producer
 	mailer    mailer.Mailer
 	config    *config.Config
+	cache     cache.CacheService
 }
 
 func NewAuthService(
@@ -40,6 +47,7 @@ func NewAuthService(
 	producer kafka.Producer,
 	mailer mailer.Mailer,
 	config *config.Config,
+	cache cache.CacheService,
 ) AuthService {
 	return &authService{
 		userRepo:  userRepo,
@@ -47,6 +55,7 @@ func NewAuthService(
 		producer:  producer,
 		mailer:    mailer,
 		config:    config,
+		cache:     cache,
 	}
 }
 
@@ -57,6 +66,12 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 		return nil, errors.New("invalid email or password")
 	}
 
+	if user.Status == "freezed" {
+		return nil, errors.New("your account is frozen, please contact administrator")
+	}
+	if user.Status == "pending" {
+		return nil, errors.New("your account is pending approval")
+	}
 	// 2. Verify password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
@@ -71,6 +86,18 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	user = fullUser
 
 	// 4. Generate JWT Tokens
+	// 4a. If 2FA is enabled, issue a temp token instead of JWT
+	if user.TwoFAEnabled {
+		tempToken := uuid.New().String()
+		tempKey := "2fa_temp:" + tempToken
+		s.cache.Set(ctx, tempKey, fmt.Sprintf("%d", user.ID), 5*time.Minute)
+		return &dto.LoginResponse{
+			Requires2FA: true,
+			TempToken:   tempToken,
+		}, nil
+	}
+
+	// 4b. No 2FA: Generate JWT Tokens directly
 	var permissionsMask uint64
 	for _, p := range user.Role.Permissions {
 		if p.ID <= 64 {
@@ -86,13 +113,10 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	var refreshTokenStr string
 	if req.RememberMe {
 		refreshTokenStr = uuid.New().String()
-		expirationDays := 7 // Default 7 days
+		expirationDays := 7
 		if s.config.JWT.RefreshExpirationTime != "" {
 			fmt.Sscanf(s.config.JWT.RefreshExpirationTime, "%dh", &expirationDays)
-			// This is a simple parser, usually it would be "168h" (7 days)
-			// Let's assume it's in hours for now or just hardcode for simplicity if parsing fails
 		}
-
 		expiresAt := time.Now().Add(time.Hour * time.Duration(24*expirationDays))
 		rt := &entity.RefreshToken{
 			UserID:    user.ID,
@@ -104,28 +128,30 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 		}
 	}
 
-	// Audit login
 	logger.LogAudit(context.WithValue(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), logger.CtxKeyUserEmail, user.Email), "LOGIN", "AUTH", fmt.Sprintf("%d", user.ID), fmt.Sprintf("RememberMe: %v", req.RememberMe))
 
 	// 5. Return response
+	userResp := &dto.AuthUserResponse{
+		ID:              user.ID,
+		Name:            user.Name,
+		Email:           user.Email,
+		RoleID:          user.RoleID,
+		Role:            user.Role.Name,
+		PermissionsMask: permissionsMask,
+		Status:          user.Status,
+		TwoFAEnabled:    user.TwoFAEnabled,
+	}
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshTokenStr,
-		User: dto.AuthUserResponse{
-			ID:              user.ID,
-			Name:            user.Name,
-			Email:           user.Email,
-			RoleID:          user.RoleID,
-			Role:            user.Role.Name,
-			PermissionsMask: permissionsMask,
-		},
+		User:         userResp,
 	}, nil
 }
 
 func (s *authService) generateAccessToken(user *entity.User, permissionsMask uint64) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":         user.ID,
-		"email":       user.Email,
+		"sub":              user.ID,
+		"email":            user.Email,
 		"role":             user.Role.Name,
 		"permissions_mask": permissionsMask,
 		"exp":              time.Now().Add(time.Minute * 15).Unix(), // 15 minutes
@@ -148,6 +174,13 @@ func (s *authService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 		return nil, errors.New("refresh token expired")
 	}
 
+	if rt.User.Status == "freezed" {
+		return nil, errors.New("your account is frozen, please contact administrator")
+	}
+	if rt.User.Status == "pending" {
+		return nil, errors.New("your account is pending approval")
+	}
+
 	// 3. Generate new Access Token
 	var permissionsMask uint64
 	for _, p := range rt.User.Role.Permissions {
@@ -162,17 +195,20 @@ func (s *authService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 	}
 
 	// 4. Return response
+	userResp := &dto.AuthUserResponse{
+		ID:              rt.User.ID,
+		Name:            rt.User.Name,
+		Email:           rt.User.Email,
+		RoleID:          rt.User.RoleID,
+		Role:            rt.User.Role.Name,
+		PermissionsMask: permissionsMask,
+		Status:          rt.User.Status,
+		TwoFAEnabled:    rt.User.TwoFAEnabled,
+	}
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
-		RefreshToken: rt.Token, // Reuse same refresh token
-		User: dto.AuthUserResponse{
-			ID:              rt.User.ID,
-			Name:            rt.User.Name,
-			Email:           rt.User.Email,
-			RoleID:          rt.User.RoleID,
-			Role:            rt.User.Role.Name,
-			PermissionsMask: permissionsMask,
-		},
+		RefreshToken: rt.Token,
+		User:         userResp,
 	}, nil
 }
 
@@ -289,4 +325,140 @@ func (s *authService) Logout(ctx context.Context, req dto.LogoutRequest) error {
 	logger.LogAudit(ctx, "LOGOUT", "AUTH", fmt.Sprintf("%d", userID), fmt.Sprintf("reason: %s", req.Reason))
 
 	return nil
+}
+
+// Enroll2FA generates a new TOTP secret for the user (does not activate 2FA yet)
+func (s *authService) Enroll2FA(ctx context.Context, userID uint) (*dto.TwoFAEnrollResponse, error) {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	if user.TwoFAEnabled {
+		return nil, errors.New("2FA is already enabled")
+	}
+
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "GoReactApp",
+		AccountName: user.Email,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Save the secret (not enabled yet, needs confirmation)
+	user.TwoFASecret = key.Secret()
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return &dto.TwoFAEnrollResponse{
+		Secret: key.Secret(),
+		QRURL:  key.URL(),
+	}, nil
+}
+
+// Confirm2FA activates 2FA after verifying the first code
+func (s *authService) Confirm2FA(ctx context.Context, userID uint, req dto.TwoFAConfirmRequest) error {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	if user.TwoFAEnabled {
+		return errors.New("2FA is already enabled")
+	}
+	if user.TwoFASecret == "" {
+		return errors.New("no 2FA secret found, please enroll first")
+	}
+
+	// Validate TOTP code
+	valid := totp.Validate(req.Code, user.TwoFASecret)
+	if !valid {
+		return errors.New("invalid 2FA code")
+	}
+
+	user.TwoFAEnabled = true
+	return s.userRepo.Update(ctx, user)
+}
+
+// Disable2FA verifies the code then turns off 2FA
+func (s *authService) Disable2FA(ctx context.Context, userID uint, req dto.TwoFADisableRequest) error {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	if !user.TwoFAEnabled {
+		return errors.New("2FA is not enabled")
+	}
+
+	// Validate TOTP code
+	valid := totp.Validate(req.Code, user.TwoFASecret)
+	if !valid {
+		return errors.New("invalid 2FA code")
+	}
+
+	user.TwoFAEnabled = false
+	user.TwoFASecret = ""
+	user.TwoFACounter = 0
+	return s.userRepo.Update(ctx, user)
+}
+
+// Verify2FA exchanges a temp_token + code for a real JWT
+func (s *authService) Verify2FA(ctx context.Context, req dto.TwoFAVerifyRequest) (*dto.LoginResponse, error) {
+	tempKey := "2fa_temp:" + req.TempToken
+	var userIDStr string
+	if err := s.cache.Get(ctx, tempKey, &userIDStr); err != nil || userIDStr == "" {
+		return nil, errors.New("invalid or expired 2FA session, please login again")
+	}
+
+	var userID uint
+	fmt.Sscanf(userIDStr, "%d", &userID)
+
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// Validate TOTP code
+	valid := totp.Validate(req.Code, user.TwoFASecret)
+	if !valid {
+		return nil, errors.New("invalid 2FA code")
+	}
+
+	// Delete the temp token
+	s.cache.Delete(ctx, tempKey)
+
+	// Generate the full JWT
+	return s.generateLoginResponse(ctx, user)
+}
+
+// Helper to generate standard login response with audit logging
+func (s *authService) generateLoginResponse(ctx context.Context, user *entity.User) (*dto.LoginResponse, error) {
+	var permissionsMask uint64
+	for _, p := range user.Role.Permissions {
+		if p.ID <= 64 {
+			permissionsMask |= (1 << (p.ID - 1))
+		}
+	}
+
+	accessToken, err := s.generateAccessToken(user, permissionsMask)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.LogAudit(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), "LOGIN_2FA", "AUTH", fmt.Sprintf("%d", user.ID), "")
+
+	userResp := &dto.AuthUserResponse{
+		ID:              user.ID,
+		Name:            user.Name,
+		Email:           user.Email,
+		RoleID:          user.RoleID,
+		Role:            user.Role.Name,
+		PermissionsMask: permissionsMask,
+		Status:          user.Status,
+		TwoFAEnabled:    user.TwoFAEnabled,
+	}
+	return &dto.LoginResponse{
+		AccessToken: accessToken,
+		User:        userResp,
+	}, nil
 }

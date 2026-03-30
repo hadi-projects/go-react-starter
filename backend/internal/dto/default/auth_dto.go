@@ -13,9 +13,11 @@ type RefreshTokenRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken  string           `json:"access_token"`
-	RefreshToken string           `json:"refresh_token"`
-	User         AuthUserResponse `json:"user"`
+	AccessToken  string           `json:"access_token,omitempty"`
+	RefreshToken string           `json:"refresh_token,omitempty"`
+	User         *AuthUserResponse `json:"user,omitempty"`
+	Requires2FA  bool             `json:"requires_2fa,omitempty"`
+	TempToken    string           `json:"temp_token,omitempty"`
 }
 
 type AuthUserResponse struct {
@@ -25,6 +27,26 @@ type AuthUserResponse struct {
 	RoleID          uint   `json:"role_id"`
 	Role            string `json:"role"`
 	PermissionsMask uint64 `json:"permissions_mask"`
+	Status          string `json:"status"`
+	TwoFAEnabled    bool   `json:"two_fa_enabled"`
+}
+
+type TwoFAEnrollResponse struct {
+	Secret string `json:"secret"`
+	QRURL  string `json:"qr_url"`
+}
+
+type TwoFAVerifyRequest struct {
+	TempToken string `json:"temp_token" binding:"required"`
+	Code      string `json:"code" binding:"required"`
+}
+
+type TwoFAConfirmRequest struct {
+	Code string `json:"code" binding:"required"`
+}
+
+type TwoFADisableRequest struct {
+	Code string `json:"code" binding:"required"`
 }
 
 type UserResponse struct {
@@ -33,6 +55,7 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	RoleID    uint      `json:"role_id"`
 	Role      string    `json:"role"`
+	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

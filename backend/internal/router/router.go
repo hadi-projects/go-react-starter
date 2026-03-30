@@ -77,7 +77,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
-	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config)
+	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config, r.cache)
 	userService := service.NewUserService(userRepo, r.config, r.cache)
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)

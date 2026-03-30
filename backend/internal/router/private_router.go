@@ -56,6 +56,11 @@ func (r *Router) setupPrivateRoutes(
 		auth.POST("/forgot-password", authHandler.ForgotPassword)
 		auth.POST("/reset-password", authHandler.ResetPassword)
 		auth.POST("/refresh", authHandler.RefreshToken)
+		// 2FA routes
+		auth.POST("/2fa/verify", authHandler.Verify2FA) // Public: no JWT needed
+		auth.POST("/2fa/enroll", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Enroll2FA)
+		auth.POST("/2fa/confirm", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Confirm2FA)
+		auth.DELETE("/2fa/disable", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Disable2FA)
 	}
 
 	logs := v1.Group("/logs")

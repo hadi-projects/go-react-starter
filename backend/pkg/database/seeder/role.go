@@ -28,10 +28,19 @@ var defaultRoles = []RolePermission{
 	{Role: "admin", Permission: "get-all-logs"},
 	{Role: "admin", Permission: "get-http-log"},
 	{Role: "admin", Permission: "create-module"},
+	{Role: "admin", Permission: "upload-file"},
+	{Role: "admin", Permission: "get-file"},
+	{Role: "admin", Permission: "delete-file"},
+	{Role: "admin", Permission: "share-file"},
+	{Role: "admin", Permission: "manage-storage"},
 	{Role: "auditor", Permission: "get-audit-log"},
 	{Role: "auditor", Permission: "get-auth-log"},
 	{Role: "auditor", Permission: "get-own-logs"},
 	{Role: "user", Permission: "get-profile"}, // Basic user role
+	{Role: "user", Permission: "upload-file"},
+	{Role: "user", Permission: "get-file"},
+	{Role: "user", Permission: "delete-file"},
+	{Role: "user", Permission: "share-file"},
 }
 
 func SeedRole(db *gorm.DB) {

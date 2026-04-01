@@ -26,6 +26,12 @@ type Config struct {
 	Mail      MailConfig
 	Kafka     KafkaConfig
 	Frontend  FrontendConfig
+	Storage   StorageConfig
+}
+
+type StorageConfig struct {
+	BasePath      string
+	MaxFileSizeMB int64
 }
 
 type MailConfig struct {
@@ -47,6 +53,8 @@ type FrontendConfig struct {
 
 func LoadConfig() (config Config) {
 	viper.SetDefault("LOG_DIR", "./storage/logs")
+	viper.SetDefault("STORAGE_BASE_PATH", "./storage/uploads")
+	viper.SetDefault("STORAGE_MAX_FILE_SIZE_MB", 50)
 	viper.SetDefault("DB_MAX_IDLE_CONNS", 10)
 	viper.SetDefault("DB_MAX_OPEN_CONNS", 100)
 	viper.SetDefault("DB_MAX_LIFETIME", 60) // minutes
@@ -103,6 +111,8 @@ func LoadConfig() (config Config) {
 		"KAFKA_BROKERS",
 		"KAFKA_TOPIC",
 		"FRONTEND_URL",
+		"STORAGE_BASE_PATH",
+		"STORAGE_MAX_FILE_SIZE_MB",
 	}
 
 	for _, envVar := range envVars {
@@ -189,6 +199,11 @@ func LoadConfig() (config Config) {
 
 	config.Frontend = FrontendConfig{
 		URL: viper.GetString("FRONTEND_URL"),
+	}
+
+	config.Storage = StorageConfig{
+		BasePath:      viper.GetString("STORAGE_BASE_PATH"),
+		MaxFileSizeMB: viper.GetInt64("STORAGE_MAX_FILE_SIZE_MB"),
 	}
 
 	return config

@@ -21,6 +21,7 @@ func (r *Router) setupPrivateRoutes(
 	auditLogHandler handler.AuditLogHandler,
 	generatorHandler handler.GeneratorHandler,
 	produkHandler customHandler.ProdukHandler,
+	storageHandler customHandler.StorageHandler,
 	healthHandler handler.HealthHandler,
 	permGuard *middleware.PermissionGuard,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
@@ -37,6 +38,29 @@ func (r *Router) setupPrivateRoutes(
 	{
 		generator.POST("", permGuard.Check("create-module"), generatorHandler.Generate)
 	}
+	// Storage routes (authenticated)
+	storageGroup := v1.Group("/storage")
+	storageGroup.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		storageGroup.POST("/upload", permGuard.Check("upload-file"), storageHandler.Upload)
+		storageGroup.GET("", permGuard.Check("get-file"), storageHandler.GetFiles)
+		storageGroup.GET("/:id", permGuard.Check("get-file"), storageHandler.GetFileByID)
+		storageGroup.DELETE("/:id", permGuard.Check("delete-file"), storageHandler.DeleteFile)
+		storageGroup.GET("/:id/download", permGuard.Check("get-file"), storageHandler.DownloadFile)
+		storageGroup.POST("/:id/share", permGuard.Check("share-file"), storageHandler.CreateShareLink)
+		storageGroup.GET("/:id/shares", permGuard.Check("share-file"), storageHandler.GetShareLinks)
+		storageGroup.PUT("/shares/:shareId", permGuard.Check("share-file"), storageHandler.UpdateShareLink)
+		storageGroup.DELETE("/shares/:shareId", permGuard.Check("share-file"), storageHandler.RevokeShareLink)
+		storageGroup.GET("/shares/:shareId/logs", permGuard.Check("share-file"), storageHandler.GetShareLinkLogs)
+	}
+
+	// Public share routes (no auth required)
+	publicGroup := v1.Group("/public")
+	{
+		publicGroup.GET("/share/:token", storageHandler.PublicFileInfo)
+		publicGroup.GET("/share/:token/download", storageHandler.PublicDownload)
+	}
+
 	produk := v1.Group("/produk")
 	produk.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
 	{

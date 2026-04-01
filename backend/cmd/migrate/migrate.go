@@ -30,6 +30,9 @@ func main() {
 		&entity.AuditLog{},
 		&entity.RefreshToken{},
 		&customEntity.Produk{},
+		&customEntity.StorageFile{},
+		&customEntity.ShareLink{},
+		&customEntity.ShareLinkAccess{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

@@ -15,6 +15,7 @@ import (
 	handler "github.com/hadi-projects/go-react-starter/internal/handler/default"
 	"github.com/hadi-projects/go-react-starter/internal/middleware"
 	customRepository "github.com/hadi-projects/go-react-starter/internal/repository"
+	"github.com/hadi-projects/go-react-starter/pkg/storage"
 	repository "github.com/hadi-projects/go-react-starter/internal/repository/default"
 	customService "github.com/hadi-projects/go-react-starter/internal/service"
 	service "github.com/hadi-projects/go-react-starter/internal/service/default"
@@ -74,6 +75,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	roleRepo := repository.NewRoleRepository(db)
 	tokenRepo := repository.NewTokenRepository(db)
 	produkRepo := customRepository.NewProdukRepository(db)
+	storageFileRepo := customRepository.NewStorageFileRepository(db)
+	shareLinkRepo := customRepository.NewShareLinkRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
@@ -87,6 +90,15 @@ func (r *Router) SetupRouter() *gin.Engine {
 	systemLogService := service.NewSystemLogService(systemLogRepo, r.cache)
 	auditLogService := service.NewAuditLogService(auditLogRepo, r.cache)
 	produkService := customService.NewProdukService(produkRepo, r.cache)
+	storageDriver := storage.NewLocalDriver(r.config.Storage.BasePath)
+	storageService := customService.NewStorageService(
+		storageFileRepo,
+		shareLinkRepo,
+		storageDriver,
+		r.cache,
+		r.config.Frontend.URL,
+		r.config.Storage.MaxFileSizeMB,
+	)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -102,6 +114,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	auditLogHandler := handler.NewAuditLogHandler(auditLogService)
 	generatorHandler := handler.NewGeneratorHandler(".", db)
 	produkHandler := customHandler.NewProdukHandler(produkService)
+	storageHandler := customHandler.NewStorageHandler(storageService)
 	healthHandler := handler.NewHealthHandler(r.cache, r.kafkaProducer)
 	// [GENERATOR_INSERT_HANDLER]
 
@@ -111,6 +124,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 
 			generatorHandler,
 			produkHandler,
+			storageHandler,
 			healthHandler,
 			middleware.NewPermissionGuard(r.cache, permissionRepo),
 		// [GENERATOR_INSERT_HANDLER_PARAM]

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/hadi-projects/go-react-starter/config"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 	"github.com/hadi-projects/go-react-starter/pkg/mailer"
 )
@@ -13,7 +14,7 @@ type ResetPasswordPayload struct {
 	Token string `json:"token"`
 }
 
-func ProcessResetPassword(payload []byte, mailService mailer.Mailer) error {
+func ProcessResetPassword(payload []byte, cfg *config.Config, mailService mailer.Mailer) error {
 	var data ResetPasswordPayload
 	if err := json.Unmarshal(payload, &data); err != nil {
 		return err
@@ -28,8 +29,16 @@ func ProcessResetPassword(payload []byte, mailService mailer.Mailer) error {
 		Str("request_body", string(payload)).
 		Msg("worker operation")
 
-	// Construct reset link
-	resetLink := "http://localhost:3000/reset-password?token=" + data.Token
+	// Construct reset link using configuration
+	frontendURL := cfg.Frontend.URL
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+	resetLink := frontendURL + "/reset-password?token=" + data.Token
+	
+	// Debug log to verify the generated link
+	logger.SystemLogger.Info().Str("reset_link", resetLink).Msg("Generated Reset Password Link")
+	
 	body := mailer.GetResetPasswordEmailNative(resetLink)
 
 	if err := mailService.SendEmail(context.Background(), data.Email, "Reset Password Request", body); err != nil {

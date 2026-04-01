@@ -51,7 +51,7 @@ func main() {
 	logger.SystemLogger.Info().Str("topic", topic).Msg("Listening for messages...")
 
 	err = consumer.Consume(ctx, topic, func(message []byte) error {
-		return worker.ProcessResetPassword(message, mailService)
+		return worker.ProcessResetPassword(message, &cfg, mailService)
 	})
 
 	if err != nil {

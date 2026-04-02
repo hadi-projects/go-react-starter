@@ -29,6 +29,7 @@ func main() {
 		&entity.SystemLog{},
 		&entity.AuditLog{},
 		&entity.RefreshToken{},
+		&entity.TwoFAResetToken{},
 		&customEntity.Produk{},
 		&customEntity.StorageFile{},
 		&customEntity.ShareLink{},

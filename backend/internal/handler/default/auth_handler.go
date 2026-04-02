@@ -20,6 +20,8 @@ type AuthHandler interface {
 	Enroll2FA(c *gin.Context)
 	Confirm2FA(c *gin.Context)
 	Disable2FA(c *gin.Context)
+	Request2FAReset(c *gin.Context)
+	Confirm2FAReset(c *gin.Context)
 }
 
 type authHandler struct {
@@ -161,4 +163,30 @@ func (h *authHandler) Disable2FA(c *gin.Context) {
 		return
 	}
 	response.Success(c, http.StatusOK, "2FA disabled successfully", nil)
+}
+
+func (h *authHandler) Request2FAReset(c *gin.Context) {
+	var req dto.TwoFAResetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.service.Request2FAReset(c.Request.Context(), req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "If valid, a reset link has been sent to your email.", nil)
+}
+
+func (h *authHandler) Confirm2FAReset(c *gin.Context) {
+	var req dto.TwoFAResetConfirmRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.service.Confirm2FAReset(c.Request.Context(), req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "2FA disabled successfully. You can now login.", nil)
 }

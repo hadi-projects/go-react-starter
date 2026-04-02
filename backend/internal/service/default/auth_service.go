@@ -30,6 +30,8 @@ type AuthService interface {
 	Confirm2FA(ctx context.Context, userID uint, req dto.TwoFAConfirmRequest) error
 	Disable2FA(ctx context.Context, userID uint, req dto.TwoFADisableRequest) error
 	Verify2FA(ctx context.Context, req dto.TwoFAVerifyRequest) (*dto.LoginResponse, error)
+	Request2FAReset(ctx context.Context, req dto.TwoFAResetRequest) error
+	Confirm2FAReset(ctx context.Context, req dto.TwoFAResetConfirmRequest) error
 }
 
 type authService struct {
@@ -461,4 +463,81 @@ func (s *authService) generateLoginResponse(ctx context.Context, user *entity.Us
 		AccessToken: accessToken,
 		User:        userResp,
 	}, nil
+}
+
+func (s *authService) Request2FAReset(ctx context.Context, req dto.TwoFAResetRequest) error {
+	tempKey := "2fa_temp:" + req.TempToken
+	var userIDStr string
+	if err := s.cache.Get(ctx, tempKey, &userIDStr); err != nil || userIDStr == "" {
+		return errors.New("invalid or expired 2FA session")
+	}
+
+	var userID uint
+	fmt.Sscanf(userIDStr, "%d", &userID)
+
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	// Delete any existing reset tokens
+	s.tokenRepo.DeleteTwoFAResetTokenByUserID(ctx, user.ID)
+
+	token := uuid.New().String()
+	expiresAt := time.Now().Add(15 * time.Minute)
+
+	resetToken := &entity.TwoFAResetToken{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	}
+
+	if err := s.tokenRepo.CreateTwoFAResetToken(ctx, resetToken); err != nil {
+		return err
+	}
+
+	frontendURL := s.config.Frontend.URL
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+	resetLink := frontendURL + "/twofa/reset-confirm?token=" + token
+
+	go func() {
+		body := mailer.GetTwoFAResetEmailNative(resetLink)
+		if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Two-Factor Authentication", body); err != nil {
+			logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send 2FA reset email")
+		} else {
+			logger.SystemLogger.Info().Str("email", user.Email).Msg("2FA reset email sent successfully")
+		}
+	}()
+
+	return nil
+}
+
+func (s *authService) Confirm2FAReset(ctx context.Context, req dto.TwoFAResetConfirmRequest) error {
+	resetToken, err := s.tokenRepo.FindByTwoFAResetToken(ctx, req.Token)
+	if err != nil {
+		return errors.New("invalid or expired token")
+	}
+
+	if time.Now().After(resetToken.ExpiresAt) {
+		return errors.New("invalid or expired token")
+	}
+
+	user := resetToken.User
+	user.TwoFAEnabled = false
+	user.TwoFASecret = ""
+	user.TwoFACounter = 0
+
+	if err := s.userRepo.Update(ctx, &user); err != nil {
+		return err
+	}
+
+	if err := s.tokenRepo.DeleteTwoFAResetTokenByUserID(ctx, user.ID); err != nil {
+		logger.SystemLogger.Error().Err(err).Msg("Failed to delete 2FA reset tokens")
+	}
+
+	logger.LogAudit(context.WithValue(context.WithValue(ctx, logger.CtxKeyUserID, user.ID), logger.CtxKeyUserEmail, user.Email), "RESET_2FA", "AUTH", fmt.Sprintf("%d", user.ID), "")
+
+	return nil
 }

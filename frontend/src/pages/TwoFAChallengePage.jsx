@@ -72,13 +72,22 @@ const TwoFAChallengePage = () => {
                         <Button type="submit" fullWidth disabled={verifyMutation.isPending || code.length !== 6}>
                             {verifyMutation.isPending ? 'Verifying...' : 'Verify Code'}
                         </Button>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/login')}
-                            className="w-full text-sm text-surface-on-variant hover:text-primary transition-colors"
-                        >
-                            ← Back to Login
-                        </button>
+                        <div className="flex flex-col items-center space-y-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => navigate('/twofa/reset-request', { state: { tempToken } })}
+                                className="text-sm text-primary hover:underline transition-all"
+                            >
+                                Lost access to OTP?
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate('/login')}
+                                className="w-full text-sm text-surface-on-variant hover:text-primary transition-colors"
+                            >
+                                ← Back to Login
+                            </button>
+                        </div>
                     </form>
                 </Card>
             </div>

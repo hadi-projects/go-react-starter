@@ -146,6 +146,7 @@ Key environment variables used in `backend/.env`:
 2. Request id empty on system logs OK
 3. email input background color only on login page OK
 4. permission ubah ke bitwise operator OK
+5. file view counter is not accurate
 
 
 ## TODO
@@ -155,6 +156,7 @@ Key environment variables used in `backend/.env`:
 4. Storage with one time link and user access permission OK
 5. web description untuk set title, favicon, seo
 6. reset 2fa secret key
-7. module api key, (uuid, hex, private key) 
+7. module api key, (uuid, hex, private key)
 8. native event for notifications
 9. freeze user OK
+10. notify file shared by email

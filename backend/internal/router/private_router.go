@@ -85,6 +85,8 @@ func (r *Router) setupPrivateRoutes(
 		auth.POST("/2fa/enroll", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Enroll2FA)
 		auth.POST("/2fa/confirm", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Confirm2FA)
 		auth.DELETE("/2fa/disable", middleware.AuthMiddleware(r.config.JWT.Secret), authHandler.Disable2FA)
+		auth.POST("/2fa/reset-request", authHandler.Request2FAReset) // Public: needs temp token
+		auth.POST("/2fa/reset-confirm", authHandler.Confirm2FAReset) // Public: needs email format token
 	}
 
 	logs := v1.Group("/logs")

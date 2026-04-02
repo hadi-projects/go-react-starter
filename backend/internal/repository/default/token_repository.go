@@ -15,6 +15,10 @@ type TokenRepository interface {
 	CreateRefreshToken(ctx context.Context, token *entity.RefreshToken) error
 	FindByRefreshToken(ctx context.Context, token string) (*entity.RefreshToken, error)
 	DeleteRefreshToken(ctx context.Context, token string) error
+	CreateTwoFAResetToken(ctx context.Context, token *entity.TwoFAResetToken) error
+	FindByTwoFAResetToken(ctx context.Context, token string) (*entity.TwoFAResetToken, error)
+	DeleteTwoFAResetToken(ctx context.Context, token *entity.TwoFAResetToken) error
+	DeleteTwoFAResetTokenByUserID(ctx context.Context, userID uint) error
 }
 
 type tokenRepository struct {
@@ -61,4 +65,25 @@ func (r *tokenRepository) FindByRefreshToken(ctx context.Context, token string) 
 
 func (r *tokenRepository) DeleteRefreshToken(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&entity.RefreshToken{}).Error
+}
+
+func (r *tokenRepository) CreateTwoFAResetToken(ctx context.Context, token *entity.TwoFAResetToken) error {
+	return r.db.WithContext(ctx).Create(token).Error
+}
+
+func (r *tokenRepository) FindByTwoFAResetToken(ctx context.Context, token string) (*entity.TwoFAResetToken, error) {
+	var t entity.TwoFAResetToken
+	err := r.db.WithContext(ctx).Preload("User").Where("token = ?", token).First(&t).Error
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+func (r *tokenRepository) DeleteTwoFAResetToken(ctx context.Context, token *entity.TwoFAResetToken) error {
+	return r.db.WithContext(ctx).Delete(token).Error
+}
+
+func (r *tokenRepository) DeleteTwoFAResetTokenByUserID(ctx context.Context, userID uint) error {
+	return r.db.WithContext(ctx).Where("user_id = ?", userID).Delete(&entity.TwoFAResetToken{}).Error
 }

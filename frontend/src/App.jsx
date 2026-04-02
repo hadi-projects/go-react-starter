@@ -19,6 +19,8 @@ import TwoFAChallengePage from "./pages/TwoFAChallengePage";
 import ProfilePage from "./pages/admin/ProfilePage";
 import StoragePage from "./pages/admin/StoragePage";
 import SharePage from "./pages/SharePage";
+import TwoFAResetRequestPage from "./pages/TwoFAResetRequestPage";
+import TwoFAResetConfirmPage from "./pages/TwoFAResetConfirmPage";
 
 // [GENERATOR_INSERT_IMPORT]
 
@@ -33,6 +35,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/2fa-challenge" element={<TwoFAChallengePage />} />
+        <Route path="/twofa/reset-request" element={<TwoFAResetRequestPage />} />
+        <Route path="/twofa/reset-confirm" element={<TwoFAResetConfirmPage />} />
 
         {/* Admin Routes with Sidebar */}
         <Route path="/" element={<AdminLayout />}>

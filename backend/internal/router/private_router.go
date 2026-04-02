@@ -23,6 +23,7 @@ func (r *Router) setupPrivateRoutes(
 	produkHandler customHandler.ProdukHandler,
 	storageHandler customHandler.StorageHandler,
 	healthHandler handler.HealthHandler,
+	settingHandler handler.SettingHandler,
 	permGuard *middleware.PermissionGuard,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
@@ -153,5 +154,13 @@ func (r *Router) setupPrivateRoutes(
 	{
 		cache.DELETE("/clear", permGuard.Check("manage-cache"), cacheHandler.ClearAll)
 		cache.GET("/status", permGuard.Check("manage-cache"), cacheHandler.GetStatus)
+	}
+
+	// Settings management
+	settings := v1.Group("/settings")
+	settings.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		settings.GET("/:category", permGuard.Check("get-setting"), settingHandler.GetByCategory)
+		settings.PUT("", permGuard.Check("edit-setting"), settingHandler.BulkUpdate)
 	}
 }

@@ -19,6 +19,7 @@ import TwoFAChallengePage from "./pages/TwoFAChallengePage";
 import ProfilePage from "./pages/admin/ProfilePage";
 import StoragePage from "./pages/admin/StoragePage";
 import SharePage from "./pages/SharePage";
+import SettingsPage from "./pages/admin/SettingsPage";
 import TwoFAResetRequestPage from "./pages/TwoFAResetRequestPage";
 import TwoFAResetConfirmPage from "./pages/TwoFAResetConfirmPage";
 
@@ -53,6 +54,8 @@ function App() {
           <Route path="admin/generator" element={<GeneratorPage />} />
           <Route path="admin/produk" element={<ProdukPage />} />
           <Route path="admin/storage" element={<StoragePage />} />
+          <Route path="admin/settings" element={<Navigate to="/admin/settings/website" replace />} />
+          <Route path="admin/settings/:category" element={<SettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           // [GENERATOR_INSERT_ROUTE]
         </Route>

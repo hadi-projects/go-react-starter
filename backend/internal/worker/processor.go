@@ -10,8 +10,9 @@ import (
 )
 
 type ResetPasswordPayload struct {
-	Email string `json:"email"`
-	Token string `json:"token"`
+	Email   string `json:"email"`
+	Token   string `json:"token"`
+	AppName string `json:"app_name"`
 }
 
 func ProcessResetPassword(payload []byte, cfg *config.Config, mailService mailer.Mailer) error {
@@ -37,9 +38,12 @@ func ProcessResetPassword(payload []byte, cfg *config.Config, mailService mailer
 	resetLink := frontendURL + "/reset-password?token=" + data.Token
 	
 	// Debug log to verify the generated link
-	logger.SystemLogger.Info().Str("reset_link", resetLink).Msg("Generated Reset Password Link")
+	logger.SystemLogger.Info().
+		Str("reset_link", resetLink).
+		Str("app_name", data.AppName).
+		Msg("Generated Reset Password Link")
 	
-	body := mailer.GetResetPasswordEmailNative(resetLink)
+	body := mailer.GetResetPasswordEmailNative(resetLink, data.AppName)
 
 	if err := mailService.SendEmail(context.Background(), data.Email, "Reset Password Request", body); err != nil {
 		return err

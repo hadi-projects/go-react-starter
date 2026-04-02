@@ -6,6 +6,7 @@ import (
 	customEntity "github.com/hadi-projects/go-react-starter/internal/entity"
 	entity "github.com/hadi-projects/go-react-starter/internal/entity/default"
 	"github.com/hadi-projects/go-react-starter/pkg/database"
+	"github.com/hadi-projects/go-react-starter/pkg/database/seeder"
 	"github.com/hadi-projects/go-react-starter/pkg/logger"
 )
 
@@ -34,6 +35,7 @@ func main() {
 		&customEntity.StorageFile{},
 		&customEntity.ShareLink{},
 		&customEntity.ShareLinkAccess{},
+		&entity.Setting{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 
@@ -57,6 +59,11 @@ func main() {
 		UserEmail:       "system@local",
 	}
 	db.Create(logAction)
+
+	// Run Seeders
+	logger.SystemLogger.Info().Msg("Running Seeders...")
+	seeder.SeedRole(db)
+	seeder.SeedSettings(db)
 
 	logger.SystemLogger.Info().Msg("Auto-migration completed successfully!")
 }

@@ -33,6 +33,8 @@ var defaultRoles = []RolePermission{
 	{Role: "admin", Permission: "delete-file"},
 	{Role: "admin", Permission: "share-file"},
 	{Role: "admin", Permission: "manage-storage"},
+	{Role: "admin", Permission: "get-setting"},
+	{Role: "admin", Permission: "edit-setting"},
 	{Role: "auditor", Permission: "get-audit-log"},
 	{Role: "auditor", Permission: "get-auth-log"},
 	{Role: "auditor", Permission: "get-own-logs"},

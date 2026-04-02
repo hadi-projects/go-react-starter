@@ -29,6 +29,10 @@ export const PERMS = {
   UPDATE_PRODUK: 1n << 32n,
   DELETE_PRODUK: 1n << 33n,
 
+  // Settings
+  GET_SETTING: 1n << 34n,
+  EDIT_SETTING: 1n << 35n,
+
   // Storage
   UPLOAD_FILE: 1n << 58n,
   GET_FILE: 1n << 59n,

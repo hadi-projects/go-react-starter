@@ -77,10 +77,12 @@ func (r *Router) SetupRouter() *gin.Engine {
 	produkRepo := customRepository.NewProdukRepository(db)
 	storageFileRepo := customRepository.NewStorageFileRepository(db)
 	shareLinkRepo := customRepository.NewShareLinkRepository(db)
+	settingRepo := repository.NewSettingRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
-	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config, r.cache)
+	settingService := service.NewSettingService(settingRepo, r.config)
+	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config, r.cache, settingService)
 	userService := service.NewUserService(userRepo, r.config, r.cache)
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)
@@ -116,6 +118,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	produkHandler := customHandler.NewProdukHandler(produkService)
 	storageHandler := customHandler.NewStorageHandler(storageService)
 	healthHandler := handler.NewHealthHandler(r.cache, r.kafkaProducer)
+	settingHandler := handler.NewSettingHandler(settingService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
@@ -126,6 +129,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 			produkHandler,
 			storageHandler,
 			healthHandler,
+			settingHandler,
 			middleware.NewPermissionGuard(r.cache, permissionRepo),
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)

@@ -2,7 +2,10 @@ package mailer
 
 import "fmt"
 
-func GetResetPasswordEmailNative(resetLink string) string {
+func GetResetPasswordEmailNative(resetLink string, appName string) string {
+	if appName == "" {
+		appName = "Go-React Starter Team"
+	}
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +43,7 @@ func GetResetPasswordEmailNative(resetLink string) string {
               <table width="100%%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="%s" style="display: inline-block; background: #4f46e5; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); transition: all 0.2s ease;">
+                    <a href="%[1]s" style="display: inline-block; background: #4f46e5; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); transition: all 0.2s ease;">
                       Reset Password Now
                     </a>
                   </td>
@@ -57,7 +60,7 @@ func GetResetPasswordEmailNative(resetLink string) string {
               <!-- Manual Link -->
               <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">If the button doesn't work, copy this link:</p>
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; word-break: break-all;">
-                <a href="%s" style="color: #4f46e5; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%s</a>
+                <a href="%[1]s" style="color: #4f46e5; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[1]s</a>
               </div>
             </td>
           </tr>
@@ -66,8 +69,8 @@ func GetResetPasswordEmailNative(resetLink string) string {
           <tr>
             <td style="background-color: #f8fafc; padding: 32px 48px; border-top: 1px solid #edf2f7; text-align: center;">
               <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                Sent with ❤️ from <strong>Go-React Starter Team</strong>.<br>
-                &copy; 2026 Admin Panel Inc. All rights reserved.
+                Sent with ❤️ from <strong>%[2]s</strong>.<br>
+                &copy; 2026 %[2]s. All rights reserved.
               </p>
             </td>
           </tr>
@@ -88,10 +91,13 @@ func GetResetPasswordEmailNative(resetLink string) string {
     </tr>
   </table>
 </body>
-</html>`, resetLink, resetLink, resetLink)
+</html>`, resetLink, appName)
 }
 
-func GetTwoFAResetEmailNative(resetLink string) string {
+func GetTwoFAResetEmailNative(resetLink string, appName string) string {
+	if appName == "" {
+		appName = "Go-React Starter Team"
+	}
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,7 +128,7 @@ func GetTwoFAResetEmailNative(resetLink string) string {
               <table width="100%%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="%s" style="display: inline-block; background: #10b981; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
+                    <a href="%[1]s" style="display: inline-block; background: #10b981; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
                       Disable 2FA Now
                     </a>
                   </td>
@@ -134,15 +140,15 @@ func GetTwoFAResetEmailNative(resetLink string) string {
               <div style="height: 1px; background-color: #f1f5f9; margin: 40px 0 32px;"></div>
               <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">If the button doesn't work, copy this link:</p>
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; word-break: break-all;">
-                <a href="%s" style="color: #10b981; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%s</a>
+                <a href="%[1]s" style="color: #10b981; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[1]s</a>
               </div>
             </td>
           </tr>
           <tr>
             <td style="background-color: #f8fafc; padding: 32px 48px; border-top: 1px solid #edf2f7; text-align: center;">
               <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                Sent with ❤️ from <strong>Go-React Starter Team</strong>.<br>
-                &copy; 2026 Admin Panel Inc. All rights reserved.
+                Sent with ❤️ from <strong>%[2]s</strong>.<br>
+                &copy; 2026 %[2]s. All rights reserved.
               </p>
             </td>
           </tr>
@@ -161,5 +167,5 @@ func GetTwoFAResetEmailNative(resetLink string) string {
     </tr>
   </table>
 </body>
-</html>`, resetLink, resetLink, resetLink)
+</html>`, resetLink, appName)
 }

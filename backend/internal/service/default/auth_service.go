@@ -38,9 +38,10 @@ type authService struct {
 	userRepo  repository.UserRepository
 	tokenRepo repository.TokenRepository
 	producer  kafka.Producer
-	mailer    mailer.Mailer
-	config    *config.Config
-	cache     cache.CacheService
+	mailer         mailer.Mailer
+	config         *config.Config
+	cache          cache.CacheService
+	settingService SettingService
 }
 
 func NewAuthService(
@@ -50,14 +51,16 @@ func NewAuthService(
 	mailer mailer.Mailer,
 	config *config.Config,
 	cache cache.CacheService,
+	settingService SettingService,
 ) AuthService {
 	return &authService{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,
 		producer:  producer,
-		mailer:    mailer,
-		config:    config,
-		cache:     cache,
+		mailer:         mailer,
+		config:         config,
+		cache:          cache,
+		settingService: settingService,
 	}
 }
 
@@ -241,9 +244,11 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 	}
 
 	// 4. Publish message to Kafka
+	appName := s.settingService.GetConfigValue(ctx, "app_name")
 	msg := map[string]string{
-		"email": user.Email,
-		"token": token,
+		"email":    user.Email,
+		"token":    token,
+		"app_name": appName,
 	}
 
 	// Use configured topic from config
@@ -269,7 +274,14 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 				frontendURL = "http://localhost:5173"
 			}
 			resetLink := frontendURL + "/reset-password?token=" + token
-			body := mailer.GetResetPasswordEmailNative(resetLink)
+			
+			// Debug log to verify the generated link
+			logger.SystemLogger.Info().
+				Str("reset_link", resetLink).
+				Str("app_name", appName).
+				Msg("Generated Reset Password Link")
+			
+			body := mailer.GetResetPasswordEmailNative(resetLink, appName)
 			if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Password Request (Fallback)", body); err != nil {
 				logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send fallback email")
 			} else {
@@ -502,8 +514,10 @@ func (s *authService) Request2FAReset(ctx context.Context, req dto.TwoFAResetReq
 	}
 	resetLink := frontendURL + "/twofa/reset-confirm?token=" + token
 
+	appName := s.settingService.GetConfigValue(ctx, "app_name")
+
 	go func() {
-		body := mailer.GetTwoFAResetEmailNative(resetLink)
+		body := mailer.GetTwoFAResetEmailNative(resetLink, appName)
 		if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Two-Factor Authentication", body); err != nil {
 			logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send 2FA reset email")
 		} else {

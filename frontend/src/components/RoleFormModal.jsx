@@ -10,6 +10,7 @@ const RoleFormModal = ({ isOpen, onClose, onSubmit, role, loading = false }) => 
     const [formData, setFormData] = useState({
         name: '',
         description: '',
+        category: 'user',
         permission_ids: [],
     });
     const [allPermissions, setAllPermissions] = useState([]);
@@ -36,12 +37,14 @@ const RoleFormModal = ({ isOpen, onClose, onSubmit, role, loading = false }) => 
                 setFormData({
                     name: role.name || '',
                     description: role.description || '',
+                    category: role.category || 'user',
                     permission_ids: role.permissions?.map(p => p.id) || [],
                 });
             } else {
                 setFormData({
                     name: '',
                     description: '',
+                    category: 'user',
                     permission_ids: [],
                 });
             }
@@ -115,6 +118,25 @@ const RoleFormModal = ({ isOpen, onClose, onSubmit, role, loading = false }) => 
                         onChange={handleChange}
                         placeholder="Describe what this role can do"
                     />
+
+                    <div>
+                        <label className="text-field-label mb-2 block">Role Category</label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="text-field w-full"
+                            required
+                        >
+                            <option value="user">User Role (For humans)</option>
+                            <option value="api">API Role (For automated keys)</option>
+                        </select>
+                        <p className="mt-1.5 text-[10px] text-surface-on-variant px-1">
+                            {formData.category === 'user' 
+                                ? 'User roles appear in the User Management section and are assigned to human accounts.' 
+                                : 'API roles appear only when generating API Keys and are used for external integrations.'}
+                        </p>
+                    </div>
 
                     <div>
                         <label className="text-field-label mb-3">

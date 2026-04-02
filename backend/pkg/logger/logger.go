@@ -18,6 +18,7 @@ const (
 	CtxKeyUserID      contextKey = "user_id"
 	CtxKeyUserEmail   contextKey = "user_email"
 	CtxKeyRequestID   contextKey = "request_id"
+	CtxKeyApiKeyID    contextKey = "api_key_id"
 )
 
 func Truncate(s string, maxLen int) string {
@@ -50,6 +51,7 @@ type AuditLog struct {
 	Module    string
 	TargetID  string
 	Metadata  string
+	ApiKeyID  *uint
 }
 
 type AuditLogRepository interface {
@@ -77,6 +79,11 @@ func LogAudit(ctx context.Context, action, module, targetID, metadata string) {
 		requestID = val
 	}
 
+	var apiKeyID *uint
+	if val, ok := ctx.Value(CtxKeyApiKeyID).(uint); ok {
+		apiKeyID = &val
+	}
+
 	// Truncate metadata to avoid oversized logs
 	truncatedMetadata := Truncate(metadata, 65536)
 
@@ -88,6 +95,7 @@ func LogAudit(ctx context.Context, action, module, targetID, metadata string) {
 		Module:    module,
 		TargetID:  targetID,
 		Metadata:  truncatedMetadata,
+		ApiKeyID:  apiKeyID,
 	})
 
 	// Also log to file-based AuditLogger
@@ -111,6 +119,10 @@ func WithCtx(ctx context.Context, l zerolog.Logger) *zerolog.Logger {
 
 	if val, ok := ctx.Value(CtxKeyUserEmail).(string); ok && val != "" {
 		lc = lc.Str("user_email", val)
+	}
+
+	if val, ok := ctx.Value(CtxKeyApiKeyID).(uint); ok && val != 0 {
+		lc = lc.Uint("api_key_id", val)
 	}
 
 	logger := lc.Logger()

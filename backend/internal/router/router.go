@@ -78,12 +78,13 @@ func (r *Router) SetupRouter() *gin.Engine {
 	storageFileRepo := customRepository.NewStorageFileRepository(db)
 	shareLinkRepo := customRepository.NewShareLinkRepository(db)
 	settingRepo := repository.NewSettingRepository(db)
+	apiKeyRepo := repository.NewApiKeyRepository(db)
 	// [GENERATOR_INSERT_REPOSITORY]
 
 	// Services
 	settingService := service.NewSettingService(settingRepo, r.config)
 	authService := service.NewAuthService(userRepo, tokenRepo, r.kafkaProducer, r.mailer, r.config, r.cache, settingService)
-	userService := service.NewUserService(userRepo, r.config, r.cache)
+	userService := service.NewUserService(userRepo, roleRepo, r.config, r.cache)
 	permissionService := service.NewPermissionService(permissionRepo, r.cache)
 	roleService := service.NewRoleService(roleRepo, r.cache)
 	logService := service.NewLogService(r.config)
@@ -101,6 +102,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 		r.config.Frontend.URL,
 		settingService,
 	)
+	apiKeyService := service.NewApiKeyService(apiKeyRepo, roleRepo, r.cache)
 	// [GENERATOR_INSERT_SERVICE]
 
 	// Handlers
@@ -119,10 +121,13 @@ func (r *Router) SetupRouter() *gin.Engine {
 	storageHandler := customHandler.NewStorageHandler(storageService)
 	healthHandler := handler.NewHealthHandler(r.cache, r.kafkaProducer)
 	settingHandler := handler.NewSettingHandler(settingService)
+	apiKeyHandler := handler.NewApiKeyHandler(apiKeyService)
 	// [GENERATOR_INSERT_HANDLER]
 
 	v1 := router.Group("/api/v1")
 	{
+		v1.Use(middleware.APIKeyMiddleware(apiKeyService))
+
 		r.setupPrivateRoutes(v1, authHandler, userHandler, permissionHandler, roleHandler, logHandler, cacheHandler, statisticsHandler, httpLogHandler, systemLogHandler, auditLogHandler,
 
 			generatorHandler,
@@ -130,6 +135,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 			storageHandler,
 			healthHandler,
 			settingHandler,
+			apiKeyHandler,
 			middleware.NewPermissionGuard(r.cache, permissionRepo),
 		// [GENERATOR_INSERT_HANDLER_PARAM]
 		)

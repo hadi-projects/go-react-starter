@@ -41,6 +41,7 @@ func (s *roleService) Create(ctx context.Context, req dto.CreateRoleRequest) (*d
 	role := &entity.Role{
 		Name:        req.Name,
 		Description: req.Description,
+		Category:    req.Category,
 	}
 
 	if err := s.roleRepo.Create(ctx, role, req.PermissionIDs); err != nil {
@@ -69,7 +70,7 @@ func (s *roleService) Create(ctx context.Context, req dto.CreateRoleRequest) (*d
 
 func (s *roleService) GetAll(ctx context.Context, pagination *dto.PaginationRequest) (*dto.PaginationResponse, error) {
 	// Try cache first
-	cacheKey := fmt.Sprintf("roles:page:%d:limit:%d:search:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search)
+	cacheKey := fmt.Sprintf("roles:page:%d:limit:%d:search:%s:cat:%s", pagination.GetPage(), pagination.GetLimit(), pagination.Search, pagination.Category)
 	var cached dto.PaginationResponse
 	if err := s.cache.Get(ctx, cacheKey, &cached); err == nil {
 		return &cached, nil
@@ -136,6 +137,10 @@ func (s *roleService) Update(ctx context.Context, id uint, req dto.UpdateRoleReq
 
 	if req.Description != "" {
 		role.Description = req.Description
+	}
+
+	if req.Category != "" {
+		role.Category = req.Category
 	}
 
 	if err := s.roleRepo.Update(ctx, role, req.PermissionIDs); err != nil {
@@ -270,6 +275,7 @@ func (s *roleService) mapToResponse(role *entity.Role) *dto.RoleResponse {
 		ID:          role.ID,
 		Name:        role.Name,
 		Description: role.Description,
+		Category:    role.Category,
 		Permissions: permissions,
 		CreatedAt:   role.CreatedAt,
 		UpdatedAt:   role.UpdatedAt,

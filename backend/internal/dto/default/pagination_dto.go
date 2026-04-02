@@ -1,9 +1,10 @@
 package dto
 
 type PaginationRequest struct {
-	Page   int    `form:"page"`
-	Limit  int    `form:"limit"`
-	Search string `form:"search"`
+	Page     int    `form:"page"`
+	Limit    int    `form:"limit"`
+	Search   string `form:"search"`
+	Category string `form:"category"`
 }
 
 func (p *PaginationRequest) GetOffset() int {

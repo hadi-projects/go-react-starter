@@ -37,8 +37,8 @@ const Users = () => {
 
     // Fetch roles for mapping role_id to role name
     const { data: rolesData } = useQuery({
-        queryKey: ['roles'],
-        queryFn: () => getRoles(1, 100), // Get all roles
+        queryKey: ['roles', 'user'],
+        queryFn: () => getRoles(1, 100, '', 'user'), // Get all user roles
     });
 
     const createMutation = useMutation({

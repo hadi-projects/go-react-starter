@@ -31,13 +31,15 @@ type UserService interface {
 
 type userService struct {
 	userRepo repository.UserRepository
+	roleRepo repository.RoleRepository
 	config   *config.Config
 	cache    cache.CacheService
 }
 
-func NewUserService(userRepo repository.UserRepository, config *config.Config, cache cache.CacheService) UserService {
+func NewUserService(userRepo repository.UserRepository, roleRepo repository.RoleRepository, config *config.Config, cache cache.CacheService) UserService {
 	return &userService{
 		userRepo: userRepo,
+		roleRepo: roleRepo,
 		config:   config,
 		cache:    cache,
 	}
@@ -109,6 +111,14 @@ func (s *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest)
 	status := "active"
 	if req.Status != "" {
 		status = req.Status
+	}
+
+	role, err := s.roleRepo.FindByID(ctx, req.RoleID)
+	if err != nil {
+		return nil, fmt.Errorf("role not found")
+	}
+	if role.Category != "user" {
+		return nil, fmt.Errorf("role category must be 'user' for human users")
 	}
 
 	user := &entity.User{
@@ -250,6 +260,13 @@ func (s *userService) Update(ctx context.Context, id uint, req dto.UpdateUserReq
 		user.Password = string(hashedPassword)
 	}
 	if req.RoleID != 0 {
+		role, err := s.roleRepo.FindByID(ctx, req.RoleID)
+		if err != nil {
+			return nil, fmt.Errorf("role not found")
+		}
+		if role.Category != "user" {
+			return nil, fmt.Errorf("role category must be 'user' for human users")
+		}
 		user.RoleID = req.RoleID
 	}
 	if req.Status != "" {

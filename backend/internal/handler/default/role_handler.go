@@ -51,11 +51,13 @@ func (h *roleHandler) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	search := c.DefaultQuery("search", "")
+	category := c.DefaultQuery("category", "")
 
 	pagination := &dto.PaginationRequest{
-		Page:   page,
-		Limit:  limit,
-		Search: search,
+		Page:     page,
+		Limit:    limit,
+		Search:   search,
+		Category: category,
 	}
 
 	res, err := h.service.GetAll(c.Request.Context(), pagination)

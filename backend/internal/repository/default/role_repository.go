@@ -55,6 +55,10 @@ func (r *roleRepository) FindAll(ctx context.Context, pagination *dto.Pagination
 		query = query.Where("name LIKE ?", searchTerm)
 	}
 
+	if pagination.Category != "" {
+		query = query.Where("category = ?", pagination.Category)
+	}
+
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}

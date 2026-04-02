@@ -24,6 +24,7 @@ func (r *Router) setupPrivateRoutes(
 	storageHandler customHandler.StorageHandler,
 	healthHandler handler.HealthHandler,
 	settingHandler handler.SettingHandler,
+	apiKeyHandler handler.ApiKeyHandler,
 	permGuard *middleware.PermissionGuard,
 	// [GENERATOR_INSERT_HANDLER_PARAM]
 ) {
@@ -163,5 +164,14 @@ func (r *Router) setupPrivateRoutes(
 	{
 		settings.GET("/:category", permGuard.Check("get-setting"), settingHandler.GetByCategory)
 		settings.PUT("", permGuard.Check("edit-setting"), settingHandler.BulkUpdate)
+	}
+
+	// API Keys management
+	apiKeys := v1.Group("/apikeys")
+	apiKeys.Use(middleware.AuthMiddleware(r.config.JWT.Secret))
+	{
+		apiKeys.POST("", permGuard.Check("create-api-key"), apiKeyHandler.Create)
+		apiKeys.GET("", permGuard.Check("get-api-key"), apiKeyHandler.GetAll)
+		apiKeys.DELETE("/:id", permGuard.Check("delete-api-key"), apiKeyHandler.Delete)
 	}
 }

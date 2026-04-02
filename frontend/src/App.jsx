@@ -23,6 +23,8 @@ import SettingsPage from "./pages/admin/SettingsPage";
 import TwoFAResetRequestPage from "./pages/TwoFAResetRequestPage";
 import TwoFAResetConfirmPage from "./pages/TwoFAResetConfirmPage";
 
+import ApiKeyPage from "./pages/admin/ApiKeyPage";
+
 // [GENERATOR_INSERT_IMPORT]
 
 function App() {
@@ -42,21 +44,23 @@ function App() {
         {/* Admin Routes with Sidebar */}
         <Route path="/" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="admin/users" element={<Users />} />
-          <Route path="admin/roles" element={<Roles />} />
-          <Route path="admin/permissions" element={<Permissions />} />
-          <Route
-            path="admin/logs"
-            element={<Navigate to="/admin/logs/all" replace />}
-          />
-          <Route path="admin/logs/http" element={<HttpLogs />} />
-          <Route path="admin/logs/:type" element={<Logs />} />
-          <Route path="admin/generator" element={<GeneratorPage />} />
-          <Route path="admin/produk" element={<ProdukPage />} />
-          <Route path="admin/storage" element={<StoragePage />} />
-          <Route path="admin/settings" element={<Navigate to="/admin/settings/website" replace />} />
-          <Route path="admin/settings/:category" element={<SettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          
+          <Route path="admin">
+            <Route path="apikeys" element={<ApiKeyPage />} />
+            <Route path="users" element={<Users />} />
+            <Route path="roles" element={<Roles />} />
+            <Route path="permissions" element={<Permissions />} />
+            <Route path="logs" element={<Navigate to="/admin/logs/all" replace />} />
+            <Route path="logs/http" element={<HttpLogs />} />
+            <Route path="logs/:type" element={<Logs />} />
+            <Route path="generator" element={<GeneratorPage />} />
+            <Route path="produk" element={<ProdukPage />} />
+            <Route path="storage" element={<StoragePage />} />
+            <Route path="settings" element={<Navigate to="/admin/settings/website" replace />} />
+            <Route path="settings/:category" element={<SettingsPage />} />
+          </Route>
+          
           // [GENERATOR_INSERT_ROUTE]
         </Route>
 

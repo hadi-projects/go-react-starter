@@ -107,14 +107,18 @@ const Sidebar = ({
                     <li key={item.label}>
                       <Link
                         to={href || "#"}
-                        title={item.label}
-                        className={`flex items-center justify-center w-full p-2 rounded-full transition-all duration-200 ${
+                        className={`group relative flex items-center justify-center w-full p-2 rounded-full transition-all duration-200 ${
                           active
                             ? "bg-secondary-container text-secondary-on-container"
                             : "text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on"
                         }`}
                       >
                         {item.icon}
+                        
+                        {/* Tooltip */}
+                        <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-surface-container-highest text-surface-on text-[11px] font-bold shadow-xl border border-outline-variant/30 pointer-events-none invisible opacity-0 -translate-x-2 group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-50 whitespace-nowrap">
+                          {item.label}
+                        </span>
                       </Link>
                     </li>
                   );
@@ -215,8 +219,7 @@ const Sidebar = ({
       >
         <button
           onClick={onLogout}
-          title="Logout"
-          className={`flex items-center gap-2 px-3 py-2 rounded-full text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on transition-all duration-300 group ${collapsed ? "justify-center w-full" : "w-full"}`}
+          className={`group relative flex items-center gap-2 px-3 py-2 rounded-full text-surface-on-variant hover:bg-surface-container-high hover:text-surface-on transition-all duration-300 ${collapsed ? "justify-center w-full" : "w-full"}`}
         >
           <div className="transition-transform duration-300 group-hover:scale-110 flex-shrink-0">
             <svg
@@ -235,6 +238,12 @@ const Sidebar = ({
           </div>
           {!collapsed && (
             <span className="font-medium text-xs whitespace-nowrap">
+              Logout
+            </span>
+          )}
+
+          {collapsed && (
+            <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-surface-container-highest text-surface-on text-[11px] font-bold shadow-xl border border-outline-variant/30 pointer-events-none invisible opacity-0 -translate-x-2 group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-50 whitespace-nowrap">
               Logout
             </span>
           )}

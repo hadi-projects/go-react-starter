@@ -33,6 +33,11 @@ export const PERMS = {
   GET_SETTING: 1n << 34n,
   EDIT_SETTING: 1n << 35n,
 
+  // API Keys
+  GET_API_KEY: 1n << 36n,
+  CREATE_API_KEY: 1n << 37n,
+  DELETE_API_KEY: 1n << 38n,
+
   // Storage
   UPLOAD_FILE: 1n << 58n,
   GET_FILE: 1n << 59n,

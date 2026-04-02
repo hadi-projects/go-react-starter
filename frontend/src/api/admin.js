@@ -1,7 +1,7 @@
 import apiClient from './client';
 
-export const getUsers = async (page = 1, limit = 10, search = '') => {
-    const response = await apiClient.get(`/users?page=${page}&limit=${limit}&search=${search}`);
+export const getUsers = async (page = 1, limit = 10, search = '', category = '') => {
+    const response = await apiClient.get(`/users?page=${page}&limit=${limit}&search=${search}&category=${category}`);
     return response.data;
 };
 export const exportUsers = async (format = 'excel') => {
@@ -29,8 +29,8 @@ export const deleteUser = async (id) => {
     return response.data;
 };
 
-export const getRoles = async (page = 1, limit = 10, search = '') => {
-    const response = await apiClient.get(`/roles?page=${page}&limit=${limit}&search=${search}`);
+export const getRoles = async (page = 1, limit = 10, search = '', category = '') => {
+    const response = await apiClient.get(`/roles?page=${page}&limit=${limit}&search=${search}&category=${category}`);
     return response.data;
 };
 

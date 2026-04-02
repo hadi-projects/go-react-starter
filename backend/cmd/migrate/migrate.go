@@ -36,6 +36,7 @@ func main() {
 		&customEntity.ShareLink{},
 		&customEntity.ShareLinkAccess{},
 		&entity.Setting{},
+		&entity.ApiKey{},
 		// [GENERATOR_INSERT_MIGRATION]
 	)
 

@@ -61,6 +61,7 @@ func (r *Router) setupPrivateRoutes(
 	{
 		publicGroup.GET("/share/:token", storageHandler.PublicFileInfo)
 		publicGroup.GET("/share/:token/download", storageHandler.PublicDownload)
+		publicGroup.GET("/storage/:id", storageHandler.PublicSystemFile)
 		publicGroup.GET("/settings/:category", settingHandler.GetPublicByCategory)
 	}
 

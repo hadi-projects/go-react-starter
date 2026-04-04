@@ -3,13 +3,25 @@ import Button from '../components/Button';
 import { useSettings } from '../context/SettingsContext';
 
 const Landing = () => {
-    const { app_name } = useSettings();
+    const { app_name, logo } = useSettings();
     return (
         <div className="min-h-screen bg-primary-500">
             {/* Navigation */}
             <nav className="container mx-auto px-6 py-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-white">{app_name}</h1>
+                    <div className="flex items-center gap-3">
+                        {logo && (
+                            <div className="w-10 h-10 rounded-xl border border-white/20 overflow-hidden bg-white/10 flex items-center justify-center p-1.5">
+                                <img 
+                                    src={`${import.meta.env.VITE_API_URL}/public/storage/${logo}`} 
+                                    alt="Logo"
+                                    className="w-full h-full object-contain"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                            </div>
+                        )}
+                        <h1 className="text-2xl font-bold text-white">{app_name}</h1>
+                    </div>
                     <div className="space-x-4">
                         <Link to="/login">
                             <Button variant="outline" className="text-white border-white hover:bg-white/10">
@@ -68,9 +80,21 @@ const Landing = () => {
 
             {/* Footer Section */}
             <div className="container mx-auto px-6 py-12 text-center">
-                <p className="text-white/70">
-                    © 2026 {app_name}. Built with ❤️ using Go and React.
-                </p>
+                <div className="flex flex-col items-center gap-3 mb-6">
+                    {logo && (
+                        <div className="w-8 h-8 rounded-lg border border-white/10 overflow-hidden bg-white/5 p-1">
+                            <img 
+                                src={`${import.meta.env.VITE_API_URL}/public/storage/${logo}`} 
+                                alt="Logo"
+                                className="w-full h-full object-contain grayscale opacity-60"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                        </div>
+                    )}
+                    <p className="text-white/70">
+                        © 2026 {app_name}. Built with ❤️ using Go and React.
+                    </p>
+                </div>
             </div>
         </div>
     );

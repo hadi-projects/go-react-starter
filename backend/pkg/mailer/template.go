@@ -1,11 +1,26 @@
 package mailer
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func GetResetPasswordEmailNative(resetLink string, appName string) string {
+func GetResetPasswordEmailNative(resetLink string, appName string, logoURL string) string {
 	if appName == "" {
 		appName = "Go-React Starter Team"
 	}
+	logoHTML := ""
+	if logoURL != "" {
+		logoHTML = fmt.Sprintf(`
+			<div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.2); overflow: hidden;">
+				<img src="%s" alt="Logo" style="width: 100%%; height: 100%%; object-fit: contain;">
+			</div>`, logoURL)
+	} else {
+		logoHTML = `
+			<div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.2);">
+				<span style="font-size: 32px; line-height: 1;">🔐</span>
+			</div>`
+	}
+
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +38,7 @@ func GetResetPasswordEmailNative(resetLink string, appName string) string {
           <!-- Header Area -->
           <tr>
             <td align="center" style="background: linear-gradient(135deg, #4f46e5 0%%, #7c3aed 100%%); padding: 56px 40px 48px;">
-                <div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.2);">
-                    <span style="font-size: 32px; line-height: 1;">🔐</span>
-                </div>
+                %[1]s
                 <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.2;">Reset Your Password</h1>
                 <p style="margin: 12px 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px; font-weight: 400;">Secure your account with a new password</p>
             </td>
@@ -43,7 +56,7 @@ func GetResetPasswordEmailNative(resetLink string, appName string) string {
               <table width="100%%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="%[1]s" style="display: inline-block; background: #4f46e5; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); transition: all 0.2s ease;">
+                    <a href="%[2]s" style="display: inline-block; background: #4f46e5; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); transition: all 0.2s ease;">
                       Reset Password Now
                     </a>
                   </td>
@@ -60,7 +73,7 @@ func GetResetPasswordEmailNative(resetLink string, appName string) string {
               <!-- Manual Link -->
               <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">If the button doesn't work, copy this link:</p>
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; word-break: break-all;">
-                <a href="%[1]s" style="color: #4f46e5; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[1]s</a>
+                <a href="%[2]s" style="color: #4f46e5; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[2]s</a>
               </div>
             </td>
           </tr>
@@ -69,8 +82,8 @@ func GetResetPasswordEmailNative(resetLink string, appName string) string {
           <tr>
             <td style="background-color: #f8fafc; padding: 32px 48px; border-top: 1px solid #edf2f7; text-align: center;">
               <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                Sent with ❤️ from <strong>%[2]s</strong>.<br>
-                &copy; 2026 %[2]s. All rights reserved.
+                Sent with ❤️ from <strong>%[3]s</strong>.<br>
+                &copy; 2026 %[3]s. All rights reserved.
               </p>
             </td>
           </tr>
@@ -91,13 +104,26 @@ func GetResetPasswordEmailNative(resetLink string, appName string) string {
     </tr>
   </table>
 </body>
-</html>`, resetLink, appName)
+</html>`, logoHTML, resetLink, appName)
 }
 
-func GetTwoFAResetEmailNative(resetLink string, appName string) string {
+func GetTwoFAResetEmailNative(resetLink string, appName string, logoURL string) string {
 	if appName == "" {
 		appName = "Go-React Starter Team"
 	}
+	logoHTML := ""
+	if logoURL != "" {
+		logoHTML = fmt.Sprintf(`
+			<div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden;">
+				<img src="%s" alt="Logo" style="width: 100%%; height: 100%%; object-fit: contain;">
+			</div>`, logoURL)
+	} else {
+		logoHTML = `
+			<div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.2);">
+				<span style="font-size: 32px; line-height: 1;">🛡️</span>
+			</div>`
+	}
+
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,9 +138,7 @@ func GetTwoFAResetEmailNative(resetLink string, appName string) string {
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%%;background-color:#ffffff;border-radius:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01);overflow:hidden;">
           <tr>
             <td align="center" style="background: linear-gradient(135deg, #10b981 0%%, #059669 100%%); padding: 56px 40px 48px;">
-                <div style="background: rgba(255, 255, 255, 0.15); width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.2);">
-                    <span style="font-size: 32px; line-height: 1;">🛡️</span>
-                </div>
+                %[1]s
                 <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.2;">Reset Your 2FA</h1>
                 <p style="margin: 12px 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px; font-weight: 400;">Disable 2FA to regain access to your account</p>
             </td>
@@ -128,7 +152,7 @@ func GetTwoFAResetEmailNative(resetLink string, appName string) string {
               <table width="100%%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="%[1]s" style="display: inline-block; background: #10b981; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
+                    <a href="%[2]s" style="display: inline-block; background: #10b981; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 18px 44px; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
                       Disable 2FA Now
                     </a>
                   </td>
@@ -140,15 +164,15 @@ func GetTwoFAResetEmailNative(resetLink string, appName string) string {
               <div style="height: 1px; background-color: #f1f5f9; margin: 40px 0 32px;"></div>
               <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">If the button doesn't work, copy this link:</p>
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; word-break: break-all;">
-                <a href="%[1]s" style="color: #10b981; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[1]s</a>
+                <a href="%[2]s" style="color: #10b981; font-size: 13px; text-decoration: none; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">%[2]s</a>
               </div>
             </td>
           </tr>
           <tr>
             <td style="background-color: #f8fafc; padding: 32px 48px; border-top: 1px solid #edf2f7; text-align: center;">
               <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                Sent with ❤️ from <strong>%[2]s</strong>.<br>
-                &copy; 2026 %[2]s. All rights reserved.
+                Sent with ❤️ from <strong>%[3]s</strong>.<br>
+                &copy; 2026 %[3]s. All rights reserved.
               </p>
             </td>
           </tr>
@@ -167,5 +191,5 @@ func GetTwoFAResetEmailNative(resetLink string, appName string) string {
     </tr>
   </table>
 </body>
-</html>`, resetLink, appName)
+</html>`, logoHTML, resetLink, appName)
 }

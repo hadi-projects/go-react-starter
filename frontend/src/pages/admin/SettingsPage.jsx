@@ -37,6 +37,7 @@ const SettingsPage = () => {
     });
 
     const [formState, setFormState] = useState({});
+    const [previews, setPreviews] = useState({});
 
     // Sync form state with fetched settings
     useEffect(() => {
@@ -63,17 +64,28 @@ const SettingsPage = () => {
     };
 
     const handleFileUpload = async (key, file) => {
+        // Create local preview immediately
+        const localUrl = URL.createObjectURL(file);
+        setPreviews(prev => ({ ...prev, [key]: localUrl }));
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('description', `System Setting: ${key}`);
 
         try {
             const res = await uploadFile(formData);
+            // res.data is the axios response body { meta: ..., data: { id: ... } }
             const fileId = res.data.data.id;
             handleInputChange(key, String(fileId));
             toast.success('File uploaded. Save settings to apply.');
         } catch (err) {
+            console.error('Upload error:', err);
             toast.error('Failed to upload file');
+            setPreviews(prev => {
+                const newState = { ...prev };
+                delete newState[key];
+                return newState;
+            });
         }
     };
 
@@ -121,12 +133,16 @@ const SettingsPage = () => {
                                         {setting.field_type === 'file' ? (
                                             <div className="mt-2 flex items-center gap-6">
                                                 <div className="w-24 h-24 rounded-lg bg-surface-variant/50 flex items-center justify-center overflow-hidden border border-outline-variant">
-                                                    {formState[setting.key] ? (
+                                                    {(previews[setting.key] || formState[setting.key]) ? (
                                                         <img 
-                                                           src={`${import.meta.env.VITE_API_URL}/public/share/${formState[setting.key]}`}
+                                                           src={previews[setting.key] || `${import.meta.env.VITE_API_URL}/public/storage/${formState[setting.key]}`}
                                                            alt="Preview" 
                                                            className="w-full h-full object-cover"
-                                                           onError={(e) => { e.target.src = 'https://placehold.co/100?text=No+Image'; }}
+                                                           onError={(e) => { 
+                                                               if (!previews[setting.key]) {
+                                                                   e.target.src = 'https://placehold.co/100?text=No+Image'; 
+                                                               }
+                                                           }}
                                                         />
                                                     ) : (
                                                         <span className="text-2xl opacity-20">🖼️</span>

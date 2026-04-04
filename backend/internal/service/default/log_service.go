@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -45,14 +44,11 @@ func (s *logService) GetLogs(query dto.LogQuery) ([]dto.LogResponse, error) {
 
 	for _, fileName := range filesToRead {
 		filePath := filepath.Join(s.config.Log.Dir, fileName)
-		fmt.Printf("DEBUG: Reading log file: %s\n", filePath)
 		logs, err := s.readLogFile(filePath, strings.TrimSuffix(fileName, ".log"))
 		if err != nil {
-			fmt.Printf("DEBUG: Error reading %s: %v\n", filePath, err)
 			// Skip if file doesn't exist yet
 			continue
 		}
-		fmt.Printf("DEBUG: Successfully read %d logs from %s\n", len(logs), filePath)
 		allLogs = append(allLogs, logs...)
 	}
 
@@ -140,18 +136,16 @@ func (s *logService) readLogFile(filePath string, logType string) ([]dto.LogResp
 		if val, ok := raw["time"].(string); ok {
 			if t, err := json.Marshal(val); err == nil {
 				if err := json.Unmarshal(t, &log.Time); err != nil {
-					fmt.Printf("DEBUG: Failed to unmarshal time (time): %v, val: %s\n", err, val)
+					// Ignore error for missing time mapping
 				}
 			}
 		} else if val, ok := raw["timestamp"].(string); ok {
 			// System logs use 'timestamp' instead of 'time'
 			if t, err := json.Marshal(val); err == nil {
 				if err := json.Unmarshal(t, &log.Time); err != nil {
-					fmt.Printf("DEBUG: Failed to unmarshal time (timestamp): %v, val: %s\n", err, val)
+					// Ignore error for missing time mapping
 				}
 			}
-		} else {
-			fmt.Printf("DEBUG: No time or timestamp found in log: %v\n", raw)
 		}
 
 		// Collect other fields into Details

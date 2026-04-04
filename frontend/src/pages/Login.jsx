@@ -4,10 +4,12 @@ import { useMutation } from '@tanstack/react-query';
 import Card from '../components/Card';
 import TextField from '../components/TextField';
 import Button from '../components/Button';
+import { useSettings } from '../context/SettingsContext';
 import apiClient from '../api/client';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { logo } = useSettings();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -79,7 +81,17 @@ const Login = () => {
         <div className="min-h-screen bg-surface-variant flex items-center justify-center p-6">
             <div className="w-full max-w-md">
                 {/* Logo/Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 flex flex-col items-center">
+                    {logo && (
+                        <div className="w-16 h-16 rounded-2xl border border-outline-variant/30 overflow-hidden bg-surface-container-high shadow-lg p-2.5 mb-6">
+                            <img 
+                                src={`${import.meta.env.VITE_API_URL}/public/storage/${logo}`} 
+                                alt="Logo"
+                                className="w-full h-full object-contain"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                        </div>
+                    )}
                     <h1 className="text-4xl font-bold text-primary-500 mb-2">Welcome Back</h1>
                     <p className="text-gray-600">Sign in to your account</p>
                 </div>

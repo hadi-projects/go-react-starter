@@ -13,6 +13,7 @@ type ResetPasswordPayload struct {
 	Email   string `json:"email"`
 	Token   string `json:"token"`
 	AppName string `json:"app_name"`
+	LogoURL string `json:"logo_url"`
 }
 
 func ProcessResetPassword(payload []byte, cfg *config.Config, mailService mailer.Mailer) error {
@@ -43,7 +44,10 @@ func ProcessResetPassword(payload []byte, cfg *config.Config, mailService mailer
 		Str("app_name", data.AppName).
 		Msg("Generated Reset Password Link")
 	
-	body := mailer.GetResetPasswordEmailNative(resetLink, data.AppName)
+	// The processor currently doesn't have access to SettingService
+	// We should pass the logo URL in the message payload or fetch it here
+	// For now, we'll use an empty logo URL or pass it from the producer
+	body := mailer.GetResetPasswordEmailNative(resetLink, data.AppName, data.LogoURL)
 
 	if err := mailService.SendEmail(context.Background(), data.Email, "Reset Password Request", body); err != nil {
 		return err

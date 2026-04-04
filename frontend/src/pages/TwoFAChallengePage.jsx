@@ -5,7 +5,10 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import apiClient from '../api/client';
 
+import { useSettings } from '../context/SettingsContext';
+
 const TwoFAChallengePage = () => {
+    const settings = useSettings();
     const navigate = useNavigate();
     const location = useLocation();
     const tempToken = location.state?.tempToken;
@@ -43,8 +46,18 @@ const TwoFAChallengePage = () => {
     return (
         <div className="min-h-screen bg-surface-variant flex items-center justify-center p-6">
             <div className="w-full max-w-sm">
-                <div className="text-center mb-8">
-                    <div className="text-6xl mb-4">🔐</div>
+                <div className="text-center mb-8 flex flex-col items-center">
+                    {settings.logo ? (
+                        <div className="mb-6 h-16 w-16 flex items-center justify-center overflow-hidden">
+                             <img 
+                                src={`${import.meta.env.VITE_API_URL}/public/storage/${settings.logo}`} 
+                                alt="Logo" 
+                                className="max-h-full max-w-full object-contain"
+                            />
+                        </div>
+                    ) : (
+                        <div className="text-6xl mb-4">🔐</div>
+                    )}
                     <h1 className="text-2xl font-bold text-surface-on mb-2">Two-Factor Authentication</h1>
                     <p className="text-surface-on-variant text-sm">Enter the 6-digit code from your Authenticator app</p>
                 </div>

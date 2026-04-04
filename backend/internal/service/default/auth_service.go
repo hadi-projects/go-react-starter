@@ -245,10 +245,17 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 
 	// 4. Publish message to Kafka
 	appName := s.settingService.GetConfigValue(ctx, "app_name")
+	logoID := s.settingService.GetConfigValue(ctx, "app_logo")
+	logoURL := ""
+	if logoID != "" {
+		logoURL = s.config.App.URL + "/api/v1/public/storage/" + logoID
+	}
+
 	msg := map[string]string{
 		"email":    user.Email,
 		"token":    token,
 		"app_name": appName,
+		"logo_url": logoURL,
 	}
 
 	// Use configured topic from config
@@ -275,13 +282,21 @@ func (s *authService) ForgotPassword(ctx context.Context, req dto.ForgotPassword
 			}
 			resetLink := frontendURL + "/reset-password?token=" + token
 			
+			// Get logo URL
+			logoID := s.settingService.GetConfigValue(context.Background(), "app_logo")
+			logoURL := ""
+			if logoID != "" {
+				logoURL = s.config.App.URL + "/api/v1/public/storage/" + logoID
+			}
+
 			// Debug log to verify the generated link
 			logger.SystemLogger.Info().
 				Str("reset_link", resetLink).
 				Str("app_name", appName).
+				Str("logo_url", logoURL).
 				Msg("Generated Reset Password Link")
 			
-			body := mailer.GetResetPasswordEmailNative(resetLink, appName)
+			body := mailer.GetResetPasswordEmailNative(resetLink, appName, logoURL)
 			if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Password Request (Fallback)", body); err != nil {
 				logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send fallback email")
 			} else {
@@ -515,9 +530,14 @@ func (s *authService) Request2FAReset(ctx context.Context, req dto.TwoFAResetReq
 	resetLink := frontendURL + "/twofa/reset-confirm?token=" + token
 
 	appName := s.settingService.GetConfigValue(ctx, "app_name")
+	logoID := s.settingService.GetConfigValue(ctx, "app_logo")
+	logoURL := ""
+	if logoID != "" {
+		logoURL = s.config.App.URL + "/api/v1/public/storage/" + logoID
+	}
 
 	go func() {
-		body := mailer.GetTwoFAResetEmailNative(resetLink, appName)
+		body := mailer.GetTwoFAResetEmailNative(resetLink, appName, logoURL)
 		if err := s.mailer.SendEmail(context.Background(), user.Email, "Reset Two-Factor Authentication", body); err != nil {
 			logger.SystemLogger.Error().Err(err).Str("email", user.Email).Msg("Failed to send 2FA reset email")
 		} else {

@@ -31,6 +31,7 @@ type StorageHandler interface {
 	// Public endpoints (no auth)
 	PublicFileInfo(c *gin.Context)
 	PublicDownload(c *gin.Context)
+	PublicSystemFile(c *gin.Context)
 }
 
 type storageHandler struct {
@@ -282,5 +283,34 @@ func (h *storageHandler) PublicDownload(c *gin.Context) {
 	c.Header("Content-Type", file.MimeType)
 	c.Header("Content-Length", strconv.FormatInt(file.Size, 10))
 	c.Header("Cache-Control", "no-store")
+	c.DataFromReader(http.StatusOK, file.Size, file.MimeType, reader, nil)
+}
+
+func (h *storageHandler) PublicSystemFile(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid file id")
+		return
+	}
+
+	reader, file, err := h.service.ServePublicSystemFile(c.Request.Context(), uint(id))
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			response.Error(c, http.StatusNotFound, "file not found")
+			return
+		}
+		if errors.Is(err, service.ErrForbidden) {
+			response.Error(c, http.StatusForbidden, "access denied")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer reader.Close()
+
+	c.Header("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, file.OriginalName))
+	c.Header("Content-Type", file.MimeType)
+	c.Header("Content-Length", strconv.FormatInt(file.Size, 10))
+	c.Header("Cache-Control", "public, max-age=31536000") // Cache system files for 1 year
 	c.DataFromReader(http.StatusOK, file.Size, file.MimeType, reader, nil)
 }

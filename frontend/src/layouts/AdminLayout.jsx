@@ -10,7 +10,7 @@ import { PERMS } from "../utils/permissions";
 
 const AdminLayout = () => {
   const { theme, toggleTheme } = useTheme();
-  const { app_name } = useSettings();
+  const { app_name, logo } = useSettings();
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -556,6 +556,7 @@ const AdminLayout = () => {
       <Sidebar
         sections={filteredNavigation}
         title={app_name}
+        logo={logo}
         onLogout={handleLogout}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -569,7 +570,17 @@ const AdminLayout = () => {
             <h2 className="text-[10px] font-bold text-surface-on-variant uppercase tracking-widest">
               Administration
             </h2>
-            <div className="flex items-center gap-1.5 overflow-hidden">
+            <div className="flex items-center gap-2 overflow-hidden">
+               {logo && (
+                 <div className="w-6 h-6 rounded-md border border-outline-variant/30 overflow-hidden bg-surface-variant/20 flex-shrink-0">
+                    <img 
+                      src={`${import.meta.env.VITE_API_URL}/public/storage/${logo}`} 
+                      alt="Logo"
+                      className="w-full h-full object-contain"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                 </div>
+               )}
                <span className="text-sm font-bold text-surface-on truncate max-w-[200px]">
                   {app_name}
                </span>

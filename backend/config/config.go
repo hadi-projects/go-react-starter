@@ -70,6 +70,7 @@ func LoadConfig() (config Config) {
 		"APP_PORT",
 		"APP_NAME",
 		"APP_ENV",
+		"APP_URL",
 		"DB_HOST",
 		"DB_PORT",
 		"DB_USERNAME",
@@ -128,6 +129,7 @@ func LoadConfig() (config Config) {
 		Port: viper.GetString("APP_PORT"),
 		Name: viper.GetString("APP_NAME"),
 		Env:  viper.GetString("APP_ENV"),
+		URL:  viper.GetString("APP_URL"),
 	}
 
 	config.Database = DatabaseConfig{

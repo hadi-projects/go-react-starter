@@ -59,6 +59,7 @@ type StorageService interface {
 	// Public access (no auth)
 	GetPublicFileInfo(ctx context.Context, token string) (*dto.PublicFileResponse, error)
 	ServePublicFile(ctx context.Context, token, password, ip, userAgent string) (io.ReadCloser, *entity.StorageFile, bool, error)
+	ServePublicSystemFile(ctx context.Context, id uint) (io.ReadCloser, *entity.StorageFile, error)
 }
 
 type storageService struct {
@@ -535,4 +536,27 @@ func (s *storageService) ServePublicFile(ctx context.Context, token, password, i
 	go s.consumeLink(context.Background(), link, ip, userAgent)
 
 	return reader, &link.File, link.AllowDownload, nil
+}
+
+func (s *storageService) ServePublicSystemFile(ctx context.Context, id uint) (io.ReadCloser, *entity.StorageFile, error) {
+	// Check if ID is logo or favicon in settings
+	logoID := s.settingService.GetConfigValue(ctx, "app_logo")
+	faviconID := s.settingService.GetConfigValue(ctx, "app_favicon")
+
+	idStr := strconv.FormatUint(uint64(id), 10)
+	if idStr != logoID && idStr != faviconID {
+		return nil, nil, ErrForbidden
+	}
+
+	file, err := s.fileRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, nil, ErrNotFound
+	}
+
+	reader, err := s.driver.Get(ctx, file.StoragePath+file.StoredName)
+	if err != nil {
+		return nil, nil, fmt.Errorf("file not available: %w", err)
+	}
+
+	return reader, file, nil
 }

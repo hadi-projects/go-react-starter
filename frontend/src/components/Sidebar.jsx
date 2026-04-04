@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 const Sidebar = ({
   sections = [],
   title = "Admin Panel",
+  logo,
   onLogout,
   collapsed = false,
   onToggleCollapse,
@@ -49,14 +50,24 @@ const Sidebar = ({
       style={{ overflow: "hidden" }}
     >
       {/* Header with toggle button */}
-      <div
-        className={`h-12 flex items-center flex-shrink-0 ${collapsed ? "justify-center px-2" : "justify-between px-3"}`}
-      >
-        {!collapsed && (
-          <h2 className="text-sm font-semibold text-surface-on truncate">
-            {title}
-          </h2>
-        )}
+      <div className={`h-12 flex items-center flex-shrink-0 ${collapsed ? "justify-center px-2" : "justify-between px-3"}`}>
+        <div className="flex items-center gap-2 overflow-hidden">
+          {logo && (
+            <div className={`flex-shrink-0 transition-all duration-300 ${collapsed ? 'w-8 h-8' : 'w-7 h-7'} rounded-md border border-outline-variant/30 overflow-hidden bg-surface-variant/20`}>
+              <img 
+                src={`${import.meta.env.VITE_API_URL}/public/storage/${logo}`} 
+                alt="Logo"
+                className="w-full h-full object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
+          {!collapsed && (
+            <h2 className="text-sm font-semibold text-surface-on truncate">
+              {title}
+            </h2>
+          )}
+        </div>
         <button
           onClick={onToggleCollapse}
           className="p-1.5 rounded-full hover:bg-surface-variant/40 text-surface-on-variant transition-all duration-200 flex-shrink-0"
@@ -274,6 +285,7 @@ Sidebar.propTypes = {
     }),
   ),
   title: PropTypes.string,
+  logo: PropTypes.string,
   onLogout: PropTypes.func.isRequired,
   collapsed: PropTypes.bool,
   onToggleCollapse: PropTypes.func.isRequired,

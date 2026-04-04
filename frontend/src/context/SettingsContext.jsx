@@ -16,11 +16,11 @@ export const SettingsProvider = ({ children }) => {
             // Fetch website and storage settings in parallel
             const [webRes, storageRes] = await Promise.all([
                 getPublicSettings('website'),
-                getPublicSettings('storage').catch(() => ({ data: { data: [] } }))
+                getPublicSettings('storage').catch(() => ({ data: [] }))
             ]);
 
-            const websiteSettings = webRes.data.data;
-            const storageSettings = storageRes.data.data;
+            const websiteSettings = webRes.data || [];
+            const storageSettings = storageRes.data || [];
 
             const newSettings = { ...settings };
             websiteSettings.forEach(s => {
@@ -43,10 +43,13 @@ export const SettingsProvider = ({ children }) => {
             }
 
             if (newSettings.favicon) {
-                const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-                link.type = 'image/x-icon'; link.rel = 'shortcut icon';
-                link.href = `${import.meta.env.VITE_API_URL}/public/share/${newSettings.favicon}`;
-                document.getElementsByTagName('head')[0].appendChild(link);
+                let link = document.querySelector("link[rel~='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.getElementsByTagName('head')[0].appendChild(link);
+                }
+                link.href = `${import.meta.env.VITE_API_URL}/public/storage/${newSettings.favicon}`;
             }
         } catch (err) {
             console.error('Failed to fetch settings:', err);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
@@ -22,7 +23,6 @@ const ApiKeyPage = () => {
 
     // Create Modal state
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [roles, setRoles] = useState([]);
     const [newKeyData, setNewKeyData] = useState({
         name: '',
         type: 'sk_tp',
@@ -53,18 +53,13 @@ const ApiKeyPage = () => {
         fetchData();
     }, [currentPage, itemsPerPage, searchTerm, refreshTrigger]);
 
-    // Fetch Roles for selection
-    useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const res = await getRoles(1, 100, '', 'api');
-                setRoles(res.data?.data || []);
-            } catch (err) {
-                console.error('Failed to fetch roles');
-            }
-        };
-        if (isCreateModalOpen) fetchRoles();
-    }, [isCreateModalOpen]);
+    const { data: rolesData, isLoading: isLoadingRoles } = useQuery({
+        queryKey: ['roles', 'api'],
+        queryFn: () => getRoles(1, 100, '', 'api'),
+        enabled: isCreateModalOpen,
+    });
+
+    const roles = rolesData?.data || [];
 
     const handleCreate = async (e) => {
         e.preventDefault();
@@ -208,11 +203,16 @@ const ApiKeyPage = () => {
                                 onChange={e => setNewKeyData(prev => ({ ...prev, role_id: e.target.value }))}
                                 required
                             >
-                                <option value="">Select Role</option>
+                                <option value="">{isLoadingRoles ? 'Loading...' : 'Select Role'}</option>
                                 {roles.map(r => (
                                     <option key={r.id} value={r.id}>{r.name}</option>
                                 ))}
                             </select>
+                            {roles.length === 0 && !isLoadingRoles && (
+                                <p className="text-[10px] text-error mt-1 px-1">
+                                    No API roles found. Please create a role with category "API Role" in Roles Management.
+                                </p>
+                            )}
                             <p className="text-[10px] text-surface-on-variant mt-1.5 px-1">This key will have all permissions associated with this role.</p>
                         </div>
                         <div>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useQuery } from '@tanstack/react-query';
 import Modal from './Modal';
 import TextField from './TextField';
 import Button from './Button';
+import { getRoles } from '../api/admin';
 
 const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => {
     const isEdit = !!user;
@@ -13,6 +15,15 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
         status: 'active',
     });
     const [errors, setErrors] = useState({});
+
+    // Fetch User Roles
+    const { data: rolesData, isLoading: isLoadingRoles } = useQuery({
+        queryKey: ['roles', 'user'],
+        queryFn: () => getRoles(1, 100, '', 'user'),
+        enabled: isOpen,
+    });
+
+    const roles = rolesData?.data || [];
 
     useEffect(() => {
         if (user) {
@@ -118,9 +129,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading = false }) => 
                             onChange={handleChange}
                             className="text-field"
                         >
-                            <option value={1}>Admin (1)</option>
-                            <option value={2}>User (2)</option>
+                            <option value="">{isLoadingRoles ? 'Loading...' : 'Select Role'}</option>
+                            {roles.map(r => (
+                                <option key={r.id} value={r.id}>{r.name}</option>
+                            ))}
                         </select>
+                        {roles.length === 0 && !isLoadingRoles && (
+                             <p className="text-[10px] text-error mt-1 px-1">No human user roles found.</p>
+                        )}
                     </div>
 
                     <div>
